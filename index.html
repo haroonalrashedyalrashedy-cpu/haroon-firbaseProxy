@@ -387,7 +387,10 @@ window.toggleEye = id => {
 };
 // تعديل رقم 2: منع تكرار إنشاء الحساب
   // تعديل: استعادة الحساب - أرقام فقط + حماية من الضغط المكرر
-window.restoreAccount = async () => { console.log('زر الاستعادة انضغط');
+
+  
+  
+  window.restoreAccount = async () => { console.log('زر الاستعادة انضغط');
   if(isRestoringAccount) return;
   isRestoringAccount = true;
   const uidNum = $('loginUid').value.trim();
@@ -1474,7 +1477,6 @@ window.autoInstallAfterLogin = () => {
   }, 1500);
 };
 // تعديل: فتح وقفل الفورم بالزر
-let currentForm = null;
 
 
   // منع الأرقام العربية والانجليزية في حقل الاسم
