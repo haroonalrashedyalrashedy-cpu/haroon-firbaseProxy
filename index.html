@@ -391,30 +391,38 @@ window.toggleEye = id => {
 
   
   
-  window.restoreAccount = async () => { console.log('زر الاستعادة انضغط');
+  window.restoreAccount = async () => { 
+  console.log('1: بدأت restoreAccount');
   if(isRestoringAccount) return;
   isRestoringAccount = true;
   const uidNum = $('loginUid').value.trim();
   const pass = $('loginPass').value.trim();
   const err = $('loginError');
-  const btn = document.querySelector('#loginForm .submit-btn');
+  const btn = $('loginBtn');
   err.textContent = '';
+  console.log('2: الرقم =', uidNum, 'الباس =', pass);
   
   if(btn) btn.disabled = true;
   if(btn) btn.classList.add('loading');
+  
   if(!/^\d{6}$/.test(uidNum)) { 
+    console.log('3: الرقم غلط - مو 6 خانات');
     isRestoringAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'الرقم 6 خانات أرقام فقط'; 
   }
+  
   if(!/^\d+$/.test(pass)) { 
+    console.log('4: الباس مو أرقام');
     isRestoringAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة السر أرقام فقط'; 
   }
+  
   if(!pass) { 
+    console.log('5: الباس فاضي');
     isRestoringAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
@@ -422,25 +430,38 @@ window.toggleEye = id => {
   }
   
   try {
+    console.log('6: دخلت try - بأبحث عن الرقم في Firebase');
     const usersSnap = await get(query(ref(db, 'users'), orderByChild('uid'), equalTo(uidNum)));
+    console.log('7: نتيجة البحث موجودة؟', usersSnap.exists());
+    
     if(!usersSnap.exists()) { 
+      console.log('8: الرقم مو موجود في قاعدة البيانات');
       isRestoringAccount = false; 
       if(btn) btn.disabled = false;
       if(btn) btn.classList.remove('loading');
       return err.textContent = 'الرقم غلط'; 
     }
+    
     let userEmail = '';
-    usersSnap.forEach(u => { userEmail = u.val().email });
+    usersSnap.forEach(u => { 
+      userEmail = u.val().email;
+      console.log('9: لقيت الإيميل =', userEmail);
+    });
+    
+    console.log('10: بأحاول أسجل دخول بـ Firebase Auth');
     await signInWithEmailAndPassword(auth, userEmail, pass);
+    console.log('11: نجح تسجيل الدخول في Auth');
+    
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
-    autoInstallAfterLogin(); // تثبيت تلقائي
+    console.log('12: حفظت الباسوورد، onAuthStateChanged المفروض يشتغل الحين');
+    autoInstallAfterLogin();
 
-  } catch(e) { console.error('خطأ الاستعادة:', e.message, e.code);
+  } catch(e) { 
+    console.error('13: طحت في catch - الخطأ:', e.message, 'الكود:', e.code);
     err.textContent = 'كلمة السر غلط'; 
-    if(btn) btn.classList.remove('loading');
-  }
-  finally { 
+  } finally { 
+    console.log('14: دخلت finally - أرجع الزر طبيعي');
     isRestoringAccount = false;
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
@@ -479,6 +500,7 @@ window.toggleForm = (type) => {
   }
 };
 // تعديل: منع تكرار الحساب + منع إنشاء حسابين بنفس الاسم والباسورد + حماية من الضغط المكرر
+// تعديل: منع تكرار الحساب + منع إنشاء حسابين بنفس الاسم والباسورد + حماية من الضغط المكرر
 window.createAccount = async () => {
   if(isCreatingAccount) return;
   isCreatingAccount = true;
@@ -487,77 +509,88 @@ window.createAccount = async () => {
   const err = $('signupError');
   const btn = $('signupBtn');
   err.textContent = '';
-  console.log(' ..................... 1 ');
+  console.log('1: بدأت createAccount');
+  
   if(btn) btn.disabled = true;
   if(btn) btn.classList.add('loading');
   
   if(!/^[\u0600-\u06FFa-zA-Z\s]+$/.test(name)) {
+    console.log('2: الاسم غلط - حروف فقط');
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'الاسم حروف عربية أو إنجليزية فقط'; 
-  console.log(' ..................... 2 ');
   }
+  
   if(name.length < 3) { 
+    console.log('3: الاسم قصير');
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'الاسم 3 أحرف على الأقل'; 
-  console.log(' ..................... 3 ');
   }
   
   if(!/^\d+$/.test(pass)) { 
+    console.log('4: الباس مو أرقام');
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور أرقام فقط'; 
-  console.log(' ..................... 4 ');
   }
+  
   if(pass.length < 6) { 
+    console.log('5: الباس قصير');
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور 6 أرقام على الأقل'; 
- console.log(' ..................... 5 ');
-      }
+  }
+  
   if(/^(\d)\1+$/.test(pass)) { 
+    console.log('6: الباس مكرر');
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة - أرقام مكررة'; 
-    console.log(' ..................... 6 ');
   }
+  
   if(/012345|123456|234567|345678|456789|987654|876543|765432|654321|543210/.test(pass)) { 
+    console.log('7: الباس متتالي');
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة - أرقام متتالية'; 
-    console.log(' ..................... 7');
-  } 
+  }
+  
   const weak = ['000000','111111','123123','112233','123321'];
   if(weak.includes(pass)) { 
+    console.log('8: الباس ضعيف جداً');
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة جداً'; 
-    console.log(' ..................... 8');
   }
   
   try {
+    console.log('9: دخلت try - بأجيب users');
     const usersSnap = await get(ref(db, 'users'));
+    console.log('10: جبت users');
+    
     let exists = false;
     usersSnap.forEach(u => {
       if(u.val().name === name && u.val().passHash === pass) exists = true;
-   console.log(' ..................... 9 ');
     });
+    console.log('11: شيكت لو موجود =', exists);
+    
     if(exists) { 
+      console.log('12: الحساب موجود مسبقاً');
       isCreatingAccount = false; 
       if(btn) btn.disabled = false;
       if(btn) btn.classList.remove('loading');
       return err.textContent = 'هذا الحساب موجود مسبقاً بنفس الاسم وكلمة السر'; 
-   console.log(' ..................... 10');
     }
-    console.log(' ..................... 11');
+    
+    console.log('13: بأبدأ إنشاء في Firebase Auth');
     const email = `${Date.now()}@haroon.app`;
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     const uidNumber = generateUID();
@@ -568,22 +601,23 @@ window.createAccount = async () => {
       passHash: pass,
       createdAt: serverTimestamp(), 
       lastSeen: serverTimestamp()
-    });console.log(' ..................... 12');
+    });
+    console.log('14: حفظت في database رقمك =', uidNumber);
     showToast('تم إنشاء الحساب: رقمك هو '+uidNumber, '#00a884');
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
-    console.log('=== خلصت إنشاء الحساب، المفروض onAuthStateChanged يشتغل الحين ===');
+    console.log('15: خلصت، onAuthStateChanged المفروض ينقلك');
     autoInstallAfterLogin();
-    console.log(' ..................... 13 ');
+    
   } catch(e) { 
-    console.error('الخطأ:', e.message, e.code);
+    console.error('16: طحت في catch:', e.message, e.code);
     err.textContent = 'خطأ: '+e.message; 
-    if(btn) btn.classList.remove('loading');
   } finally { 
+    console.log('17: finally');
     isCreatingAccount = false;
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
-  } console.log(' ..................... 14 ');
+  }
 };
 onAuthStateChanged(auth, async user => { console.log('onAuthStateChanged اشتغل، اليوزر:', user ? user.uid : 'لا يوجد');
   if(user) {
