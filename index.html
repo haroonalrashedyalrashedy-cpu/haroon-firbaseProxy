@@ -259,7 +259,7 @@ import { getDatabase, ref, set, get, push, onValue, onChildAdded, onDisconnect, 
   const firebaseConfig = {
   apiKey: "AIzaSyDSWYRUfeO0ruDXO-2lv4tnrqxBVUHXFIs",
   authDomain: "watsapp-haroon.firebaseapp.com",
-    databaseURL: "https://haroon-firbase-proxy.vercel.app/api/db",
+    databaseURL: "https://haroon-firbase-proxy.vercel.app",
   projectId: "watsapp-haroon",
   projectId: "watsapp-haroon",
   storageBucket: "watsapp-haroon.appspot.com",
@@ -1215,6 +1215,19 @@ if ('serviceWorker' in navigator) {
     console.log('SW شغال ✅ الموقع بيفتح بدون نت المرة الجاية');
   }).catch(err => console.log('SW Error:', err));
 }
+  // عشان الأزرار تشتغل
+window.showAuthForm = showAuthForm;
+window.hideAuthForm = hideAuthForm;
+window.logout = logout;
+window.changePassword = changePassword;
+window.addFriend = addFriend;
+window.sendMessage = sendMessage;
+window.toggleTheme = toggleTheme;
+window.createGroup = createGroup;
+window.selectChat = selectChat;
+window.goBackToChatList = goBackToChatList;
+window.setTyping = setTyping;
+window.stopTyping = stopTyping;
 </script>
 </body>
 </html>
