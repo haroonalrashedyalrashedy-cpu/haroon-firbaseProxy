@@ -253,13 +253,13 @@ button,input {font-family:inherit; outline:none; border:none}
 </div>
 <div id="toast"></div>
 <script type="module">
-import { initializeApp } from './firebase-app.js';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, connectAuthEmulator } from "./firebase-auth.js";
-import { getDatabase, ref, set, get, push, onValue, onChildAdded, onDisconnect, serverTimestamp, remove, update, query, orderByChild, equalTo, increment, off, endBefore, limitToLast } from './firebase-database.js';
-const firebaseConfig = {
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, set, get, push, onValue, onChildAdded, onDisconnect, serverTimestamp, remove, update, query, orderByChild, equalTo, increment, off, endBefore, limitToLast } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+  const firebaseConfig = {
   apiKey: "AIzaSyDSWYRUfeO0ruDXO-2lv4tnrqxBVUHXFIs",
   authDomain: "watsapp-haroon.firebaseapp.com",
-    databaseURL: "https://haroon-firbase-proxy.vercel.app/api",
+    databaseURL: "https://haroon-firbase-proxy.vercel.app/api/db",
   projectId: "watsapp-haroon",
   projectId: "watsapp-haroon",
   storageBucket: "watsapp-haroon.appspot.com",
@@ -269,7 +269,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-connectAuthEmulator(auth, "https://haroon-firbase-proxy.vercel.app/api/auth");
+
 const db = getDatabase(app);
 
 let currentUser = null;
