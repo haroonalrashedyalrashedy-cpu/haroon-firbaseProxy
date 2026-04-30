@@ -173,6 +173,7 @@ button,input {font-family:inherit; outline:none; border:none}
   position:fixed; top:0; left:0; right:0; bottom:0; background:#111b21; z-index:99999; 
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px
 }
+  
 @keyframes fadeIn {from{opacity:0; transform:translateX(-50%) translateY(20px)} to{opacity:1}}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 /* حجز مساحة ديناميكية للفورم عشان الأزرار ما تقفز */
@@ -182,7 +183,9 @@ button,input {font-family:inherit; outline:none; border:none}
   max-width: min(320px, 90vw);
   transition: all 0.3s ease;
 }
-
+#authScreen { display:flex; flex-direction:column; }
+#authScreen.hidden { display:none !important; }
+#chatsScreen.hidden { display:none !important; }
 /* للجوالات الصغيرة */
 @media (max-height: 600px) {
   #authScreen { padding-top: 5vh !important; gap: 12px !important; }
@@ -201,7 +204,7 @@ button,input {font-family:inherit; outline:none; border:none}
 
 
 <!-- تعديل رقم 14: واجهة الدخول الجديدة -->
-<div id="authScreen" style="min-height:100vh; min-height:100dvh; overflow-y:auto; box-sizing:border-box; background:linear-gradient(180deg,#0b141a 0%,#111b21 100%); display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:clamp(8vh,15vh,20vh) 20px 20px 20px; gap:clamp(16px,3vh,24px)">
+<div id="authScreen" style="min-height:100vh; min-height:100dvh; overflow-y:auto; box-sizing:border-box; background:linear-gradient(180deg,#0b141a 0%,#111b21 100%); align-items:center; justify-content:flex-start; padding:clamp(8vh,15vh,20vh) 20px 20px 20px; gap:clamp(16px,3vh,24px)">
   <div style="text-align:center; margin-bottom:10px">
     <div style="width:80px; height:80px; background:#00a884; border-radius:20px; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,168,132,0.3)">
       <svg viewBox="0 0 24 24" width="50" height="50" fill="white">
@@ -428,7 +431,7 @@ window.restoreAccount = async () => {
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
     autoInstallAfterLogin(); // تثبيت تلقائي
-    showMainApp(); // <-- هذا السطر الوحيد اللي أضفته: ينقلك للمحادثات
+
   } catch(e) { 
     err.textContent = 'كلمة السر غلط'; 
     if(btn) btn.classList.remove('loading');
@@ -535,7 +538,7 @@ window.createAccount = async () => {
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
     autoInstallAfterLogin(); // تثبيت تلقائي
-    showMainApp(); // <-- هذا السطر الوحيد اللي أضفته: ينقلك للمحادثات
+    
   } catch(e) { 
     err.textContent = 'خطأ: '+e.message; 
     btn.classList.remove('loading');
