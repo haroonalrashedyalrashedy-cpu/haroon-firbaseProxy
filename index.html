@@ -74,7 +74,17 @@ button,input {font-family:inherit; outline:none; border:none}
   transform: scale(0.98);
   transition: all 0.2s;
 }
+.submit-btn.loading {
+  background: #008069 !important; 
+  transform: scale(0.98);
+  transition: all 0.2s;
+  pointer-events: none;
+}
 
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 #loginBtn:disabled, #signupBtn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
@@ -217,7 +227,7 @@ button,input {font-family:inherit; outline:none; border:none}
       <span class="eye-icon" onclick="toggleEye('signupPass')">👁️</span>
     </div>
     <div class="error-msg" id="signupError"></div>
-    <button class="submit-btn" onclick="createAccount()" style="height:50px; border-radius:25px">تسجيل الدخول</button>
+    <button id="signupBtn" class="submit-btn" type="button" onclick="createAccount()" style="height:50px; border-radius:25px">إنشاء الحساب</button>
   </div>
   <div id="loginForm" class="auth-form flex-col hidden" style="width:100%; max-width:320px; gap:12px; margin-top:8px">
     <div class="input-group">
@@ -230,7 +240,7 @@ button,input {font-family:inherit; outline:none; border:none}
       <span class="eye-icon" onclick="toggleEye('loginPass')">👁️</span>
     </div>
     <div class="error-msg" id="loginError"></div>
-    <button id="loginBtn" class="submit-btn" type="button" onclick="restoreAccount()" style="height:50px; border-radius:25px">تسجيل الدخول</button> 
+    <button id="loginBtn" class="submit-btn" type="button" onclick="restoreAccount()" style="height:50px; border-radius:25px">تسجيل الدخول</button>
   </div>
 </div>
 
@@ -314,7 +324,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const db = getDatabase(app);
-
+window.showMainApp = () => {
+  $('authScreen').classList.add('hidden');
+  $('chatsScreen').classList.remove('hidden');
+};
 let currentUser = null;
 let currentChat = null;
 let myPassword = '';
