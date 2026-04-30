@@ -261,7 +261,7 @@ import { getDatabase, ref, set, get, push, onValue, onChildAdded, onDisconnect, 
   authDomain: "watsapp-haroon.firebaseapp.com",
     databaseURL: "https://haroon-firbase-proxy.vercel.app",
   projectId: "watsapp-haroon",
-  projectId: "watsapp-haroon",
+  
   storageBucket: "watsapp-haroon.appspot.com",
   messagingSenderId: "85603158090",
   appId: "1:85603158090:web:001303416bd3a68879feb3"
@@ -377,7 +377,7 @@ window.restoreAccount = async () => {
 };
 onAuthStateChanged(auth, async user => {
   if(user) {
-    $('loadingScreen')?.classList.add('hidden');
+    
     const snap = await get(ref(db, 'users/'+user.uid));
     if(snap.exists()){
       const u = snap.val();
@@ -440,7 +440,7 @@ onAuthStateChanged(auth, async user => {
       }
     }
   } else {
-    $('loadingScreen')?.classList.add('hidden');
+    
     $('authScreen')?.classList.remove('hidden');
 $('chatsScreen')?.classList.add('hidden');
   }
