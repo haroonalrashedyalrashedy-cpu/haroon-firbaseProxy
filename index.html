@@ -475,66 +475,63 @@ window.toggleForm = (type) => {
   }
 };
 // تعديل: منع تكرار الحساب + منع إنشاء حسابين بنفس الاسم والباسورد + حماية من الضغط المكرر
-window.createAccount = async () => { console.log('زر الإنشاء انضغط');
+window.createAccount = async () => {
   if(isCreatingAccount) return;
   isCreatingAccount = true;
   const name = $('signupName').value.trim();
   const pass = $('signupPass').value.trim();
   const err = $('signupError');
-  const btn = document.querySelector('#signupForm .submit-btn');
+  const btn = $('signupBtn');
   err.textContent = '';
   
-  // قفل الزر عشان ما يضغط مرتين
   if(btn) btn.disabled = true;
-  btn.classList.add('loading');
-  // تعديل: الاسم حروف فقط عربي/انجليزي
+  if(btn) btn.classList.add('loading');
+  
   if(!/^[\u0600-\u06FFa-zA-Z\s]+$/.test(name)) {
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
-    btn.classList.remove('loading');
+    if(btn) btn.classList.remove('loading');
     return err.textContent = 'الاسم حروف عربية أو إنجليزية فقط'; 
   }
   if(name.length < 3) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
-    btn.classList.remove('loading');
+    if(btn) btn.classList.remove('loading');
     return err.textContent = 'الاسم 3 أحرف على الأقل'; 
   }
   
-  // تعديل: كلمة السر أرقام فقط
   if(!/^\d+$/.test(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
-    btn.classList.remove('loading');
+    if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور أرقام فقط'; 
   }
   if(pass.length < 6) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
-    btn.classList.remove('loading');
+    if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور 6 أرقام على الأقل'; 
   }
   if(/^(\d)\1+$/.test(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
-    btn.classList.remove('loading');
+    if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة - أرقام مكررة'; 
   }
   if(/012345|123456|234567|345678|456789|987654|876543|765432|654321|543210/.test(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
-    btn.classList.remove('loading');
+    if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة - أرقام متتالية'; 
   }
   const weak = ['000000','111111','123123','112233','123321'];
   if(weak.includes(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
-    btn.classList.remove('loading');
+    if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة جداً'; 
   }
   
-  // تعديل مهم جداً: منع تكرار نفس الاسم + نفس كلمة السر
   try {
     const usersSnap = await get(ref(db, 'users'));
     let exists = false;
@@ -544,27 +541,18 @@ window.createAccount = async () => { console.log('زر الإنشاء انضغط
     if(exists) { 
       isCreatingAccount = false; 
       if(btn) btn.disabled = false;
-      btn.classList.remove('loading');
+      if(btn) btn.classList.remove('loading');
       return err.textContent = 'هذا الحساب موجود مسبقاً بنفس الاسم وكلمة السر'; 
     }
     
-  } console.log('وصلت لـ Firebase');
-  catch(e) { console.error('الخطأ:', e.message, e.code);
-    isCreatingAccount = false;
-    if(btn) btn.disabled = false;
-    btn.classList.remove('loading');
-    return err.textContent = 'خطأ في الاتصال';
-  }
-  
-  const email = `${Date.now()}@haroon.app`;
-  try {
+    const email = `${Date.now()}@haroon.app`;
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     const uidNumber = generateUID();
     await set(ref(db, 'users/'+cred.user.uid), {
       name: name, 
       uid: uidNumber, 
       email: email,
-      passHash: pass, // نخزنها عشان نفحص التكرار
+      passHash: pass,
       createdAt: serverTimestamp(), 
       lastSeen: serverTimestamp()
     });
@@ -572,16 +560,16 @@ window.createAccount = async () => { console.log('زر الإنشاء انضغط
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
     console.log('=== خلصت إنشاء الحساب، المفروض onAuthStateChanged يشتغل الحين ===');
-    autoInstallAfterLogin(); // تثبيت تلقائي
+    autoInstallAfterLogin();
     
   } catch(e) { 
+    console.error('الخطأ:', e.message, e.code);
     err.textContent = 'خطأ: '+e.message; 
-    btn.classList.remove('loading');
-  }
-  finally { 
+    if(btn) btn.classList.remove('loading');
+  } finally { 
     isCreatingAccount = false;
-    if(btn) btn.disabled = false; // نفك قفل الزر
-    btn.classList.remove('loading');
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
   }
 };
 onAuthStateChanged(auth, async user => { console.log('onAuthStateChanged اشتغل، اليوزر:', user ? user.uid : 'لا يوجد');
