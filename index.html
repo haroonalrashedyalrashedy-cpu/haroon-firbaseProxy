@@ -385,16 +385,19 @@ window.restoreAccount = async () => {
   if(!/^\d{6}$/.test(uidNum)) { 
     isRestoringAccount = false; 
     if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
     return err.textContent = 'الرقم 6 خانات أرقام فقط'; 
   }
   if(!/^\d+$/.test(pass)) { 
     isRestoringAccount = false; 
     if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة السر أرقام فقط'; 
   }
   if(!pass) { 
     isRestoringAccount = false; 
     if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
     return err.textContent = 'اكتب كلمة المرور'; 
   }
   
@@ -403,6 +406,7 @@ window.restoreAccount = async () => {
     if(!usersSnap.exists()) { 
       isRestoringAccount = false; 
       if(btn) btn.disabled = false;
+      if(btn) btn.classList.remove('loading');
       return err.textContent = 'الرقم غلط'; 
     }
     let userEmail = '';
@@ -410,7 +414,8 @@ window.restoreAccount = async () => {
     await signInWithEmailAndPassword(auth, userEmail, pass);
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
-        autoInstallAfterLogin(); // تثبيت تلقائي
+    autoInstallAfterLogin(); // تثبيت تلقائي
+    showMainApp(); // <-- هذا السطر الوحيد اللي أضفته: ينقلك للمحادثات
   } catch(e) { 
     err.textContent = 'كلمة السر غلط'; 
     if(btn) btn.classList.remove('loading');
@@ -438,11 +443,13 @@ window.createAccount = async () => {
   if(!/^[\u0600-\u06FFa-zA-Z\s]+$/.test(name)) {
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
+    btn.classList.remove('loading');
     return err.textContent = 'الاسم حروف عربية أو إنجليزية فقط'; 
   }
   if(name.length < 3) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
+    btn.classList.remove('loading');
     return err.textContent = 'الاسم 3 أحرف على الأقل'; 
   }
   
@@ -450,27 +457,32 @@ window.createAccount = async () => {
   if(!/^\d+$/.test(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
+    btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور أرقام فقط'; 
   }
   if(pass.length < 6) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
+    btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور 6 أرقام على الأقل'; 
   }
   if(/^(\d)\1+$/.test(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
+    btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة - أرقام مكررة'; 
   }
   if(/012345|123456|234567|345678|456789|987654|876543|765432|654321|543210/.test(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
+    btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة - أرقام متتالية'; 
   }
   const weak = ['000000','111111','123123','112233','123321'];
   if(weak.includes(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
+    btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة جداً'; 
   }
   
@@ -484,11 +496,13 @@ window.createAccount = async () => {
     if(exists) { 
       isCreatingAccount = false; 
       if(btn) btn.disabled = false;
+      btn.classList.remove('loading');
       return err.textContent = 'هذا الحساب موجود مسبقاً بنفس الاسم وكلمة السر'; 
     }
   } catch(e) {
     isCreatingAccount = false;
     if(btn) btn.disabled = false;
+    btn.classList.remove('loading');
     return err.textContent = 'خطأ في الاتصال';
   }
   
@@ -507,7 +521,8 @@ window.createAccount = async () => {
     showToast('تم إنشاء الحساب: رقمك هو '+uidNumber, '#00a884');
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
-        autoInstallAfterLogin(); // تثبيت تلقائي
+    autoInstallAfterLogin(); // تثبيت تلقائي
+    showMainApp(); // <-- هذا السطر الوحيد اللي أضفته: ينقلك للمحادثات
   } catch(e) { 
     err.textContent = 'خطأ: '+e.message; 
     btn.classList.remove('loading');
@@ -515,7 +530,7 @@ window.createAccount = async () => {
   finally { 
     isCreatingAccount = false;
     if(btn) btn.disabled = false; // نفك قفل الزر
-  btn.classList.remove('loading');
+    btn.classList.remove('loading');
   }
 };
 onAuthStateChanged(auth, async user => {
@@ -1470,6 +1485,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+  window.showMainApp = () => {
+  $('authScreen').classList.add('hidden');
+  $('chatsScreen').classList.remove('hidden');
+};
 </script>
 </body>
 </html>
