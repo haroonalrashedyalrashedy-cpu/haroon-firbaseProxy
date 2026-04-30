@@ -479,37 +479,77 @@ window.toggleForm = (type) => {
 };
 // تعديل: منع تكرار الحساب + منع إنشاء حسابين بنفس الاسم والباسورد + حماية من الضغط المكرر
 window.createAccount = async () => {
-  console.log('1: بدأ createAccount');
   if(isCreatingAccount) return;
   isCreatingAccount = true;
   const name = $('signupName').value.trim();
   const pass = $('signupPass').value.trim();
-  console.log('2: الاسم =', name, 'الباس =', pass);
+  const err = $('signupError');
+  const btn = $('signupBtn');
+  err.textContent = '';
   
-  ... باقي الشروط ...
+  if(btn) btn.disabled = true;
+  if(btn) btn.classList.add('loading');
+  
+  if(!/^[\u0600-\u06FFa-zA-Z\s]+$/.test(name)) {
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'الاسم حروف عربية أو إنجليزية فقط'; 
+  }
+  if(name.length < 3) { 
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'الاسم 3 أحرف على الأقل'; 
+  }
+  
+  if(!/^\d+$/.test(pass)) { 
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور أرقام فقط'; 
+  }
+  if(pass.length < 6) { 
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور 6 أرقام على الأقل'; 
+  }
+  if(/^(\d)\1+$/.test(pass)) { 
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور ضعيفة - أرقام مكررة'; 
+  }
+  if(/012345|123456|234567|345678|456789|987654|876543|765432|654321|543210/.test(pass)) { 
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور ضعيفة - أرقام متتالية'; 
+  }
+  const weak = ['000000','111111','123123','112233','123321'];
+  if(weak.includes(pass)) { 
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور ضعيفة جداً'; 
+  }
   
   try {
-    console.log('3: دخلت try قبل Firebase');
     const usersSnap = await get(ref(db, 'users'));
-    console.log('4: جبت users من Firebase');
-    
     let exists = false;
     usersSnap.forEach(u => {
       if(u.val().name === name && u.val().passHash === pass) exists = true;
     });
-    console.log('5: شيكت لو الحساب موجود =', exists);
-    
     if(exists) { 
-      console.log('6: الحساب موجود، بأطلع');
       isCreatingAccount = false; 
-      return err.textContent = 'هذا الحساب موجود مسبقاً'; 
+      if(btn) btn.disabled = false;
+      if(btn) btn.classList.remove('loading');
+      return err.textContent = 'هذا الحساب موجود مسبقاً بنفس الاسم وكلمة السر'; 
     }
     
-    console.log('7: بأبدأ createUserWithEmailAndPassword');
     const email = `${Date.now()}@haroon.app`;
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    console.log('8: انشأت المستخدم في Auth', cred.user.uid);
-    
     const uidNumber = generateUID();
     await set(ref(db, 'users/'+cred.user.uid), {
       name: name, 
@@ -519,20 +559,17 @@ window.createAccount = async () => {
       createdAt: serverTimestamp(), 
       lastSeen: serverTimestamp()
     });
-    console.log('9: حفظت في database رقمك =', uidNumber);
-    
     showToast('تم إنشاء الحساب: رقمك هو '+uidNumber, '#00a884');
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
-    console.log('10: خلصت كل شي، المفروض onAuthStateChanged يشتغل');
+    console.log('=== خلصت إنشاء الحساب، المفروض onAuthStateChanged يشتغل الحين ===');
     autoInstallAfterLogin();
     
   } catch(e) { 
-    console.log('11: طحت في catch، الخطأ:', e.message, e.code);
     console.error('الخطأ:', e.message, e.code);
     err.textContent = 'خطأ: '+e.message; 
+    if(btn) btn.classList.remove('loading');
   } finally { 
-    console.log('12: دخلت finally');
     isCreatingAccount = false;
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
