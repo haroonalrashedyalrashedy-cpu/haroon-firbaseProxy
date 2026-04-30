@@ -644,6 +644,109 @@ window.createAccount = async () => {
     myGeneratedUid = uidNumber;
     
     // === أنشئ في Auth فقط - onAuthStateChanged بيكمل الحفظ في 3 أماكن ===
+window.createAccount = async () => {
+  if(isCreatingAccount) return;
+  isCreatingAccount = true;
+  const name = $('signupName').value.trim();
+  const pass = $('signupPass').value.trim();
+  const err = $('signupError');
+  const btn = $('signupBtn');
+  err.textContent = '';
+  console.log('1: بدأت createAccount');
+  
+  if(btn) btn.disabled = true;
+  if(btn) btn.classList.add('loading');
+  
+  if(!/^[\u0600-\u06FFa-zA-Z\s]+$/.test(name)) {
+    console.log('2: الاسم غلط - حروف فقط');
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'الاسم حروف عربية أو إنجليزية فقط'; 
+  }
+  
+  if(name.length < 3) { 
+    console.log('3: الاسم قصير');
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'الاسم 3 أحرف على الأقل'; 
+  }
+  
+  if(!/^\d+$/.test(pass)) { 
+    console.log('4: الباس مو أرقام');
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور أرقام فقط'; 
+  }
+  
+  if(pass.length < 6) { 
+    console.log('5: الباس قصير');
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور 6 أرقام على الأقل'; 
+  }
+  
+  if(/^(\d)\1+$/.test(pass)) { 
+    console.log('6: الباس مكرر');
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور ضعيفة - أرقام مكررة'; 
+  }
+  
+  if(/012345|123456|234567|345678|456789|987654|876543|765432|654321|543210/.test(pass)) { 
+    console.log('7: الباس متتالي');
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور ضعيفة - أرقام متتالية'; 
+  }
+  
+  const weak = ['000000','111111','123123','112233','123321'];
+  if(weak.includes(pass)) { 
+    console.log('8: الباس ضعيف جداً');
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور ضعيفة جداً'; 
+  }
+  
+  try {
+    console.log('9: دخلت try - بأولد رقم فريد');
+    
+    const genUid = () => Math.floor(100000 + Math.random()*900000).toString();
+    let uidNumber;
+    let tries = 0;
+    
+    while(tries < 10){
+      uidNumber = genUid();
+      const exists = await get(ref(db, `uids/${uidNumber}`));
+      if(!exists.exists()) break;
+      tries++;
+    }
+    
+    if(tries >= 10) {
+      isCreatingAccount = false; 
+      if(btn) btn.disabled = false;
+      if(btn) btn.classList.remove('loading');
+      return err.textContent = 'فشل توليد رقم، حاول مرة ثانية';
+    }
+    
+    console.log('10: الرقم الفريد =', uidNumber);
+    console.log('11: بأبدأ إنشاء في Firebase Auth');
+    const email = `${Date.now()}@haroon.app`;
+    
+    pendingUserData = { 
+      name: name, 
+      uid: uidNumber, 
+      email: email,
+      passHash: pass
+    };
+    myGeneratedUid = uidNumber;
+    
     await createUserWithEmailAndPassword(auth, email, pass);
     console.log('12: تم إنشاء اليوزر في Auth، onAuthStateChanged بيكمل الحفظ والتحويل');
     
@@ -654,7 +757,6 @@ window.createAccount = async () => {
     } else {
       err.textContent = 'خطأ: '+e.message; 
     }
-    // === التعديل 3: امسح البيانات المؤقتة لو فشل ===
     pendingUserData = null;
     myGeneratedUid = null;
   } finally { 
@@ -664,6 +766,160 @@ window.createAccount = async () => {
     if(btn) btn.classList.remove('loading');
   }
 };
+
+onAuthStateChanged(auth, async user => { 
+  console.log('onAuthStateChanged اشتغل، اليوزر:', user ? user.uid : 'لا يوجد');
+
+  if(user) {
+    if(pendingUserData) { 
+      console.log('فيه pendingUserData - بأحفظه الحين');
+      try { 
+        await set(ref(db, `users/${user.uid}`), { 
+          passHash: pendingUserData.passHash,
+          email: pendingUserData.email,
+          createdAt: serverTimestamp(), 
+          lastSeen: serverTimestamp()
+        }); 
+        
+        await set(ref(db, `publicUsers/${user.uid}`), {
+          name: pendingUserData.name,
+          uid: pendingUserData.uid
+        });
+        
+        await set(ref(db, `uids/${pendingUserData.uid}`), user.uid);
+        
+        currentUser = {uid: user.uid, name: pendingUserData.name, uidNumber: pendingUserData.uid};
+        $('myName').textContent = pendingUserData.name;
+        $('myNumber').textContent = pendingUserData.uid;
+        myPassword = pendingUserData.passHash || '';
+        sessionStorage.setItem('myPass', myPassword);
+        $('myPass').textContent = '••••••';
+        passVisible = false;
+        $('authScreen').classList.add('hidden');
+        $('chatsScreen').classList.remove('hidden');
+        showToast('تم إنشاء الحساب: رقمك هو '+pendingUserData.uid, '#00a884');
+        autoInstallAfterLogin();
+        
+        const userRef = ref(db, 'users/'+user.uid);
+        onDisconnect(userRef).update({lastSeen: serverTimestamp(), online: false});
+        setInterval(() => update(userRef, {lastSeen: serverTimestamp()}), 15000);
+        loadChats();
+        
+        pendingUserData = null; 
+        myGeneratedUid = null; 
+        return;
+      } catch(err) { 
+        console.error('فشل حفظ pendingUserData:', err); 
+        showToast('فشل إنشاء الحساب'); 
+        await signOut(auth); 
+        pendingUserData = null; 
+        myGeneratedUid = null; 
+        return;
+      } 
+    }
+    
+    const pubSnap = await get(ref(db, 'publicUsers/'+user.uid));
+    if(pubSnap.exists()){
+      const u = pubSnap.val();
+      currentUser = {uid: user.uid, name: u.name, uidNumber: u.uid};
+      $('myName').textContent = u.name;
+      $('myNumber').textContent = u.uid;
+      myPassword = sessionStorage.getItem('myPass') || '';
+      $('myPass').textContent = '••••••';
+      passVisible = false;
+      $('authScreen').classList.add('hidden');
+      $('chatsScreen').classList.remove('hidden');
+      const userRef = ref(db, 'users/'+user.uid);
+      onDisconnect(userRef).update({lastSeen: serverTimestamp(), online: false});
+      setInterval(() => update(userRef, {lastSeen: serverTimestamp()}), 15000);
+      loadChats();
+      autoInstallAfterLogin();
+      const lastSearch = localStorage.getItem('lastSearchResult');
+      if(lastSearch) {
+        const foundUser = JSON.parse(lastSearch);
+        const resultDiv = $('searchResult');
+        resultDiv.innerHTML = `
+          <div class="search-result-item" onclick="startChatFromSearch('${foundUser.uid}', '${foundUser.name}')">
+            <div class="avatar">${foundUser.name[0]}</div>
+            <div class="chat-info">
+              <div class="chat-name">${foundUser.name}</div>
+              <div class="chat-last">رقم: ${foundUser.uid} • اضغط لبدء المحادثة</div>
+            </div>
+            <div style="color:#00a884; font-size:24px">💬</div>
+            <span style="color:#8696a0; font-size:22px; padding:0 8px" onclick="event.stopPropagation(); clearSearchResult()">×</span>
+          </div>
+        `;
+        resultDiv.classList.remove('hidden');
+      }
+      onValue(ref(db, `calls/${auth.currentUser?.uid}`), snap => {
+        if(snap.exists()) {
+          const call = snap.val();
+          if (navigator.vibrate) navigator.vibrate([500,200,500]);
+          if($('callScreen')) return;
+          const callScreen = document.createElement('div');
+          callScreen.id = 'callScreen';
+          callScreen.innerHTML = `
+            <div style="font-size:20px; color:#8696a0">مكالمة واردة</div>
+            <div class="avatar" style="width:120px; height:120px; font-size:50px">${call.fromName[0]}</div>
+            <div style="font-size:28px; font-weight:600">${call.fromName}</div>
+            <button onclick="endCall()" style="width:70px; height:70px; background:#f15c6d; border-radius:50%; font-size:30px; margin-top:40px; cursor:pointer">✕</button>
+          `;
+          document.body.appendChild(callScreen);
+          window.endCall = async () => {
+            $('callScreen')?.remove();
+            await remove(ref(db, `calls/${auth.currentUser.uid}`));
+          };
+        }
+      });
+      const settingsSnap = await get(ref(db, `users/${user.uid}/settings`));
+      if(settingsSnap.exists()) {
+        const settings = settingsSnap.val();
+        if(settings.bgChats) $('chatsList').style.background = settings.bgChats;
+        if(settings.bgChat) $('messagesList').style.background = settings.bgChat;
+      }
+    } else {
+      console.log('اليوزر موجود في Auth بس مو في publicUsers - حساب قديم');
+      showToast('الحساب قديم، سجل حساب جديد', '#f15c6d');
+      await signOut(auth);
+    }
+  } else {
+    $('authScreen')?.classList.remove('hidden');
+    $('chatsScreen')?.classList.add('hidden');
+  }
+});
+
+const loadChats = () => {
+  const chatsRef = query(ref(db, 'userChats/'+currentUser.uid), orderByChild('lastMsgTime'), limitToLast(15));
+  onValue(chatsRef, snap => {
+    const chats = [];
+    snap.forEach(child => { chats.push({uid: child.key,...child.val()}); });
+    chats.reverse();
+    const list = $('chatsList');
+    list.innerHTML = '';
+    chats.forEach(chat => {
+      get(ref(db, 'publicUsers/'+chat.uid)).then(uSnap => {
+        if(!uSnap.exists()) return;
+        const u = uSnap.val();
+        const div = document.createElement('div');
+        div.className = 'chat-item';
+        div.onclick = () => openChat({uid: chat.uid, name: u.name});
+        const unreadBadge = chat.unreadCount > 0? `<span style="background:#00a884; color:#111b21; border-radius:10px; padding:2px 6px; font-size:12px; font-weight:bold">${chat.unreadCount}</span>` : '';
+        div.innerHTML = `
+          <div class="avatar">${u.name[0]}</div>
+          <div class="chat-info">
+            <div class="chat-name">${u.name}<span style="font-size:13px; color:#8696a0; font-weight:400; margin-right:8px">${u.uid}</span></div>
+            <div class="chat-last">${chat.lastMsg || 'اضغط للدردشة'}</div>
+          </div>
+          <div class="chat-meta">
+            <div>${chat.lastMsgTime? formatTime(chat.lastMsgTime) : ''}</div>
+            <div class="chat-status">${unreadBadge || formatLastSeen(u.lastSeen)}</div>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    });
+  });
+}; // ← هذي القوسين كانت ناقصة
 onAuthStateChanged(auth, async user => { 
   console.log('onAuthStateChanged اشتغل، اليوزر:', user ? user.uid : 'لا يوجد');
 
