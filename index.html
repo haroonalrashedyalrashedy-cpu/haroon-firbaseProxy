@@ -371,6 +371,7 @@ window.restoreAccount = async () => {
     await signInWithEmailAndPassword(auth, userEmail, pass);
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
+        autoInstallAfterLogin(); // تثبيت تلقائي
   } catch(e) { 
     err.textContent = 'كلمة السر غلط'; 
   }
@@ -465,6 +466,7 @@ window.createAccount = async () => {
     showToast('تم إنشاء الحساب: رقمك هو '+uidNumber, '#00a884');
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
+        autoInstallAfterLogin(); // تثبيت تلقائي
   } catch(e) { 
     err.textContent = 'خطأ: '+e.message; 
   }
@@ -491,6 +493,7 @@ onAuthStateChanged(auth, async user => {
       onDisconnect(userRef).update({lastSeen: serverTimestamp(), online: false});
       setInterval(() => update(userRef, {lastSeen: serverTimestamp()}), 15000);
       loadChats();
+            autoInstallAfterLogin(); // تثبيت تلقائي لو كان مسجل دخول مسبقاً
       const lastSearch = localStorage.getItem('lastSearchResult');
       if(lastSearch) {
         const foundUser = JSON.parse(lastSearch);
@@ -1320,7 +1323,59 @@ window.changePassword = changePassword;
 window.sendMessage = sendMessage;
 window.setTyping = setTyping;
 
+// تعديل: تثبيت التطبيق تلقائياً بعد تسجيل الدخول
+let deferredPrompt = null;
 
+// نلتقط حدث التثبيت
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+// دالة تثبيت التطبيق
+window.installApp = async () => {
+  if (!deferredPrompt) {
+    showToast('التطبيق مثبت مسبقاً أو غير متاح للتثبيت', '#00a884');
+    return false;
+  }
+  
+  // نظهر نافذة التثبيت
+  deferredPrompt.prompt();
+  
+  // ننتظر اختيار المستخدم
+  const { outcome } = await deferredPrompt.userChoice;
+  
+  if (outcome === 'accepted') {
+    showToast('✅ تم تثبيت التطبيق على الشاشة', '#00a884');
+    deferredPrompt = null;
+    return true;
+  } else {
+    showToast('تم إلغاء التثبيت', '#f15c6d');
+    return false;
+  }
+};
+
+// تعديل رقم 15: تثبيت تلقائي بعد الدخول
+window.autoInstallAfterLogin = () => {
+  // نأخر ثانية عشان المستخدم يشوف الشاشة
+  setTimeout(async () => {
+    if (deferredPrompt) {
+      const installed = await installApp();
+      if (!installed) {
+        // لو رفض، نذكره بعدين
+        setTimeout(() => {
+          if (deferredPrompt) showToast('💡 ثبّت التطبيق من القائمة ⋮', '#00a884');
+        }, 3000);
+      }
+    } else {
+      // للآيفون - ما يدعم التثبيت التلقائي
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) {
+        showToast('💡 للآيفون: شارك → إضافة للشاشة الرئيسية', '#00a884');
+      }
+    }
+  }, 1500);
+};
 
 </script>
 </body>
