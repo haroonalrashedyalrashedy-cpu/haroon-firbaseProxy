@@ -377,7 +377,7 @@ window.restoreAccount = async () => {
 };
 onAuthStateChanged(auth, async user => {
   if(user) {
-    $('loadingScreen').classList.add('hidden');
+    $('loadingScreen')?.classList.add('hidden');
     const snap = await get(ref(db, 'users/'+user.uid));
     if(snap.exists()){
       const u = snap.val();
@@ -440,9 +440,9 @@ onAuthStateChanged(auth, async user => {
       }
     }
   } else {
-    $('loadingScreen').classList.add('hidden');
-    $('authScreen').classList.remove('hidden');
-    $('chatsScreen').classList.add('hidden');
+    $('loadingScreen')?.classList.add('hidden');
+    $('authScreen')?.classList.remove('hidden');
+$('chatsScreen')?.classList.add('hidden');
   }
 });
 const loadChats = () => {
@@ -1211,9 +1211,7 @@ if ('serviceWorker' in navigator) {
   `;
   const blob = new Blob([swCode], {type: 'application/javascript'});
   const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).then(() => {
-    console.log('SW شغال ✅ الموقع بيفتح بدون نت المرة الجاية');
-  }).catch(err => console.log('SW Error:', err));
+  
 }
   // عشان الأزرار تشتغل
 window.showAuthForm = showAuthForm;
