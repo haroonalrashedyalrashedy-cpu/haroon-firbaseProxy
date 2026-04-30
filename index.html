@@ -539,6 +539,7 @@ window.createAccount = async () => { console.log('زر الإنشاء انضغط
     showToast('تم إنشاء الحساب: رقمك هو '+uidNumber, '#00a884');
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
+    console.log('=== خلصت إنشاء الحساب، المفروض onAuthStateChanged يشتغل الحين ===');
     autoInstallAfterLogin(); // تثبيت تلقائي
     
   } catch(e) { 
