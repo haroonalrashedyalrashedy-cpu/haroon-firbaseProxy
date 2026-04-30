@@ -781,6 +781,23 @@ onAuthStateChanged(auth, async user => {
         if(settings.bgChat) $('messagesList').style.background = settings.bgChat;
       }
     } else {
+      // === هذا التعديل الجديد ===
+      console.log('اليوزر موجود في Auth بس مو في publicUsers - حساب قديم');
+      showToast('الحساب قديم، سجل حساب جديد', '#f15c6d');
+      await signOut(auth);
+    }
+  } else {
+    $('authScreen')?.classList.remove('hidden');
+    $('chatsScreen')?.classList.add('hidden');
+  }
+});
+      const settingsSnap = await get(ref(db, `users/${user.uid}/settings`));
+      if(settingsSnap.exists()) {
+        const settings = settingsSnap.val();
+        if(settings.bgChats) $('chatsList').style.background = settings.bgChats;
+        if(settings.bgChat) $('messagesList').style.background = settings.bgChat;
+      }
+    } else {
       console.log('اليوزر موجود في Auth بس مو في publicUsers - بسجل خروج');
       await signOut(auth);
     }
