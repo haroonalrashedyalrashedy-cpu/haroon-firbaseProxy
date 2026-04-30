@@ -55,6 +55,30 @@ button,input {font-family:inherit; outline:none; border:none}
   width:100%; padding:14px; background:#00a884; color:#111b21;
   font-weight:bold; border-radius:8px; font-size:17px; cursor:pointer
 }
+
+  /* تعديل: شكل الزر لما يكون نشط */
+.auth-tab.active {
+  background: #00a884 !important;
+  color: #000 !important;
+  border: 2px solid #00a884 !important;
+}
+
+.auth-tab:not(.active) {
+  background: transparent !important;
+  color: #00a884 !important;
+  border: 2px solid #00a884 !important;
+}
+  /* لون زر الدخول وهو شغال */
+#loginBtn.loading, #signupBtn.loading {
+  background: #008069 !important; /* أخضر غامق */
+  transform: scale(0.98);
+  transition: all 0.2s;
+}
+
+#loginBtn:disabled, #signupBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 .submit-btn:active {background:#06cf9c}
 .error-msg {color:#f15c6d; font-size:14px; text-align:center; min-height:20px}
 /* تعديل رقم 4: ثبات لون الهيدر والفوتر */
@@ -159,13 +183,10 @@ button,input {font-family:inherit; outline:none; border:none}
     <div style="font-size:28px; font-weight:600; color:#e9edef; margin-bottom:8px">واتساب هارون</div>
     <div style="font-size:15px; color:#8696a0">مرحباً بك، سجل دخولك للمتابعة</div>
   </div>
-  <div style="display:flex; flex-direction:column; gap:16px; width:100%; max-width:320px">
-    <button onclick="showAuthForm('signup')" style="width:100%; height:50px; background:#00a884; color:#111b21; font-size:17px; font-weight:600; border-radius:25px; cursor:pointer; transition:0.2s; box-shadow:0 2px 8px rgba(0,168,132,0.3); border:none" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
-      إنشاء حساب جديد
-    </button>
-    <button onclick="showAuthForm('login')" style="width:100%; height:50px; background:transparent; color:#00a884; font-size:17px; font-weight:600; border-radius:25px; cursor:pointer; transition:0.2s; border:2px solid #00a884" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
-      استعادة حساب
-    </button>
+    <!-- أزرار التبويب الجديدة -->
+  <div class="flex" style="width:100%; max-width:320px; gap:12px; margin-top:20px">
+    <button id="signupTab" class="auth-tab submit-btn" onclick="toggleForm('signup')" style="flex:1; border-radius:25px; padding:14px">إنشاء حساب جديد</button>
+    <button id="loginTab" class="auth-tab submit-btn" onclick="toggleForm('login')" style="flex:1; border-radius:25px; padding:14px">استعادة حساب</button>
   </div>
   <div id="signupForm" class="auth-form flex-col hidden" style="width:100%; max-width:320px; gap:12px; margin-top:8px">
     <div class="input-group">
@@ -342,7 +363,7 @@ window.restoreAccount = async () => {
   err.textContent = '';
   
   if(btn) btn.disabled = true;
-  
+  if(btn) btn.classList.add('loading');
   if(!/^\d{6}$/.test(uidNum)) { 
     isRestoringAccount = false; 
     if(btn) btn.disabled = false;
@@ -374,10 +395,12 @@ window.restoreAccount = async () => {
         autoInstallAfterLogin(); // تثبيت تلقائي
   } catch(e) { 
     err.textContent = 'كلمة السر غلط'; 
+    if(btn) btn.classList.remove('loading');
   }
   finally { 
     isRestoringAccount = false;
     if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
   }
 };
 // تعديل: منع تكرار الحساب + منع إنشاء حسابين بنفس الاسم والباسورد + حماية من الضغط المكرر
@@ -392,7 +415,7 @@ window.createAccount = async () => {
   
   // قفل الزر عشان ما يضغط مرتين
   if(btn) btn.disabled = true;
-  
+  btn.classList.add('loading');
   // تعديل: الاسم حروف فقط عربي/انجليزي
   if(!/^[\u0600-\u06FFa-zA-Z\s]+$/.test(name)) {
     isCreatingAccount = false; 
@@ -469,10 +492,12 @@ window.createAccount = async () => {
         autoInstallAfterLogin(); // تثبيت تلقائي
   } catch(e) { 
     err.textContent = 'خطأ: '+e.message; 
+    btn.classList.remove('loading');
   }
   finally { 
     isCreatingAccount = false;
     if(btn) btn.disabled = false; // نفك قفل الزر
+  btn.classList.remove('loading');
   }
 };
 onAuthStateChanged(auth, async user => {
@@ -1376,7 +1401,40 @@ window.autoInstallAfterLogin = () => {
     }
   }, 1500);
 };
+// تعديل: فتح وقفل الفورم بالزر
+let currentForm = null;
 
+window.toggleForm = (type) => {
+  const signupForm = $('signupForm');
+  const loginForm = $('loginForm');
+  const signupTab = $('signupTab');
+  const loginTab = $('loginTab');
+  
+  // لو ضغط نفس الزر مرتين = يقفل
+  if (currentForm === type) {
+    signupForm.classList.add('hidden');
+    loginForm.classList.add('hidden');
+    signupTab.classList.remove('active');
+    loginTab.classList.remove('active');
+    currentForm = null;
+    return;
+  }
+  
+  // يفتح الفورم المطلوب ويقفل الثاني
+  if (type === 'signup') {
+    signupForm.classList.remove('hidden');
+    loginForm.classList.add('hidden');
+    signupTab.classList.add('active');
+    loginTab.classList.remove('active');
+    currentForm = 'signup';
+  } else {
+    loginForm.classList.remove('hidden');
+    signupForm.classList.add('hidden');
+    loginTab.classList.add('active');
+    signupTab.classList.remove('active');
+    currentForm = 'login';
+  }
+};
 </script>
 </body>
 </html>
