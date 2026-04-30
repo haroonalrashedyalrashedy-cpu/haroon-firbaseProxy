@@ -1,17 +1,19 @@
-export default async function handler(req, res) {
-  const target = req.url.startsWith('/api/auth') 
-    ? 'https://identitytoolkit.googleapis.com' 
+export const config = { runtime: 'edge' };
+
+export default async function handler(req) {
+  const url = new URL(req.url);
+  const isAuth = url.pathname.startsWith('/api/auth');
+  const target = isAuth 
+    ? 'https://identitytoolkit.googleapis.com'
     : 'https://watsapp-haroon-default-rtdb.firebaseio.com';
+    
+  const path = url.pathname.replace('/api/auth', '').replace('/api', '');
+  const headers = new Headers(req.headers);
+  headers.delete('host');
   
-  const path = req.url.replace('/api/auth', '').replace('/api', '');
-  const url = target + path + (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '');
-  
-  const response = await fetch(url, {
+  return fetch(target + path + url.search, {
     method: req.method,
-    headers: { ...req.headers, host: new URL(target).host },
-    body: req.method !== 'GET' ? req.body : undefined,
+    headers: headers,
+    body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : null,
   });
-  
-  const data = await response.text();
-  res.status(response.status).send(data);
 }
