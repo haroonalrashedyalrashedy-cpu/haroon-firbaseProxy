@@ -313,6 +313,10 @@ button,input {font-family:inherit; outline:none; border:none}
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, set, get, push, onValue, onChildAdded, onDisconnect, serverTimestamp, remove, update, query, orderByChild, equalTo, increment, off, endBefore, limitToLast } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+ // === أضف هذين السطرين في أعلى الملف ===
+let pendingUserData = null;
+let myGeneratedUid = null;
+// ====================================
   const firebaseConfig = {
   apiKey: "AIzaSyDSWYRUfeO0ruDXO-2lv4tnrqxBVUHXFIs",
   authDomain: "watsapp-haroon.firebaseapp.com",
