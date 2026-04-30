@@ -496,12 +496,14 @@ window.createAccount = async () => {
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'الاسم حروف عربية أو إنجليزية فقط'; 
+  console.log(' ..................... 2 ');
   }
-  if(name.length < 3) { console.log(' ..................... 2 ');
+  if(name.length < 3) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'الاسم 3 أحرف على الأقل'; 
+  console.log(' ..................... 3 ');
   }
   
   if(!/^\d+$/.test(pass)) { 
@@ -509,31 +511,36 @@ window.createAccount = async () => {
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور أرقام فقط'; 
+  console.log(' ..................... 4 ');
   }
-  if(pass.length < 6) { console.log(' ..................... 3 ');
+  if(pass.length < 6) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور 6 أرقام على الأقل'; 
-  }
+ console.log(' ..................... 5 ');
+      }
   if(/^(\d)\1+$/.test(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة - أرقام مكررة'; 
+    console.log(' ..................... 6 ');
   }
   if(/012345|123456|234567|345678|456789|987654|876543|765432|654321|543210/.test(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة - أرقام متتالية'; 
-  } console.log(' ..................... 5 ');
+    console.log(' ..................... 7');
+  } 
   const weak = ['000000','111111','123123','112233','123321'];
   if(weak.includes(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة جداً'; 
+    console.log(' ..................... 8');
   }
   
   try {
@@ -541,14 +548,16 @@ window.createAccount = async () => {
     let exists = false;
     usersSnap.forEach(u => {
       if(u.val().name === name && u.val().passHash === pass) exists = true;
+   console.log(' ..................... 9 ');
     });
     if(exists) { 
       isCreatingAccount = false; 
       if(btn) btn.disabled = false;
       if(btn) btn.classList.remove('loading');
       return err.textContent = 'هذا الحساب موجود مسبقاً بنفس الاسم وكلمة السر'; 
+   console.log(' ..................... 10');
     }
-    console.log(' ..................... 6 ');
+    console.log(' ..................... 11');
     const email = `${Date.now()}@haroon.app`;
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     const uidNumber = generateUID();
@@ -559,13 +568,13 @@ window.createAccount = async () => {
       passHash: pass,
       createdAt: serverTimestamp(), 
       lastSeen: serverTimestamp()
-    });console.log(' ..................... 7 ');
+    });console.log(' ..................... 12');
     showToast('تم إنشاء الحساب: رقمك هو '+uidNumber, '#00a884');
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
     console.log('=== خلصت إنشاء الحساب، المفروض onAuthStateChanged يشتغل الحين ===');
     autoInstallAfterLogin();
-    
+    console.log(' ..................... 13 ');
   } catch(e) { 
     console.error('الخطأ:', e.message, e.code);
     err.textContent = 'خطأ: '+e.message; 
@@ -574,7 +583,7 @@ window.createAccount = async () => {
     isCreatingAccount = false;
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
-  } console.log(' ..................... 8 ');
+  } console.log(' ..................... 14 ');
 };
 onAuthStateChanged(auth, async user => { console.log('onAuthStateChanged اشتغل، اليوزر:', user ? user.uid : 'لا يوجد');
   if(user) {
