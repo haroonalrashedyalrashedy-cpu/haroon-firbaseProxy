@@ -387,7 +387,7 @@ window.toggleEye = id => {
 };
 // تعديل رقم 2: منع تكرار إنشاء الحساب
   // تعديل: استعادة الحساب - أرقام فقط + حماية من الضغط المكرر
-window.restoreAccount = async () => {
+window.restoreAccount = async () => { console.log('زر الاستعادة انضغط');
   if(isRestoringAccount) return;
   isRestoringAccount = true;
   const uidNum = $('loginUid').value.trim();
@@ -432,7 +432,7 @@ window.restoreAccount = async () => {
     sessionStorage.setItem('myPass', pass);
     autoInstallAfterLogin(); // تثبيت تلقائي
 
-  } catch(e) { 
+  } catch(e) { console.error('خطأ الاستعادة:', e.message, e.code);
     err.textContent = 'كلمة السر غلط'; 
     if(btn) btn.classList.remove('loading');
   }
@@ -443,7 +443,7 @@ window.restoreAccount = async () => {
   }
 };
 // تعديل: منع تكرار الحساب + منع إنشاء حسابين بنفس الاسم والباسورد + حماية من الضغط المكرر
-window.createAccount = async () => {
+window.createAccount = async () => { console.log('زر الإنشاء انضغط');
   if(isCreatingAccount) return;
   isCreatingAccount = true;
   const name = $('signupName').value.trim();
@@ -515,7 +515,9 @@ window.createAccount = async () => {
       btn.classList.remove('loading');
       return err.textContent = 'هذا الحساب موجود مسبقاً بنفس الاسم وكلمة السر'; 
     }
-  } catch(e) {
+    
+  } console.log('وصلت لـ Firebase');
+  catch(e) { console.error('الخطأ:', e.message, e.code);
     isCreatingAccount = false;
     if(btn) btn.disabled = false;
     btn.classList.remove('loading');
@@ -549,7 +551,7 @@ window.createAccount = async () => {
     btn.classList.remove('loading');
   }
 };
-onAuthStateChanged(auth, async user => {
+onAuthStateChanged(auth, async user => { console.log('onAuthStateChanged اشتغل، اليوزر:', user ? user.uid : 'لا يوجد');
   if(user) {
     
     const snap = await get(ref(db, 'users/'+user.uid));
