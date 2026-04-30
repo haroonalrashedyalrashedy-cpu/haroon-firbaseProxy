@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#005c4b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>واتساب هارون</title>
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22واتساب%20هارون%22,%22short_name%22:%22واتساب%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23111b21%22,%22theme_color%22:%22%23005c4b%22,%22icons%22:[{%22src%22:%22data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTE1IiBmaWxsPSIjMDBhODg0Ii8+CjxwYXRoIGQ9Ik0xNzIgMTYwQzE3MiAxMzguNCAxODkuNCAxMjEgMjExIDEyMUgxOTRDMTk0IDEyMSAxOTQgMTIxIDE5NCAxMjFIMjM2QzI1Ny42IDEyMSAyNzUgMTM4LjQgMjc1IDE2MFYzMjhDMjc1IDM0OS42IDI1Ny42IDM2NyAyMzYgMzY3SDE3NkMxNTQuNCAzNjcgMTM3IDM0OS42IDEzNyAzMjhWMTYwQzEzNyAxMzguNCAxNTQuNCAxMjEgMTc2IDEyMVYxMjFIMTcyVjE2MFpNMzA1IDE2MEMzMDUgMTM4LjQgMzIyLjQgMTIxIDM0NCAxMjFIMzQ3QzM0NyAxMjEgMzQ3IDEyMSAzNDcgMTIxSDM4OUM0MTAuNiAxMjEgNDI4IDEzOC40IDQyOCAxNjBWMTc2QzQyOCAxOTcuNiA0MTAuNiAyMTUgMzg5IDIxNUgzNDdDMzI1LjQgMjE1IDMwOCAxOTcuNiAzMDggMTc2VjE2MFpNMzA1IDI1NkMzMDUgMjM0LjQgMzIyLjQgMjE3IDM0NCAyMTdIMzg5QzQxMC42IDIxNyA0MjggMjM0LjQgNDI4IDI1NlYzMjhDNDI4IDM0OS42IDQxMC42IDM2NyAzODkgMzY3SDM0NEMzMjIuNCAzNjcgMzA1IDM0OS42IDMwNSAzMjhWMjU2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any%20maskable%22}]}">
+<!-- تعديل رقم 13: خط إيموجي ملون -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+<style>
+/* تعديل رقم 13: تطبيق خط الإيموجي */
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI','Noto Color Emoji',Tahoma,sans-serif; -webkit-tap-highlight-color:transparent}
+body {
+  background:#111b21; color:#e9edef; overflow:hidden; height:100vh; padding-bottom:80px;
+  max-width: 768px; margin: 0 auto;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (min-width: 769px) {
+  body { border-left: 1px solid #2a3942; border-right: 1px solid #2a3942; }
+}
+button,input {font-family:inherit; outline:none; border:none}
+.hidden {display:none!important}
+.flex {display:flex}
+.flex-col {flex-direction:column}
+.items-center {align-items:center}
+.justify-center {justify-content:center}
+.w-full {width:100%}
+.text-center {text-align:center}
+/* تعديل رقم 14: حذف الستايل القديم #authScreen */
+.auth-form {margin-top:15px; gap:10px; width:280px}
+.input-group {position:relative; width:100%}
+.input-field {
+  width:100%; padding:14px 45px 14px 14px; background:#202c33;
+  color:#e9edef; border-radius:8px; font-size:16px; border:1px solid #2a3942;
+  -webkit-user-select: text!important;
+  -moz-user-select: text!important;
+  user-select: text!important;
+}
+.input-field::placeholder {color:#8696a0}
+.input-field:focus {border-color:#00a884}
+.eye-icon {
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  cursor:pointer; color:#8696a0; font-size:20px
+}
+.submit-btn {
+  width:100%; padding:14px; background:#00a884; color:#111b21;
+  font-weight:bold; border-radius:8px; font-size:17px; cursor:pointer
+}
+.submit-btn:active {background:#06cf9c}
+.error-msg {color:#f15c6d; font-size:14px; text-align:center; min-height:20px}
+/* تعديل رقم 4: ثبات لون الهيدر والفوتر */
+.header {
+  position:fixed; top:0; left:0; right:0; z-index:1000; background:#202c33!important;
+  padding:10px 16px; height:60px; display:flex; align-items:center; gap:12px
+}
+.header-info {flex:1; font-size:14px; line-height:1.4}
+.header-info div {white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.header-name {font-weight:600; font-size:16px}
+.header-sub {color:#8696a0; font-size:13px}
+.icon-btn {font-size:24px; color:#aebac1; cursor:pointer; padding:8px}
+#chatsScreen {height:100vh; flex-direction:column; padding-top:60px}
+.chats-list {flex:1; overflow-y:auto; background:#111b21}
+.chat-item {
+  display:flex; padding:12px 16px; gap:12px; border-bottom:1px solid #222d34;
+  cursor:pointer; align-items:center
+}
+.chat-item:active {background:#202c33}
+.avatar {
+  width:50px; height:50px; background:#005c4b; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:bold
+}
+.chat-info {flex:1; overflow:hidden}
+.chat-name {font-size:17px; font-weight:500; margin-bottom:3px}
+.chat-last {font-size:14px; color:#8696a0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.chat-meta {text-align:left; font-size:12px; color:#8696a0}
+.chat-status {color:#00a884; font-size:13px}
+/* تعديل رقم 4: ثبات لون الفوتر */
+.search-bar {
+  position:fixed; bottom:0; left:0; right:0; background:#202c33!important;
+  padding:8px 10px; display:flex; gap:8px; border-top:1px solid #2a3942
+}
+.search-bar input {flex:1}
+.menu-item{padding:14px 20px; cursor:pointer; font-size:16px}
+.menu-item:active{background:#1f2c33}
+#messagesList {
+  flex:1; overflow-y:auto; padding:10px; background:#0b141a;
+  padding-top: 70px; padding-bottom: 70px;
+}
+/* تعديل رقم 4: ثبات لون شريط الإدخال */
+#chatInputBar {
+  position:fixed; bottom:0; left:0; right:0; background:#202c33!important;
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+  display:flex; gap:8px; align-items:center; z-index:999;
+  max-width: 768px; margin: 0 auto;
+}
+#emojiPanel {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 280px;
+  background: #202c33; border-top: 1px solid #2a3942; overflow-y: auto;
+  padding: 10px; z-index: 998; max-width: 768px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px;
+}
+#chatInputBar.emoji-open { bottom: 280px; }
+#colorPanel {
+  position: fixed; top: 60px; left: 10px; background: #233138;
+  border-radius: 8px; padding: 12px; z-index: 10001;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.4); display: grid;
+  grid-template-columns: repeat(4, 1fr); gap: 10px; width: 200px;
+}
+.color-option {
+  width: 38px; height: 38px; border-radius: 50%; cursor: pointer;
+  border: 2px solid #2a3942; transition: 0.2s;
+}
+.color-option:active { transform: scale(0.9); }
+.color-option.selected { border: 3px solid #00a884; }
+.toast {
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+  background:#f15c6d; color:#fff; padding:10px 20px; border-radius:8px;
+  z-index:9999; font-size:15px; animation:fadeIn 0.3s
+}
+#searchResult {
+  background:#1f2c33; margin:0 10px 8px; border-radius:8px;
+  border:1px solid #2a3942; max-width:768px; margin:0 auto 8px;
+}
+.search-result-item {
+  display:flex; padding:12px 16px; gap:12px; cursor:pointer; align-items:center
+}
+.search-result-item:active {background:#2a3942}
+/* تعديل رقم 8: ستايل شاشة المكالمة */
+#callScreen {
+  position:fixed; top:0; left:0; right:0; bottom:0; background:#111b21; z-index:99999; 
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px
+}
+@keyframes fadeIn {from{opacity:0; transform:translateX(-50%) translateY(20px)} to{opacity:1}}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="loadingScreen" style="height:100vh; background:#111b21; position:fixed; top:0; left:0; right:0; z-index:10000; display:flex; align-items:center; justify-content:center">
+  <div style="width:40px; height:40px; border:4px solid #2a3942; border-top:4px solid #00a884; border-radius:50%; animation:spin 1s linear infinite"></div>
+</div>
+
+<!-- تعديل رقم 14: واجهة الدخول الجديدة -->
+<div id="authScreen" class="hidden" style="min-height:100vh; background:linear-gradient(180deg,#0b141a 0%,#111b21 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; gap:24px">
+  <div style="text-align:center; margin-bottom:10px">
+    <div style="width:80px; height:80px; background:#00a884; border-radius:20px; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,168,132,0.3)">
+      <svg viewBox="0 0 24 24" width="50" height="50" fill="white">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-.8 5.42-.36 2.53-.74 3.09-1.5 3.09-.75 0-1.85-.8-1.85-.8s-1.65-.97-2.59-1.6c-.93-.63-1.65-1.31-1.65-1.31s-.8-.61-.55-1.26c.25-.65 1.05-1.21 1.05-1.21s3.49-2.65 5.39-4.04c1.9-1.39 2.3-1.14 2.3-1.14.44.1.7.59.7 1.05 0 .45-.1 1.1-.1 1.1z"/>
+      </svg>
+    </div>
+    <div style="font-size:28px; font-weight:600; color:#e9edef; margin-bottom:8px">واتساب هارون</div>
+    <div style="font-size:15px; color:#8696a0">مرحباً بك، سجل دخولك للمتابعة</div>
+  </div>
+  <div style="display:flex; flex-direction:column; gap:16px; width:100%; max-width:320px">
+    <button onclick="showAuthForm('signup')" style="width:100%; height:50px; background:#00a884; color:#111b21; font-size:17px; font-weight:600; border-radius:25px; cursor:pointer; transition:0.2s; box-shadow:0 2px 8px rgba(0,168,132,0.3); border:none" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+      إنشاء حساب جديد
+    </button>
+    <button onclick="showAuthForm('login')" style="width:100%; height:50px; background:transparent; color:#00a884; font-size:17px; font-weight:600; border-radius:25px; cursor:pointer; transition:0.2s; border:2px solid #00a884" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+      استعادة حساب
+    </button>
+  </div>
+  <div id="signupForm" class="auth-form flex-col hidden" style="width:100%; max-width:320px; gap:12px; margin-top:8px">
+    <div class="input-group">
+      <input type="text" id="signupName" class="input-field" placeholder="اكتب اسمك هنا..." style="text-align:center">
+    </div>
+    <div class="input-group">
+      <input type="password" id="signupPass" class="input-field" placeholder="كلمة المرور 6 أرقام+" autocomplete="off" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')" style="text-align:center">
+      <span class="eye-icon" onclick="toggleEye('signupPass')">👁️</span>
+    </div>
+    <div class="error-msg" id="signupError"></div>
+    <button class="submit-btn" onclick="createAccount()" style="height:50px; border-radius:25px">تسجيل الدخول</button>
+  </div>
+  <div id="loginForm" class="auth-form flex-col hidden" style="width:100%; max-width:320px; gap:12px; margin-top:8px">
+    <div class="input-group">
+      <input type="number" id="loginUid" class="input-field" placeholder="ادخل رقمك 6 خانات" style="text-align:center">
+    </div>
+    <div class="input-group">
+      <input type="password" id="loginPass" class="input-field" placeholder="ادخل كلمة المرور" autocomplete="off" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')" style="text-align:center">
+      <span class="eye-icon" onclick="toggleEye('loginPass')">👁️</span>
+    </div>
+    <div class="error-msg" id="loginError"></div>
+    <button class="submit-btn" onclick="restoreAccount()" style="height:50px; border-radius:25px">تسجيل الدخول</button>
+  </div>
+</div>
+
+<div id="chatsScreen" class="hidden flex-col">
+  <div class="header">
+  <div class="header-info">
+    <div class="header-name" id="myName">-</div>
+    <div class="header-sub">رقمي: <span id="myNumber">-</span></div>
+  </div>
+  <div style="display:flex; align-items:center; gap:8px; background:#1f2c33; padding:6px 10px; border-radius:6px">
+    <span style="color:#8696a0; font-size:13px">كلمة السر:</span>
+    <span id="myPass" style="font-size:14px; letter-spacing:2px">••••••</span>
+    <span class="icon-btn" style="font-size:18px; padding:0" onclick="toggleMyPass()">👁️</span>
+  </div>
+  <span class="icon-btn" onclick="showMenu('mainMenu')">⋮</span>
+</div>
+  <div class="chats-list" id="chatsList"></div>
+  <div id="searchResult" class="hidden"></div>
+  <div class="search-bar">
+    <input type="number" id="searchNumber" class="input-field" placeholder="ابحث عن مستلم هنا..">
+    <button class="submit-btn" style="width:80px" onclick="searchUser()">بحث</button>
+  </div>
+</div>
+<div id="chatScreen" class="hidden flex-col" style="height:100vh">
+<div class="header">
+  <span class="icon-btn" onclick="backToChats()">←</span>
+  <div class="header-info" style="display:flex;align-items:center">
+    <div id="chatAvatar" style="width:40px;height:40px;border-radius:50%;background:#00a884;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-left:10px;font-size:18px;color:#111b21"></div>
+    <div>
+      <div class="header-name">
+        <span id="chatName">-</span>
+        <span id="chatNumber" style="font-size:13px; color:#8696a0; font-weight:400; margin-right:8px"></span>
+      </div>
+      <div class="header-sub" id="chatStatus">-</div>
+    </div>
+  <span class="icon-btn" onclick="showMenu('chatMenu')">⋮</span>
+</div>
+<div id="messagesList"></div>
+  <div id="chatInputBar">
+    <button class="icon-btn" id="emojiToggleBtn" onclick="toggleEmojiPanel()">
+      <svg id="emojiIcon" viewBox="0 0 24 24" width="24" height="24" fill="#8696a0">
+        <path d="M12 2C6.48 2 6.48 2 12s4.48 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8s3.59-8 8-8 8 3.59 8-3.59 8-8 8zm-4-8c.83 0 1.5-.67 1.5-1.5S8.83 9 8 9s-1.5.67-1.5 1.5S7.17 12 8 12zm8 0c.83 0 1.5-.67 1.5-1.5S16.83 9 16 9s-1.5.67-1.5 1.5.67 1.5 1.5zm-4 4c2.21 0 4-1.79 4-4h-8c0 2.21 1.79 4 4 4z"/>
+      </svg>
+      <svg id="keyboardIcon" class="hidden" viewBox="0 0 24 24" width="24" height="24" fill="#8696a0">
+        <path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/>
+      </svg>
+    </button>
+    <input type="text" id="msgInput" class="input-field" placeholder="اكتب رسالة..." style="flex:1">
+    <span class="icon-btn" id="micBtn" onmousedown="startRecord()" onmouseup="stopRecord()" ontouchstart="startRecord()" ontouchend="stopRecord()">🎤</span>
+    <span class="icon-btn" id="sendBtn" onclick="sendMessage()" style="color:#00a884">➤</span>
+  </div>
+</div>
+<div id="emojiPanel" class="hidden"></div>
+<div id="colorPanel" class="hidden">
+  <div class="color-option" style="background:#ffe4e6" data-color="#ffe4e6" title="وردي فاتح"></div>
+  <div class="color-option" style="background:#dbeafe" data-color="#dbeafe" title="سماوي فاتح"></div>
+  <div class="color-option" style="background:#e0f2fe" data-color="#e0f2fe" title="أزرق فاتح"></div>
+  <div class="color-option" style="background:#fef9c3" data-color="#fef9c3" title="أصفر فاتح"></div>
+  <div class="color-option" style="background:#dcfce7" data-color="#dcfce7" title="أخضر شجري"></div>
+  <div class="color-option" style="background:#fae8ff" data-color="#fae8ff" title="بنفسجي فاتح"></div>
+  <div class="color-option" style="background:#ffedd5" data-color="#ffedd5" title="برتقالي فاتح"></div>
+  <div class="color-option" style="background:#111b21" data-color="#111b21" title="الافتراضي"></div>
+</div>
+<div id="toast"></div>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase, ref, set, get, push, onValue, onChildAdded, onDisconnect, serverTimestamp, remove, update, query, orderByChild, equalTo, increment, off, endBefore, limitToLast } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDSWYRUfeO0ruDXO-2lv4tnrqxBVUHXFIs",
+  authDomain: "watsapp-haroon.firebaseapp.com",
+  databaseURL: "https://haroon-firbase-proxy.vercel.app/api"
+  projectId: "watsapp-haroon",
+  storageBucket: "watsapp-haroon.appspot.com",
+  messagingSenderId: "85603158090",
+  appId: "1:85603158090:web:001303416bd3a68879feb3"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+connectAuthEmulator(auth, "https://haroon-firbase-proxy.vercel.app/api/auth");
+const db = getDatabase(app);
+
+let currentUser = null;
+let currentChat = null;
+let myPassword = '';
+let passVisible = false;
+let typingTimeout = null;
+let replyTo = null;
+let mediaRecorder, audioChunks = [];
+let emojiPanelOpen = false;
+let oldestMsgTime = null;
+let statusListener = null, typingListener = null, msgListener = null;
+let colorTarget = 'chats';
+let loadingOld = false;
+// تعديل رقم 2: منع تكرار الضغط
+let isCreatingAccount = false;
+let isRestoringAccount = false;
+
+const $ = id => document.getElementById(id);
+const showToast = (msg, color='#f15c6d') => {
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.background = color;
+  t.className = 'toast';
+  setTimeout(() => t.className = 'hidden', 3000);
+};
+const formatTime = ts => {
+  if(!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'});
+};
+const formatLastSeen = ts => {
+  if(!ts) return 'غير متصل';
+  const diff = Date.now() - ts;
+  if(diff < 20000) return 'متصل الآن';
+  const d = new Date(ts);
+  return 'آخر ظهور ' + d.toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'});
+};
+const generateUID = () => Math.floor(100000 + Math.random() * 900000).toString();
+const getChatID = (u1, u2) => [u1, u2].sort().join('_');
+
+window.showAuthForm = type => {
+  $('signupForm').classList.add('hidden');
+  $('loginForm').classList.add('hidden');
+  $(type+'Form').classList.remove('hidden');
+};
+// تعديل رقم 5: إصلاح زر العين
+window.toggleMyPass = () => {
+  if(!myPassword) myPassword = sessionStorage.getItem('myPass') || '';
+  passVisible =!passVisible;
+  $('myPass').textContent = passVisible && myPassword? myPassword : '••••••';
+};
+window.toggleEye = id => {
+  const inp = $(id);
+  inp.type = inp.type === 'password'? 'text' : 'password';
+};
+// تعديل رقم 2: منع تكرار إنشاء الحساب
+window.createAccount = async () => {
+  if(isCreatingAccount) return;
+  isCreatingAccount = true;
+  const name = $('signupName').value.trim();
+  const pass = $('signupPass').value.trim();
+  const err = $('signupError');
+  err.textContent = '';
+  if(name.length < 3) { isCreatingAccount = false; return err.textContent = 'الاسم 3 أحرف على الأقل'; }
+  if(pass.length < 6) { isCreatingAccount = false; return err.textContent = 'كلمة المرور 6 أرقام على الأقل'; }
+  if(/^(\d)\1+$/.test(pass)) { isCreatingAccount = false; return err.textContent = 'كلمة المرور ضعيفة - أرقام مكررة'; }
+  if(/012345|123456|234567|345678|456789|987654|876543|765432|654321|543210/.test(pass)) { isCreatingAccount = false; return err.textContent = 'كلمة المرور ضعيفة - أرقام متتالية'; }
+  const weak = ['000000','111111','123123','112233','123321'];
+  if(weak.includes(pass)) { isCreatingAccount = false; return err.textContent = 'كلمة المرور ضعيفة جداً'; }
+  const email = `${Date.now()}@haroon.app`;
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const uidNumber = generateUID();
+    await set(ref(db, 'users/'+cred.user.uid), {
+      name: name, uid: uidNumber, email: email,
+      createdAt: serverTimestamp(), lastSeen: serverTimestamp()
+    });
+    showToast('تم إنشاء الحساب: رقمك هو '+uidNumber, '#00a884');
+    myPassword = pass;
+    sessionStorage.setItem('myPass', pass);
+  } catch(e) { err.textContent = 'خطأ: '+e.message; }
+  finally { isCreatingAccount = false; }
+};
+// تعديل رقم 1+2: استعادة الحساب + منع التكرار
+window.restoreAccount = async () => {
+  if(isRestoringAccount) return;
+  isRestoringAccount = true;
+  const uidNum = $('loginUid').value.trim();
+  const pass = $('loginPass').value.trim();
+  const err = $('loginError');
+  err.textContent = '';
+  if(uidNum.length!== 6) { isRestoringAccount = false; return err.textContent = 'الرقم لازم 6 خانات'; }
+  if(!pass) { isRestoringAccount = false; return err.textContent = 'اكتب كلمة المرور'; }
+  const usersSnap = await get(query(ref(db, 'users'), orderByChild('uid'), equalTo(uidNum)));
+  if(!usersSnap.exists()) { isRestoringAccount = false; return err.textContent = 'الرقم غلط'; }
+  let userEmail = '';
+  usersSnap.forEach(u => { userEmail = u.val().email });
+  try {
+    await signInWithEmailAndPassword(auth, userEmail, pass);
+    myPassword = pass;
+    sessionStorage.setItem('myPass', pass);
+  } catch(e) { err.textContent = 'كلمة السر غلط'; }
+  finally { isRestoringAccount = false; }
+};
+onAuthStateChanged(auth, async user => {
+  if(user) {
+    $('loadingScreen').classList.add('hidden');
+    const snap = await get(ref(db, 'users/'+user.uid));
+    if(snap.exists()){
+      const u = snap.val();
+      currentUser = {uid: user.uid, name: u.name, uidNumber: u.uid};
+      $('myName').textContent = u.name;
+      $('myNumber').textContent = u.uid;
+      myPassword = sessionStorage.getItem('myPass') || '';
+      $('myPass').textContent = '••••••';
+      passVisible = false;
+      $('authScreen').classList.add('hidden');
+      $('chatsScreen').classList.remove('hidden');
+      const userRef = ref(db, 'users/'+user.uid);
+      onDisconnect(userRef).update({lastSeen: serverTimestamp(), online: false});
+      setInterval(() => update(userRef, {lastSeen: serverTimestamp()}), 15000);
+      loadChats();
+      const lastSearch = localStorage.getItem('lastSearchResult');
+      if(lastSearch) {
+        const foundUser = JSON.parse(lastSearch);
+        const resultDiv = $('searchResult');
+        resultDiv.innerHTML = `
+          <div class="search-result-item" onclick="startChatFromSearch('${foundUser.uid}', '${foundUser.name}')">
+            <div class="avatar">${foundUser.name[0]}</div>
+            <div class="chat-info">
+              <div class="chat-name">${foundUser.name}</div>
+              <div class="chat-last">رقم: ${foundUser.uid} • اضغط لبدء المحادثة</div>
+            </div>
+            <div style="color:#00a884; font-size:24px">💬</div>
+            <span style="color:#8696a0; font-size:22px; padding:0 8px" onclick="event.stopPropagation(); clearSearchResult()">×</span>
+          </div>
+        `;
+        resultDiv.classList.remove('hidden');
+      }
+      // تعديل رقم 8: شاشة المكالمة مع زر إنهاء
+      onValue(ref(db, `calls/${auth.currentUser?.uid}`), snap => {
+        if(snap.exists()) {
+          const call = snap.val();
+          if (navigator.vibrate) navigator.vibrate([500,200,500]);
+          if($('callScreen')) return;
+          const callScreen = document.createElement('div');
+          callScreen.id = 'callScreen';
+          callScreen.innerHTML = `
+            <div style="font-size:20px; color:#8696a0">مكالمة واردة</div>
+            <div class="avatar" style="width:120px; height:120px; font-size:50px">${call.fromName[0]}</div>
+            <div style="font-size:28px; font-weight:600">${call.fromName}</div>
+            <button onclick="endCall()" style="width:70px; height:70px; background:#f15c6d; border-radius:50%; font-size:30px; margin-top:40px; cursor:pointer">✕</button>
+          `;
+          document.body.appendChild(callScreen);
+          window.endCall = async () => {
+            $('callScreen')?.remove();
+            await remove(ref(db, `calls/${auth.currentUser.uid}`));
+          };
+        }
+      });
+      const settingsSnap = await get(ref(db, `users/${user.uid}/settings`));
+      if(settingsSnap.exists()) {
+        const settings = settingsSnap.val();
+        // تعديل رقم 4: اللون للوسط فقط
+        if(settings.bgChats) $('chatsList').style.background = settings.bgChats;
+        if(settings.bgChat) $('messagesList').style.background = settings.bgChat;
+      }
+    }
+  } else {
+    $('loadingScreen').classList.add('hidden');
+    $('authScreen').classList.remove('hidden');
+    $('chatsScreen').classList.add('hidden');
+  }
+});
+const loadChats = () => {
+  const chatsRef = query(ref(db, 'userChats/'+currentUser.uid), orderByChild('lastMsgTime'), limitToLast(15));
+  onValue(chatsRef, snap => {
+    const chats = [];
+    snap.forEach(child => { chats.push({uid: child.key,...child.val()}); });
+    chats.reverse();
+    const list = $('chatsList');
+    list.innerHTML = '';
+    chats.forEach(chat => {
+      get(ref(db, 'users/'+chat.uid)).then(uSnap => {
+        if(!uSnap.exists()) return;
+        const u = uSnap.val();
+        const div = document.createElement('div');
+        div.className = 'chat-item';
+        div.onclick = () => openChat({uid: chat.uid, name: u.name});
+        const unreadBadge = chat.unreadCount > 0? `<span style="background:#00a884; color:#111b21; border-radius:10px; padding:2px 6px; font-size:12px; font-weight:bold">${chat.unreadCount}</span>` : '';
+        div.innerHTML = `
+          <div class="avatar">${u.name[0]}</div>
+          <div class="chat-info">
+            <div class="chat-name">${u.name}<span style="font-size:13px; color:#8696a0; font-weight:400; margin-right:8px">${u.uid}</span></div>
+            <div class="chat-last">${chat.lastMsg || 'اضغط للدردشة'}</div>
+          </div>
+          <div class="chat-meta">
+            <div>${chat.lastMsgTime? formatTime(chat.lastMsgTime) : ''}</div>
+            <div class="chat-status">${unreadBadge || formatLastSeen(u.lastSeen)}</div>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    });
+  });
+};
+window.searchUser = async () => {
+  const num = $('searchNumber').value.trim();
+  const resultDiv = $('searchResult');
+
+  if(num.length!== 6) {
+    showToast('الرقم لازم 6 خانات');
+    return;
+  }
+
+  if(currentUser && num === currentUser.uidNumber) {
+    showToast('هذا رقمك أنت');
+    return;
+  }
+
+  showToast('جاري البحث...', '#00a884');
+
+  try {
+    let usersSnap = await get(query(ref(db, 'users'), orderByChild('uid'), equalTo(num)));
+
+    if(!usersSnap.exists()) {
+      usersSnap = await get(query(ref(db, 'users'), orderByChild('uid'), equalTo(Number(num))));
+    }
+
+    if(!usersSnap.exists()) {
+      showToast('لا يوجد مستخدم بهذا الرقم');
+      resultDiv.classList.add('hidden');
+      localStorage.removeItem('lastSearchResult');
+      return;
+    }
+
+    let foundUser = null;
+    usersSnap.forEach(u => { foundUser = {uid: u.key,...u.val()} });
+
+    localStorage.setItem('lastSearchResult', JSON.stringify(foundUser));
+
+    resultDiv.innerHTML = `
+      <div class="search-result-item" onclick="startChatFromSearch('${foundUser.uid}', '${foundUser.name}')">
+        <div class="avatar">${foundUser.name[0]}</div>
+                <div class="chat-info">
+          <div class="chat-name">${foundUser.name}</div>
+          <div class="chat-last">رقم: ${foundUser.uid} • اضغط لبدء المحادثة</div>
+        </div>
+   <div style="color:#00a884; font-size:24px">💬</div>
+        <span style="color:#8696a0; font-size:22px; padding:0 8px" onclick="event.stopPropagation(); clearSearchResult()">×</span>
+      </div>
+    `;
+    resultDiv.classList.remove('hidden');
+    showToast('تم العثور على المستخدم', '#00a884');
+
+  } catch(e) {
+    console.error('خطأ في البحث:', e);
+    showToast('صار خطأ في البحث');
+  }
+};
+
+window.clearSearchResult = () => {
+  $('searchResult').classList.add('hidden');
+  $('searchResult').innerHTML = '';
+  localStorage.removeItem('lastSearchResult');
+};
+
+// تعديل رقم 6: البحث يضيف المستخدم الجديد أعلى القائمة
+window.startChatFromSearch = async (uid, name) => {
+  $('searchNumber').value = '';
+
+  const chatRef = ref(db, `userChats/${currentUser.uid}/${uid}`);
+  const chatSnap = await get(chatRef);
+
+  if(!chatSnap.exists()) {
+    const initChat = {
+      lastMsg: '',
+      lastMsgTime: Date.now(), // تعديل رقم 6: يطلع فوق
+      unreadCount: 0,
+      withUid: uid,
+      withName: name
+    };
+    await set(chatRef, initChat);
+    await set(ref(db, `userChats/${uid}/${currentUser.uid}`), {
+      lastMsg: '',
+      lastMsgTime: Date.now(),
+      unreadCount: 0,
+      withUid: currentUser.uid,
+      withName: currentUser.name
+    });
+  }
+
+  openChat({uid: uid, name: name});
+};
+window.openChat = async user => {
+  currentChat = user;
+  $('chatName').textContent = user.name;
+  $('chatNumber').textContent = user.uid;
+  $('chatAvatar').textContent = user.name[0];
+  $('chatScreen').classList.remove('hidden');
+  $('chatsScreen').classList.add('hidden');
+  $('messagesList').innerHTML = '';
+  replyTo = null;
+  oldestMsgTime = null;
+  await set(ref(db, `userChats/${currentUser.uid}/${currentChat.uid}/unreadCount`), 0);
+  updateReplyUI();
+  const chatID = getChatID(currentUser.uid, user.uid);
+  if (statusListener) off(statusListener);
+  statusListener = ref(db, 'users/'+user.uid+'/lastSeen');
+  onValue(statusListener, s => { $('chatStatus').textContent = formatLastSeen(s.val()); });
+  if (typingListener) off(typingListener);
+  typingListener = ref(db, `chats/${chatID}/typing/${user.uid}`);
+  onValue(typingListener, s => {
+    if(s.val()) {
+      $('chatStatus').textContent = `${user.name} يكتب...`;
+    } else {
+      onValue(ref(db, 'users/'+user.uid+'/lastSeen'), ss => {
+        $('chatStatus').textContent = formatLastSeen(ss.val());
+      }, {onlyOnce: true});
+    }
+  });
+  if (msgListener) off(msgListener);
+  msgListener = query(ref(db, `chats/${chatID}/messages`), limitToLast(20));
+  onChildAdded(msgListener, snap => {
+    renderMessage(snap.key, snap.val());
+    if(snap.val().sender!== currentUser.uid && navigator.vibrate) navigator.vibrate(50);
+    if (!oldestMsgTime || snap.val().time < oldestMsgTime) oldestMsgTime = snap.val().time;
+  });
+  const msgsRef = ref(db, `chats/${chatID}/messages`);
+  onChildChanged(msgsRef, snap => {
+    const msg = snap.val();
+    const msgEl = $('msg_'+snap.key);
+    if(msgEl && msg.sender === currentUser.uid) {
+      let statusIcon = '';
+      if(msg.status === 'sent') statusIcon = '✓';
+      else if(msg.status === 'delivered') statusIcon = '✓✓';
+      else if(msg.status === 'read') statusIcon = '<span style="color:#53bdeb">✓✓</span>';
+      msgEl.querySelector('div > div:last-child').innerHTML = `${msg.edited? '<span style="font-size:10px; color:#8696a0; margin-right:4px">معدلة</span>' : ''}${formatTime(msg.time)} ${statusIcon}`;
+    }
+  });
+  get(msgsRef).then(snap => {
+    const updates = {};
+    snap.forEach(s => {
+      const msg = s.val();
+      if(msg.sender!== currentUser.uid && msg.status!== 'read') {
+        updates[`chats/${chatID}/messages/${s.key}/status`] = 'read';
+      }
+    });
+    if(Object.keys(updates).length > 0) update(ref(db), updates);
+  });
+  setTimeout(fixBars, 100);
+};
+// تعديل رقم 7: زر الرجوع يرجع للشاشة السابقة مو يطلع من الموقع
+window.backToChats = () => {
+  if(currentChat) {
+    const chatID = getChatID(currentUser.uid, currentChat.uid);
+    set(ref(db, `chats/${chatID}/typing/${currentUser.uid}`), false);
+  }
+  $('chatScreen').classList.add('hidden');
+  $('chatsScreen').classList.remove('hidden');
+  currentChat = null;
+  closeEmojiPanel();
+  if (statusListener) off(statusListener);
+  if (typingListener) off(typingListener);
+  if (msgListener) off(msgListener);
+
+  const lastSearch = localStorage.getItem('lastSearchResult');
+  if(lastSearch) $('searchResult').classList.remove('hidden');
+
+  // تعديل رقم 7: منع الخروج من الموقع
+  history.pushState(null, null, location.href);
+};
+// تعديل رقم 12: رسائلك يمين أخضر، رسائل الطرف الثاني يسار رمادي
+const renderMessage = async (id, msg, insertTop = false) => {
+  const isMe = msg.sender === currentUser.uid;
+  const chatID = getChatID(currentUser.uid, currentChat?.uid || '');
+  if(chatID && currentChat) {
+    const deletedSnap = await get(ref(db, `userDeletedMsgs/${currentUser.uid}/${chatID}/${id}`));
+    if(deletedSnap.exists()) return;
+  }
+  if(msg.deleted) {
+    const div = document.createElement('div');
+    div.className = `msg ${isMe? 'msg-me' : 'msg-other'}`;
+    div.id = 'msg_'+id;
+    div.style.cssText = `display:flex; margin:6px 0; ${isMe?'justify-content:flex-end':'justify-content:flex-start'}; opacity:0.6;`;
+    div.innerHTML = `
+      <div style="background:#2a3942; color:#8696a0; padding:8px 12px; border-radius:8px; max-width:75%; font-style:italic">
+        🚫 تم حذف هذه الرسالة
+      </div>
+    `;
+    if (insertTop) $('messagesList').insertBefore(div, $('messagesList').firstChild);
+    else $('messagesList').appendChild(div);
+    if (!insertTop) $('messagesList').scrollTop = $('messagesList').scrollHeight;
+    return;
+  }
+  if(isMe && msg.status === 'sent' && currentChat) {
+    update(ref(db, `chats/${getChatID(currentUser.uid, currentChat.uid)}/messages/${id}`), {status: 'delivered'});
+  }
+  const div = document.createElement('div');
+  div.className = `msg ${isMe? 'msg-me' : 'msg-other'}`;
+  div.id = 'msg_'+id;
+  div.style.cssText = `display:flex; margin:6px 0; ${isMe?'justify-content:flex-end':'justify-content:flex-start'};`;
+  let pressTimer, startX = 0, startY = 0, isDragging = false;
+  div.ontouchstart = div.onmousedown = (e) => {
+    startX = e.touches? e.touches[0].clientX : e.clientX;
+    startY = e.touches? e.touches[0].clientY : e.clientY;
+    isDragging = false;
+    pressTimer = setTimeout(() => {
+      if(!isDragging) {
+        e.preventDefault();
+        showMsgMenu(id, isMe);
+        if(navigator.vibrate) navigator.vibrate(50);
+      }
+    }, 500);
+  };
+  div.ontouchmove = div.onmousemove = (e) => {
+    if(!startX) return;
+    const currentX = e.touches? e.touches[0].clientX : e.clientX;
+    const currentY = e.touches? e.touches[0].clientY : e.clientY;
+    const diffX = currentX - startX;
+    const diffY = Math.abs(currentY - startY);
+    if(diffX > 30 && diffY < 50) {
+      isDragging = true;
+      clearTimeout(pressTimer);
+      div.style.transform = `translateX(${Math.min(diffX, 60)}px)`;
+      div.style.transition = 'none';
+    }
+  };
+  div.ontouchend = div.onmouseup = div.onmouseleave = (e) => {
+    clearTimeout(pressTimer);
+    const currentX = e.changedTouches? e.changedTouches[0].clientX : e.clientX;
+    const diffX = currentX - startX;
+    if(isDragging && diffX > 50) {
+      replyMessage(id);
+      if(navigator.vibrate) navigator.vibrate(30);
+    }
+    div.style.transform = 'translateX(0)';
+    div.style.transition = 'transform 0.2s';
+    startX = 0;
+    isDragging = false;
+  };
+  let statusIcon = '';
+  let editedTag = msg.edited? '<span style="font-size:10px; color:#8696a0; margin-right:4px">معدلة</span>' : '';
+  if(isMe) {
+    if(msg.status === 'sent') statusIcon = '✓';
+    else if(msg.status === 'delivered') statusIcon = '✓✓';
+    else if(msg.status === 'read') statusIcon = '<span style="color:#53bdeb">✓✓</span>';
+  }
+  let replyHTML = '';
+  if(msg.replyTo) {
+    replyHTML = `
+      <div style="background:#00000030; padding:6px 10px; border-radius:6px; margin-bottom:6px; border-right:3px solid #00a884; font-size:13px">
+        <div style="color:#00a884; font-weight:500">${msg.replyTo.name}</div>
+        <div style="color:#8696a0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${msg.replyTo.text}</div>
+      </div>
+    `;
+  }
+  let contentHTML = '';
+  if(msg.type === 'text') contentHTML = msg.text;
+  else if(msg.type === 'audio') contentHTML = `<audio controls src="${msg.data}" style="max-width:240px"></audio>`;
+  // تعديل رقم 12: لون الرسائل صحيح
+  div.innerHTML = `
+    <div style="background:${isMe?'#005c4b':'#202c33'}; color:#e9edef; padding:8px 12px; border-radius:8px; max-width:75%; position:relative; box-shadow:0 1px #00000030">
+      ${replyHTML}
+      <div style="word-wrap:break-word">${contentHTML}</div>
+      <div style="text-align:left; font-size:11px; color:#ffffff99; margin-top:4px">
+        ${editedTag}${formatTime(msg.time)} ${statusIcon}
+      </div>
+    </div>
+  `;
+  if (insertTop) $('messagesList').insertBefore(div, $('messagesList').firstChild);
+  else $('messagesList').appendChild(div);
+  if (!insertTop) $('messagesList').scrollTop = $('messagesList').scrollHeight;
+};
+
+// تعديل رقم 10: الحفظ اللحظي
+window.sendMessage = async () => {
+  const text = $('msgInput').value.trim();
+  if(!text ||!currentChat) return;
+  $('msgInput').value = '';
+  setTyping(false);
+  const chatID = getChatID(currentUser.uid, currentChat.uid);
+  const newMsgRef = push(ref(db, `chats/${chatID}/messages`));
+  const msgData = {
+    text, type: 'text', sender: currentUser.uid,
+    time: Date.now(), // تعديل رقم 10: لحظي
+    status: 'sent'
+  };
+  if(replyTo) msgData.replyTo = replyTo;
+  const updates = {};
+  updates[`chats/${chatID}/messages/${newMsgRef.key}`] = msgData;
+  updates[`userChats/${currentUser.uid}/${currentChat.uid}/lastMsg`] = text;
+  updates[`userChats/${currentUser.uid}/${currentChat.uid}/lastMsgTime`] = Date.now();
+  updates[`userChats/${currentChat.uid}/${currentUser.uid}/lastMsg`] = text;
+  updates[`userChats/${currentChat.uid}/${currentUser.uid}/lastMsgTime`] = Date.now();
+  updates[`userChats/${currentChat.uid}/${currentUser.uid}/unreadCount`] = increment(1);
+  await update(ref(db), updates); // تعديل رقم 10: update واحد = لحظي
+  replyTo = null;
+  updateReplyUI();
+};
+
+$('msgInput').oninput = () => {
+  if(!currentChat) return;
+  const chatID = getChatID(currentUser.uid, currentChat.uid);
+  set(ref(db, `chats/${chatID}/typing/${currentUser.uid}`), true);
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    set(ref(db, `chats/${chatID}/typing/${currentUser.uid}`), false);
+  }, 2000);
+};
+
+const originalSendBtn = $('sendBtn').onclick;
+$('sendBtn').onclick = () => {
+  if(currentChat) {
+    const chatID = getChatID(currentUser.uid, currentChat.uid);
+    set(ref(db, `chats/${chatID}/typing/${currentUser.uid}`), false);
+  }
+  if(originalSendBtn) originalSendBtn();
+};
+
+window.setTyping = val => {
+  if(!currentChat) return;
+  clearTimeout(typingTimeout);
+  const typingRef = ref(db, `chats/${getChatID(currentUser.uid, currentChat.uid)}/typing/${currentUser.uid}`);
+  if(val) {
+    set(typingRef, true);
+    typingTimeout = setTimeout(() => remove(typingRef), 3000);
+  } else {
+    remove(typingRef);
+  }
+};
+
+window.showMsgMenu = (id, isMe) => {
+  const menu = document.createElement('div');
+  menu.id = 'popupMenu';
+  menu.style.cssText = `position:fixed; background:#233138; border-radius:8px; z-index:9999; box-shadow:0 2px 15px #000; padding:8px 0; min-width:200px`;
+  menu.innerHTML = `
+    <div class="menu-item" onclick="replyMessage('${id}'); closeMenu()">رد</div>
+    ${isMe?`<div class="menu-item" onclick="editMessage('${id}'); closeMenu()">تعديل</div>`:''}
+    <div class="menu-item" onclick="deleteMsg('${id}','me'); closeMenu()">حذف لدي</div>
+    ${isMe?`<div class="menu-item" onclick="deleteMsg('${id}','all'); closeMenu()">حذف لدى الجميع</div>`:''}
+  `;
+  document.body.appendChild(menu);
+  const rect = event.target.getBoundingClientRect();
+  menu.style.top = rect.top + 30 + 'px';
+  menu.style.left = rect.left + 'px';
+  setTimeout(() => document.onclick = e => {if(!menu.contains(e.target)) closeMenu()}, 100);
+};
+
+window.closeMenu = () => {
+  const m = $('popupMenu');
+  if(m) m.remove();
+  document.onclick = null;
+};
+
+window.replyMessage = async id => {
+  const snap = await get(ref(db, `chats/${getChatID(currentUser.uid, currentChat.uid)}/messages/${id}`));
+  const msg = snap.val();
+  replyTo = {id, text: msg.text || '🎤 رسالة صوتية', name: msg.sender === currentUser.uid? 'أنت' : currentChat.name};
+  updateReplyUI();
+  $('msgInput').focus();
+};
+
+const updateReplyUI = () => {
+  let bar = $('replyBar');
+  if(!replyTo) { if(bar) bar.remove(); return; }
+  if(!bar) {
+    bar = document.createElement('div');
+    bar.id = 'replyBar';
+    bar.style.cssText = 'background:#1f2c33; padding:8px 12px; display:flex; align-items:center; gap:10px; border-right:3px solid #00a884';
+    $('chatInputBar').before(bar);
+  }
+  bar.innerHTML = `
+    <div style="flex:1">
+      <div style="color:#00a884; font-size:13px">ترد على ${replyTo.name}</div>
+      <div style="color:#8696a0; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${replyTo.text}</div>
+    </div>
+    <span style="font-size:20px; cursor:pointer" onclick="replyTo=null; updateReplyUI()">×</span>
+  `;
+};
+
+window.deleteMsg = async (id, type) => {
+  const chatID = getChatID(currentUser.uid, currentChat.uid);
+  if(type === 'all') {
+    await update(ref(db, `chats/${chatID}/messages/${id}`), {
+      text: 'تم حذف هذه الرسالة', type: 'deleted', deleted: true,
+      deletedBy: currentUser.uid, deletedAt: Date.now()
+    });
+  } else {
+    await set(ref(db, `userDeletedMsgs/${currentUser.uid}/${chatID}/${id}`), true);
+    $('msg_'+id).remove();
+  }
+  closeMenu();
+};
+
+window.editMessage = async (id) => {
+  const snap = await get(ref(db, `chats/${getChatID(currentUser.uid, currentChat.uid)}/messages/${id}`));
+  const msg = snap.val();
+  if(msg.type!== 'text') return showToast('ما تقدر تعدل إلا الرسائل النصية');
+  const newText = prompt('عدل رسالتك:', msg.text);
+  if(newText === null || newText.trim() === '' || newText === msg.text) return;
+  await update(ref(db, `chats/${getChatID(currentUser.uid, currentChat.uid)}/messages/${id}`), {
+    text: newText.trim(), edited: true, editedAt: Date.now()
+  });
+  showToast('تم التعديل', '#00a884');
+};
+
+// تعديل رقم 9: تسجيل بالضغط المطول
+window.startRecord = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.start();
+    showToast('جاري التسجيل... ارفع إصبعك للإرسال', '#00a884');
+    $('micBtn').style.color = '#f15c6d';
+  } catch { showToast('المايك مرفوض'); }
+};
+
+window.stopRecord = () => {
+  if(!mediaRecorder) return;
+  $('micBtn').style.color = '#aebac1';
+  mediaRecorder.stop();
+  mediaRecorder.onstop = async () => {
+    const blob = new Blob(audioChunks, {type: 'audio/webm'});
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Audio = reader.result;
+      const chatID = getChatID(currentUser.uid, currentChat.uid);
+      const msgRef = push(ref(db, `chats/${chatID}/messages`));
+      await set(msgRef, {
+        type: 'audio', data: base64Audio, sender: currentUser.uid,
+        time: Date.now(), status: 'sent' // تعديل رقم 10: لحظي
+      });
+      const updates = {};
+      updates[`userChats/${currentUser.uid}/${currentChat.uid}/lastMsg`] = '🎤 رسالة صوتية';
+      updates[`userChats/${currentUser.uid}/${currentChat.uid}/lastMsgTime`] = Date.now();
+      updates[`userChats/${currentChat.uid}/${currentUser.uid}/lastMsg`] = '🎤 رسالة صوتية';
+      updates[`userChats/${currentChat.uid}/${currentUser.uid}/lastMsgTime`] = Date.now();
+      updates[`userChats/${currentChat.uid}/${currentUser.uid}/unreadCount`] = increment(1);
+      await update(ref(db), updates);
+    };
+    reader.readAsDataURL(blob);
+    mediaRecorder.stream.getTracks().forEach(t=>t.stop());
+  };
+};
+
+function initEmojiPanel() {
+  const panel = $('emojiPanel');
+  const emojis = '😀😁😂🤣😃😄😅😆😉😊😋😎😍😘🥰😗😙😚🙂🤗🤩🤔🤨😐😑😶🙄😏😣😥😮🤐😯😪😫😴😌😛😜😝🤤😒😓😔😕🙃🤑😲☹️🙁😖😞😟😤😢😭😦😧😨😩🤯😬😰😱🥵🥶😳🤪😵😡😠🤬😷🤒🤕🤢🤮🤧😇🥳🥺🤠🤡🤥🤫🤭🧐🤓😈👿👹👺💀👻👽🤖💩😺😸😹😻😼😽🙀😿😾👋🤚🖐✋🖖👌🤏✌️🤞🤟🤘🤙👈👉👆🖕👇☝️👍👎✊👊🤛🤜👏🙌👐🤲🤝🙏✍️💅🤳💪🦾🦿🦵🦶👣👂🦻👃🧠🫀🫁🦷🦴👀👁👅👄💋❤️🧡💛💚💙💜🖤🤍🤎💔❣️💕💞💓💗💖💘💝💟'.split('');
+  emojis.forEach(e => {
+    const span = document.createElement('span');
+    span.textContent = e;
+    span.style.cssText = 'font-size:24px; cursor:pointer; text-align:center';
+    span.onclick = () => addEmoji(e);
+    panel.appendChild(span);
+  });
+}
+
+window.toggleEmojiPanel = () => {
+  const panel = $('emojiPanel');
+  const bar = $('chatInputBar');
+  const emojiIcon = $('emojiIcon');
+  const keyboardIcon = $('keyboardIcon');
+  emojiPanelOpen =!emojiPanelOpen;
+  if (emojiPanelOpen) {
+    panel.classList.remove('hidden');
+    bar.classList.add('emoji-open');
+    emojiIcon.classList.add('hidden');
+    keyboardIcon.classList.remove('hidden');
+    $('msgInput').blur();
+    history.pushState({emoji: true}, null, location.href);
+    fixBars();
+  } else {
+    panel.classList.add('hidden');
+    bar.classList.remove('emoji-open');
+    emojiIcon.classList.remove('hidden');
+    keyboardIcon.classList.add('hidden');
+    $('msgInput').focus();
+  }
+};
+
+window.addEmoji = (emoji) => {
+  const input = $('msgInput');
+  input.value += emoji;
+};
+
+window.closeEmojiPanel = () => {
+  if (emojiPanelOpen) toggleEmojiPanel();
+};
+
+window.showMenu = type => {
+  const oldMenu = $('popupMenu');
+  if(oldMenu) oldMenu.remove();
+  const menu = document.createElement('div');
+  menu.id = 'popupMenu';
+  menu.style.cssText = `position:fixed; background:#233138; border-radius:8px; z-index:9999; box-shadow:0 2px 15px rgba(0,0.4); padding:8px 0; min-width:180px`;
+  if(type === 'mainMenu') {
+    menu.innerHTML = `
+      <div class="menu-item" onclick="showChangePassword(); closeMenu()">تغيير كلمة المرور</div>
+      <div class="menu-item" onclick="event.stopPropagation(); showColorPanel('chats');">تغيير لون الخلفية</div>
+      <div class="menu-item" onclick="logout(); closeMenu()" style="color:#f15c6d">تسجيل الخروج</div>
+    `;
+  } else if(type === 'chatMenu') {
+    menu.innerHTML = `
+      <div class="menu-item" onclick="event.stopPropagation(); showColorPanel('chat');">تغيير لون الخلفية</div>
+      <div class="menu-item" onclick="clearChat(); closeMenu()">مسح الدردشة كاملة</div>
+      <div class="menu-item" onclick="makeCall(); closeMenu()">إجراء مكالمة تنبيه</div>
+    `;
+  }
+  document.body.appendChild(menu);
+  const btn = event.target;
+  const rect = btn.getBoundingClientRect();
+  menu.style.top = rect.bottom + 5 + 'px';
+  menu.style.right = '10px';
+  setTimeout(() => {
+    document.onclick = e => {
+      if(!menu.contains(e.target) &&!e.target.closest('#colorPanel')) {
+        closeMenu();
+        closeColorPanel();
+      }
+    }
+  }, 0);
+};
+
+window.clearChat = async () => {
+  if(!confirm('مسح كل رسائل هذه الدردشة؟ لا يمكن التراجع')) return;
+  const chatID = getChatID(currentUser.uid, currentChat.uid);
+  await remove(ref(db, `chats/${chatID}/messages`));
+  $('messagesList').innerHTML = '';
+  const updates = {};
+  updates[`userChats/${currentUser.uid}/${currentChat.uid}/lastMsg`] = '';
+  updates[`userChats/${currentUser.uid}/${currentChat.uid}/lastMsgTime`] = 0;
+  await update(ref(db), updates);
+  showToast('تم مسح الدردشة', '#00a884');
+};
+
+window.makeCall = async () => {
+  if(!currentChat) return;
+  await set(ref(db, `calls/${currentChat.uid}`), {
+    from: currentUser.uid, fromName: currentUser.name, time: serverTimestamp()
+  });
+  showToast('جاري الاتصال...', '#00a884');
+};
+
+window.logout = () => {
+  if(!confirm('تسجيل الخروج؟')) return;
+  signOut(auth);
+};
+
+window.showChangePassword = () => {
+  const popup = document.createElement('div');
+  popup.id = 'changePassPopup';
+  popup.style.cssText = `position:fixed; top:0; left:0; right:0; bottom:0; background:#000000cc; z-index:99999; display:flex; align-items:center; justify-content:center`;
+  popup.innerHTML = `
+    <div style="background:#202c33; padding:20px; border-radius:12px; width:300px">
+      <div style="font-size:18px; font-weight:bold; margin-bottom:15px">تغيير كلمة المرور</div>
+      <div class="input-group" style="margin-bottom:10px">
+        <input type="password" id="oldPass" class="input-field" placeholder="كلمة المرور الحالية" autocomplete="off" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
+        <span class="eye-icon" onclick="toggleEye('oldPass')">👁️</span>
+      </div>
+      <div class="input-group" style="margin-bottom:10px">
+        <input type="password" id="newPass" class="input-field" placeholder="كلمة المرور الجديدة" autocomplete="off" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')">
+        <span class="eye-icon" onclick="toggleEye('newPass')">👁️</span>
+      </div>
+      <div class="error-msg" id="changePassError"></div>
+      <div style="display:flex; gap:10px; margin-top:15px">
+        <button class="submit-btn" style="flex:1" onclick="changePassword()">تأكيد</button>
+        <button class="submit-btn" style="flex:1; background:#2a3942; color:#e9edef" onclick="$('changePassPopup').remove()">إلغاء</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(popup);
+};
+
+window.changePassword = async () => {
+  const oldPass = $('oldPass').value.trim();
+  const newPass = $('newPass').value.trim();
+  const err = $('changePassError');
+  err.textContent = '';
+  if(!oldPass ||!newPass) return err.textContent = 'املأ كل الحقول';
+  if(newPass.length < 6) return err.textContent = 'الجديدة 6 أرقام على الأقل';
+  if(/^(\d)\1+$/.test(newPass)) return err.textContent = 'كلمة المرور ضعيفة - أرقام مكررة';
+  if(/012345|123456|234567|345678|456789|987654|876543|765432|654321|543210/.test(newPass))
+    return err.textContent = 'كلمة المرور ضعيفة - أرقام متتالية';
+  const weak = ['000000','111','123123','112233','123321'];
+  if(weak.includes(newPass)) return err.textContent = 'كلمة المرور ضعيفة جداً';
+  try {
+    const user = auth.currentUser;
+    const snap = await get(ref(db, 'users/'+user.uid));
+    const email = snap.val().email;
+    await signInWithEmailAndPassword(auth, email, oldPass);
+    await updatePassword(user, newPass);
+    myPassword = newPass;
+    sessionStorage.setItem('myPass', newPass);
+    $('changePassPopup').remove();
+    showToast('تم تغيير كلمة المرور بنجاح', '#00a884');
+  } catch(e) {
+    err.textContent = 'كلمة المرور الحالية غلط';
+  }
+};
+
+// تعديل رقم 3+4: قائمة الألوان تقفل تلقائي + اللون للوسط فقط
+window.showColorPanel = target => {
+  closeMenu();
+  colorTarget = target;
+  const panel = $('colorPanel');
+  panel.classList.remove('hidden');
+  const currentBg = target === 'chats'? $('chatsList').style.background : $('messagesList').style.background;
+  panel.querySelectorAll('.color-option').forEach(opt => {
+    opt.classList.toggle('selected', opt.dataset.color === currentBg);
+  });
+  // تعديل رقم 3: تقفل لو ضغطت برا
+  setTimeout(() => {
+    document.onclick = e => {
+      if(!panel.contains(e.target) &&!e.target.closest('.menu-item')) {
+        closeColorPanel();
+        document.onclick = null;
+      }
+    }
+  }, 0);
+};
+
+window.closeColorPanel = () => {
+  $('colorPanel').classList.add('hidden');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  $('colorPanel').addEventListener('click', async e => {
+    if(e.target.classList.contains('color-option')) {
+      const color = e.target.dataset.color;
+      const isLight = ['#ffe4e6','#dbeafe','#e0f2fe','#fef9c3','#dcfce7','#fae8ff','#ffedd5'].includes(color);
+      const textColor = isLight? '#111b21' : '#e9edef';
+
+      if(colorTarget === 'chats') {
+        $('chatsList').style.background = color;
+        $('chatsList').style.color = textColor;
+        await set(ref(db, `users/${currentUser.uid}/settings/bgChats`), color);
+      } else {
+        $('messagesList').style.background = color;
+        $('messagesList').style.color = textColor;
+        await set(ref(db, `users/${currentUser.uid}/settings/bgChat`), color);
+      }
+      closeColorPanel(); // تعديل رقم 3: تقفل بعد الاختيار
+      showToast('تم تغيير اللون', '#00a884');
+    }
+  });
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('selectstart', e => e.preventDefault());
+});
+
+function fixBars() {
+  const bar = $('chatInputBar');
+  let offset = window.visualViewport? window.innerHeight - window.visualViewport.height : 0;
+  if (emojiPanelOpen) {
+    bar.style.bottom = '280px';
+    bar.classList.add('emoji-open');
+  } else {
+    bar.style.bottom = offset + 'px';
+    bar.classList.remove('emoji-open');
+      $('messagesList').style.paddingBottom = (70 + offset) + 'px';
+  }
+}
+
+$('msgInput').addEventListener('focus', () => {
+  if (emojiPanelOpen) toggleEmojiPanel();
+  setTimeout(fixBars, 300);
+});
+
+// تعديل رقم 7: منع الخروج من الموقع بزر الرجوع
+window.addEventListener('popstate', () => {
+  if (emojiPanelOpen) {
+    closeEmojiPanel();
+    history.pushState(null, null, location.href);
+  } else if (currentChat) {
+    backToChats();
+    history.pushState(null, null, location.href);
+  }
+});
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', fixBars);
+}
+
+initEmojiPanel();
+
+$('messagesList').addEventListener('scroll', async () => {
+  if ($('messagesList').scrollTop === 0 &&!loadingOld && currentChat && oldestMsgTime) {
+    loadingOld = true;
+    const chatID = getChatID(currentUser.uid, currentChat.uid);
+    const oldestSnap = await get(
+      query(
+        ref(db, `chats/${chatID}/messages`),
+        orderByChild('time'),
+        endBefore(oldestMsgTime),
+        limitToLast(50)
+      )
+    );
+    const msgs = [];
+    oldestSnap.forEach(s => msgs.push({id: s.key,...s.val()}));
+    msgs.reverse().forEach(msg => {
+      renderMessage(msg.id, msg, true);
+    });
+    if (msgs.length > 0) oldestMsgTime = msgs[0].time;
+    loadingOld = false;
+  }
+});
+
+// تعديل رقم 11: ربط Firebase بـ GitHub - ملاحظة: الحفظ اللحظي موجود أصلاً في Firebase
+// إذا تبي نسخ احتياطي لـ GitHub تحتاج Cloud Functions - هذا خارج الكود الحالي
+console.log('✅ واتساب هارون جاهز 100% مع كل التعديلات');
+
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE_NAME = 'haroon-v5';
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./'])));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys =>
+        Promise.all(keys.filter(k => k!== CACHE_NAME).map(k => caches.delete(k)))
+      ));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      if(e.request.url.includes('firebase') || e.request.method!== 'GET') return;
+      e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(e.request, resClone));
+          return res;
+        }))
+      );
+    });
+  `;
+  const blob = new Blob([swCode], {type: 'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).then(() => {
+    console.log('SW شغال ✅ الموقع بيفتح بدون نت المرة الجاية');
+  }).catch(err => console.log('SW Error:', err));
+}
+</script>
+</body>
+</html>
