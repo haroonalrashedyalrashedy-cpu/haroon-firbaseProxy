@@ -230,7 +230,7 @@ button,input {font-family:inherit; outline:none; border:none}
       <span class="eye-icon" onclick="toggleEye('loginPass')">👁️</span>
     </div>
     <div class="error-msg" id="loginError"></div>
-    <button class="submit-btn" onclick="restoreAccount()" style="height:50px; border-radius:25px">تسجيل الدخول</button>
+    <button id="loginBtn" class="submit-btn" type="button" onclick="restoreAccount()" style="height:50px; border-radius:25px">تسجيل الدخول</button> 
   </div>
 </div>
 
@@ -1453,6 +1453,23 @@ window.toggleForm = (type) => {
     currentForm = 'login';
   }
 };
+  // منع الأرقام العربية والانجليزية في حقل الاسم
+document.addEventListener('DOMContentLoaded', () => {
+  const nameInput = document.getElementById('signupName');
+  if(nameInput) {
+    nameInput.addEventListener('input', function(e) {
+      // يحذف أي رقم عربي ٠-٩ أو انجليزي 0-9
+      this.value = this.value.replace(/[0-9٠-٩]/g, '');
+    });
+
+    // يمنع اللصق إذا فيه أرقام
+    nameInput.addEventListener('paste', function(e) {
+      setTimeout(() => {
+        this.value = this.value.replace(/[0-9٠-٩]/g, '');
+      }, 0);
+    });
+  }
+});
 </script>
 </body>
 </html>
