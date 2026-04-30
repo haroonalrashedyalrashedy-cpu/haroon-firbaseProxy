@@ -434,38 +434,67 @@ window.toggleEye = id => {
   }
   
   try {
-    console.log('6: دخلت try - بأبحث عن الرقم في Firebase');
-    const usersSnap = await get(query(ref(db, 'users'), orderByChild('uid'), equalTo(uidNum)));
-    console.log('7: نتيجة البحث موجودة؟', usersSnap.exists());
+    console.log('6: دخلت try - بأبحث عن الرقم في uids');
     
-    if(!usersSnap.exists()) { 
-      console.log('8: الرقم مو موجود في قاعدة البيانات');
+    // === التعديل 1: نجيب UID الحقيقي من uids ===
+    const uidSnap = await get(ref(db, `uids/${uidNum}`));
+    console.log('7: نتيجة البحث في uids موجودة؟', uidSnap.exists());
+    
+    if(!uidSnap.exists()) { 
+      console.log('8: الرقم مو موجود');
       isRestoringAccount = false; 
       if(btn) btn.disabled = false;
       if(btn) btn.classList.remove('loading');
       return err.textContent = 'الرقم غلط'; 
     }
     
-    let userEmail = '';
-    usersSnap.forEach(u => { 
-      userEmail = u.val().email;
-      console.log('9: لقيت الإيميل =', userEmail);
-    });
+    const realUid = uidSnap.val();
+    console.log('9: الـ UID الحقيقي =', realUid);
     
-    console.log('10: بأحاول أسجل دخول بـ Firebase Auth');
+    // === التعديل 2: نجيب الإيميل من users بالـ UID الحقيقي ===
+    const userSnap = await get(ref(db, `users/${realUid}`));
+    
+    if(!userSnap.exists()) { 
+      console.log('10: بيانات اليوزر مو موجودة');
+      isRestoringAccount = false; 
+      if(btn) btn.disabled = false;
+      if(btn) btn.classList.remove('loading');
+      return err.textContent = 'الحساب غير موجود'; 
+    }
+    
+    const userData = userSnap.val();
+    const userEmail = userData.email;
+    console.log('11: لقيت الإيميل =', userEmail);
+    
+    // === التعديل 3: نتحقق من الباسورد قبل signIn ===
+    if(userData.passHash !== pass) {
+      console.log('12: الباسورد غلط');
+      isRestoringAccount = false; 
+      if(btn) btn.disabled = false;
+      if(btn) btn.classList.remove('loading');
+      return err.textContent = 'كلمة السر غلط'; 
+    }
+    
+    console.log('13: بأحاول أسجل دخول بـ Firebase Auth');
     await signInWithEmailAndPassword(auth, userEmail, pass);
-    console.log('11: نجح تسجيل الدخول في Auth');
+    console.log('14: نجح تسجيل الدخول في Auth');
     
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
-    console.log('12: حفظت الباسوورد، onAuthStateChanged المفروض يشتغل الحين');
+    console.log('15: حفظت الباسوورد، onAuthStateChanged المفروض يشتغل الحين');
     autoInstallAfterLogin();
 
   } catch(e) { 
-    console.error('13: طحت في catch - الخطأ:', e.message, 'الكود:', e.code);
-    err.textContent = 'كلمة السر غلط'; 
+    console.error('16: طحت في catch - الخطأ:', e.message, 'الكود:', e.code);
+    if(e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
+      err.textContent = 'كلمة السر غلط'; 
+    } else if(e.code === 'auth/invalid-email') {
+      err.textContent = 'مشكلة في الحساب'; 
+    } else {
+      err.textContent = 'صار خطأ: ' + e.message; 
+    }
   } finally { 
-    console.log('14: دخلت finally - أرجع الزر طبيعي');
+    console.log('17: دخلت finally - أرجع الزر طبيعي');
     isRestoringAccount = false;
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
@@ -576,52 +605,60 @@ window.createAccount = async () => {
   }
   
   try {
-    console.log('9: دخلت try - بأجيب users');
-    const usersSnap = await get(ref(db, 'users'));
-    console.log('10: جبت users');
+    console.log('9: دخلت try - بأولد رقم فريد');
     
-    let exists = false;
-    usersSnap.forEach(u => {
-      if(u.val().name === name && u.val().passHash === pass) exists = true;
-    });
-    console.log('11: شيكت لو موجود =', exists);
+    // === التعديل 1: توليد رقم والتأكد من عدم وجوده في uids ===
+    const genUid = () => Math.floor(100000 + Math.random()*900000).toString();
+    let uidNumber;
+    let tries = 0;
     
-    if(exists) { 
-      console.log('12: الحساب موجود مسبقاً');
+    while(tries < 10){
+      uidNumber = genUid();
+      const exists = await get(ref(db, `uids/${uidNumber}`)); // نشيك في uids
+      if(!exists.exists()) break;
+      tries++;
+    }
+    
+    if(tries >= 10) {
       isCreatingAccount = false; 
       if(btn) btn.disabled = false;
       if(btn) btn.classList.remove('loading');
-      return err.textContent = 'هذا الحساب موجود مسبقاً بنفس الاسم وكلمة السر'; 
+      return err.textContent = 'فشل توليد رقم، حاول مرة ثانية';
     }
     
-    console.log('13: بأبدأ إنشاء في Firebase Auth');
-    const email = `${Date.now()}@haroon.app`;
-    const uidNumber = generateUID();
+    console.log('10: الرقم الفريد =', uidNumber);
     
-    // === التعديل المهم 1: خزن البيانات مؤقتاً ===
+    // === حذفنا فحص الاسم+الباس القديم لأن users صار مقفول ===
+    // ملاحظة: Firebase Auth يمنع تكرار الإيميل تلقائياً
+    
+    console.log('11: بأبدأ إنشاء في Firebase Auth');
+    const email = `${Date.now()}@haroon.app`;
+    
+    // === التعديل 2: خزن البيانات مؤقتاً للـ onAuthStateChanged ===
     pendingUserData = { 
       name: name, 
       uid: uidNumber, 
       email: email,
-      passHash: pass,
-      createdAt: serverTimestamp(), 
-      lastSeen: serverTimestamp()
+      passHash: pass
     };
     myGeneratedUid = uidNumber;
     
-    // === التعديل المهم 2: أنشئ في Auth فقط ===
+    // === أنشئ في Auth فقط - onAuthStateChanged بيكمل الحفظ في 3 أماكن ===
     await createUserWithEmailAndPassword(auth, email, pass);
-    console.log('14: تم إنشاء اليوزر في Auth، onAuthStateChanged بيكمل الحفظ والتحويل');
-    // حذفنا set + showToast + sessionStorage من هنا
+    console.log('12: تم إنشاء اليوزر في Auth، onAuthStateChanged بيكمل الحفظ والتحويل');
     
   } catch(e) { 
-    console.error('16: طحت في catch:', e.message, e.code);
-    err.textContent = 'خطأ: '+e.message; 
-    // === التعديل المهم 3: امسح البيانات المؤقتة لو فشل ===
+    console.error('13: طحت في catch:', e.message, e.code);
+    if(e.code === 'auth/email-already-in-use') {
+      err.textContent = 'حدث خطأ نادر، جرب مرة ثانية';
+    } else {
+      err.textContent = 'خطأ: '+e.message; 
+    }
+    // === التعديل 3: امسح البيانات المؤقتة لو فشل ===
     pendingUserData = null;
     myGeneratedUid = null;
   } finally { 
-    console.log('17: finally');
+    console.log('14: finally');
     isCreatingAccount = false;
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
@@ -635,11 +672,23 @@ onAuthStateChanged(auth, async user => {
     if(pendingUserData) { 
       console.log('فيه pendingUserData - بأحفظه الحين');
       try { 
+        // 1. البيانات الخاصة - محد يشوفها غير صاحبها
         await set(ref(db, `users/${user.uid}`), { 
-          ...pendingUserData,
+          passHash: pendingUserData.passHash,
+          email: pendingUserData.email,
           createdAt: serverTimestamp(), 
           lastSeen: serverTimestamp()
         }); 
+        
+        // 2. البيانات العامة - للبحث
+        await set(ref(db, `publicUsers/${user.uid}`), {
+          name: pendingUserData.name,
+          uid: pendingUserData.uid
+        });
+        
+        // 3. ربط الرقم بالـ UID الحقيقي
+        await set(ref(db, `uids/${pendingUserData.uid}`), user.uid);
+        
         currentUser = {uid: user.uid, name: pendingUserData.name, uidNumber: pendingUserData.uid};
         $('myName').textContent = pendingUserData.name;
         $('myNumber').textContent = pendingUserData.uid;
@@ -671,9 +720,10 @@ onAuthStateChanged(auth, async user => {
     }
     // === نهاية التعديل المهم ===
     
-    const snap = await get(ref(db, 'users/'+user.uid));
-    if(snap.exists()){
-      const u = snap.val();
+    // === التعديل المهم 2: نقرأ البيانات العامة من publicUsers ===
+    const pubSnap = await get(ref(db, 'publicUsers/'+user.uid));
+    if(pubSnap.exists()){
+      const u = pubSnap.val();
       currentUser = {uid: user.uid, name: u.name, uidNumber: u.uid};
       $('myName').textContent = u.name;
       $('myNumber').textContent = u.uid;
@@ -686,7 +736,7 @@ onAuthStateChanged(auth, async user => {
       onDisconnect(userRef).update({lastSeen: serverTimestamp(), online: false});
       setInterval(() => update(userRef, {lastSeen: serverTimestamp()}), 15000);
       loadChats();
-      autoInstallAfterLogin(); // تثبيت تلقائي لو كان مسجل دخول مسبقاً
+      autoInstallAfterLogin();
       const lastSearch = localStorage.getItem('lastSearchResult');
       if(lastSearch) {
         const foundUser = JSON.parse(lastSearch);
@@ -704,7 +754,6 @@ onAuthStateChanged(auth, async user => {
         `;
         resultDiv.classList.remove('hidden');
       }
-      // تعديل رقم 8: شاشة المكالمة مع زر إنهاء
       onValue(ref(db, `calls/${auth.currentUser?.uid}`), snap => {
         if(snap.exists()) {
           const call = snap.val();
@@ -728,12 +777,11 @@ onAuthStateChanged(auth, async user => {
       const settingsSnap = await get(ref(db, `users/${user.uid}/settings`));
       if(settingsSnap.exists()) {
         const settings = settingsSnap.val();
-        // تعديل رقم 4: اللون للوسط فقط
         if(settings.bgChats) $('chatsList').style.background = settings.bgChats;
         if(settings.bgChat) $('messagesList').style.background = settings.bgChat;
       }
     } else {
-      console.log('اليوزر موجود في Auth بس مو في users - بسجل خروج');
+      console.log('اليوزر موجود في Auth بس مو في publicUsers - بسجل خروج');
       await signOut(auth);
     }
   } else {
@@ -751,7 +799,8 @@ const loadChats = () => {
     const list = $('chatsList');
     list.innerHTML = '';
     chats.forEach(chat => {
-      get(ref(db, 'users/'+chat.uid)).then(uSnap => {
+      // === التعديل المهم 3: نقرأ من publicUsers بدل users ===
+      get(ref(db, 'publicUsers/'+chat.uid)).then(uSnap => {
         if(!uSnap.exists()) return;
         const u = uSnap.val();
         const div = document.createElement('div');
@@ -774,11 +823,12 @@ const loadChats = () => {
     });
   });
 };
+
 window.searchUser = async () => {
   const num = $('searchNumber').value.trim();
   const resultDiv = $('searchResult');
 
-  if(num.length!== 6) {
+  if(num.length !== 6) {
     showToast('الرقم لازم 6 خانات');
     return;
   }
@@ -791,32 +841,41 @@ window.searchUser = async () => {
   showToast('جاري البحث...', '#00a884');
 
   try {
-    let usersSnap = await get(query(ref(db, 'users'), orderByChild('uid'), equalTo(num)));
-
-    if(!usersSnap.exists()) {
-      usersSnap = await get(query(ref(db, 'users'), orderByChild('uid'), equalTo(Number(num))));
-    }
-
-    if(!usersSnap.exists()) {
+    // === التعديل المهم 1: نبحث في uids أول ===
+    const uidSnap = await get(ref(db, `uids/${num}`));
+    
+    if(!uidSnap.exists()) {
       showToast('لا يوجد مستخدم بهذا الرقم');
       resultDiv.classList.add('hidden');
       localStorage.removeItem('lastSearchResult');
       return;
     }
 
-    let foundUser = null;
-    usersSnap.forEach(u => { foundUser = {uid: u.key,...u.val()} });
+    const realUid = uidSnap.val(); // GeK7QZ8AL4YBMjT0JtCpS4RRAEF2
+    
+    // === التعديل المهم 2: نجيب البيانات العامة من publicUsers ===
+    const userSnap = await get(ref(db, `publicUsers/${realUid}`));
+    
+    if(!userSnap.exists()) {
+      showToast('لا يوجد مستخدم بهذا الرقم');
+      resultDiv.classList.add('hidden');
+      localStorage.removeItem('lastSearchResult');
+      return;
+    }
+
+    const userData = userSnap.val();
+    const foundUser = {uid: realUid, ...userData};
 
     localStorage.setItem('lastSearchResult', JSON.stringify(foundUser));
 
     resultDiv.innerHTML = `
-      <div class="search-result-item" onclick="startChatFromSearch('${foundUser.uid}', '${foundUser.name}')">
+      <div class="search-result-item" onclick="startChatFromSearch('${foundUser.uid}', '${foundUser.name}', '${foundUser.uid}')">
         <div class="avatar">${foundUser.name[0]}</div>
-                <div class="chat-info">
+        <div class="chat-info">
           <div class="chat-name">${foundUser.name}</div>
           <div class="chat-last">رقم: ${foundUser.uid} • اضغط لبدء المحادثة</div>
         </div>
-   <div style="color:#00a884; font-size:24px">💬</div>
+        <div style="color:#00a884; font-size:24px">💬</div>
         <span style="color:#8696a0; font-size:22px; padding:0 8px" onclick="event.stopPropagation(); clearSearchResult()">×</span>
       </div>
     `;
@@ -828,7 +887,6 @@ window.searchUser = async () => {
     showToast('صار خطأ في البحث');
   }
 };
-
 window.clearSearchResult = () => {
   $('searchResult').classList.add('hidden');
   $('searchResult').innerHTML = '';
