@@ -9,7 +9,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>واتساب هارون</title>
 <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22واتساب%20هارون%22,%22short_name%22:%22واتساب%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23111b21%22,%22theme_color%22:%22%23005c4b%22,%22icons%22:[{%22src%22:%22data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTE1IiBmaWxsPSIjMDBhODg0Ii8+CjxwYXRoIGQ9Ik0xNzIgMTYwQzE3MiAxMzguNCAxODkuNCAxMjEgMjExIDEyMUgxOTRDMTk0IDEyMSAxOTQgMTIxIDE5NCAxMjFIMjM2QzI1Ny42IDEyMSAyNzUgMTM4LjQgMjc1IDE2MFYzMjhDMjc1IDM0OS42IDI1Ny42IDM2NyAyMzYgMzY3SDE3NkMxNTQuNCAzNjcgMTM3IDM0OS42IDEzNyAzMjhWMTYwQzEzNyAxMzguNCAxNTQuNCAxMjEgMTc2IDEyMVYxMjFIMTcyVjE2MFpNMzA1IDE2MEMzMDUgMTM4LjQgMzIyLjQgMTIxIDM0NCAxMjFIMzQ3QzM0NyAxMjEgMzQ3IDEyMSAzNDcgMTIxSDM4OUM0MTAuNiAxMjEgNDI4IDEzOC40IDQyOCAxNjBWMTc2QzQyOCAxOTcuNiA0MTAuNiAyMTUgMzg5IDIxNUgzNDdDMzI1LjQgMjE1IDMwOCAxOTcuNiAzMDggMTc2VjE2MFpNMzA1IDI1NkMzMDUgMjM0LjQgMzIyLjQgMjE3IDM0NCAyMTdIMzg5QzQxMC42IDIxNyA0MjggMjM0LjQgNDI4IDI1NlYzMjhDNDI4IDM0OS42IDQxMC42IDM2NyAzODkgMzY3SDM0NEMzMjIuNCAzNjcgMzA1IDM0OS42IDMwNSAzMjhWMjU2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any%20maskable%22}]}">
-<!-- تعديل رقم 13: خط إيموجي ملون -->
+
+  <!-- تعديل رقم 13: خط إيموجي ملون -->
 <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
 <style>
 /* تعديل رقم 13: تطبيق خط الإيموجي */
@@ -486,7 +487,7 @@ window.createAccount = async () => {
   const err = $('signupError');
   const btn = $('signupBtn');
   err.textContent = '';
-  
+  console.log(' ..................... 1 ');
   if(btn) btn.disabled = true;
   if(btn) btn.classList.add('loading');
   
@@ -496,7 +497,7 @@ window.createAccount = async () => {
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'الاسم حروف عربية أو إنجليزية فقط'; 
   }
-  if(name.length < 3) { 
+  if(name.length < 3) { console.log(' ..................... 2 ');
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
@@ -509,7 +510,7 @@ window.createAccount = async () => {
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور أرقام فقط'; 
   }
-  if(pass.length < 6) { 
+  if(pass.length < 6) { console.log(' ..................... 3 ');
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
@@ -526,7 +527,7 @@ window.createAccount = async () => {
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'كلمة المرور ضعيفة - أرقام متتالية'; 
-  }
+  } console.log(' ..................... 5 ');
   const weak = ['000000','111111','123123','112233','123321'];
   if(weak.includes(pass)) { 
     isCreatingAccount = false; 
@@ -547,7 +548,7 @@ window.createAccount = async () => {
       if(btn) btn.classList.remove('loading');
       return err.textContent = 'هذا الحساب موجود مسبقاً بنفس الاسم وكلمة السر'; 
     }
-    
+    console.log(' ..................... 6 ');
     const email = `${Date.now()}@haroon.app`;
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     const uidNumber = generateUID();
@@ -558,7 +559,7 @@ window.createAccount = async () => {
       passHash: pass,
       createdAt: serverTimestamp(), 
       lastSeen: serverTimestamp()
-    });
+    });console.log(' ..................... 7 ');
     showToast('تم إنشاء الحساب: رقمك هو '+uidNumber, '#00a884');
     myPassword = pass;
     sessionStorage.setItem('myPass', pass);
@@ -573,7 +574,7 @@ window.createAccount = async () => {
     isCreatingAccount = false;
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
-  }
+  } console.log(' ..................... 8 ');
 };
 onAuthStateChanged(auth, async user => { console.log('onAuthStateChanged اشتغل، اليوزر:', user ? user.uid : 'لا يوجد');
   if(user) {
