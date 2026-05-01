@@ -1122,10 +1122,26 @@ window.sendMessage = async () => {
 
 window.showMenu = (menuType) => {
   console.log("[MENU] 114. فتح قائمة:", menuType);
+  
+  // لا تعمل شيء لو إحنا لسه في شاشة الدخول
+  if ($('chatsScreen').classList.contains('hidden')) {
+    return;
+  }
+
   if (menuType === 'mainMenu') {
-    showToast('قائمة الاعدادات قيد التطوير', '#00a884');
+    // هنا بدل التوست افتح المنيو الحقي
+    // لو المنيو لسه ما جهزته خليه ما يعمل شيء مؤقتاً
+    // showToast('قائمة الاعدادات قيد التطوير', '#00a884');
+    
+    // مثال لفتح المنيو لو عندك div id="mainMenu"
+    $('mainMenu')?.classList.toggle('hidden');
+    
   } else if (menuType === 'chatMenu') {
-    showToast('قائمة الشات قيد التطوير', '#00a884');
+    // نفس الشيء للشات
+    // showToast('قائمة الشات قيد التطوير', '#00a884');
+    
+    // مثال لفتح منيو الشات لو عندك div id="chatMenu"
+    $('chatMenu')?.classList.toggle('hidden');
   }
 };
 
