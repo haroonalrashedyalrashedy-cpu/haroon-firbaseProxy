@@ -25,6 +25,64 @@
   padding: 10px;
   background: #0b141a;
 }
+
+.menu {
+  position: absolute;
+  top: 60px;
+  left: 10px;
+  background: #2a3942;
+  border-radius: 8px;
+  padding: 5px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 100;
+  width: 200px;
+}
+.menu-item {
+  padding: 12px 16px;
+  color: #e9edef;
+  cursor: pointer;
+}
+.menu-item:hover { background: #3a4a52; }
+
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+}
+
+.modal {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #2a3942;
+  padding: 20px;
+  border-radius: 12px;
+  z-index: 201;
+  width: 300px;
+  text-align: center;
+}
+.modal h3 { margin: 0 0 15px; color: #e9edef; }
+.modal input, .modal button {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+.colors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.color {
+  height: 60px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+.color:hover { border: 2px solid #00a884; }
+.hidden { display: none; }
 .chat-input-bar {
   display: flex;
   padding: 10px;
@@ -237,8 +295,13 @@ button,input {font-family:inherit; outline:none; border:none}
     <span id="myPass" style="font-size:14px; letter-spacing:2px">••••••</span>
     <span class="icon-btn" style="font-size:18px; padding:0" onclick="toggleMyPass()">👁️</span>
   </div>
-  <span class="icon-btn" onclick="showMenu('mainMenu')">⋮</span>
+  
+
+ <span class="icon-btn" onclick="showMenu('mainMenu')" 
+      style="font-size:24px; cursor:pointer; padding:0 8px;">⋮</span>
 </div>
+
+
   <div class="chats-list" id="chatsList"></div>
   <div id="searchResult" class="hidden"></div>
   <div class="search-bar">
@@ -1128,25 +1191,66 @@ window.showMenu = (menuType) => {
     return;
   }
 
+  const menu = $('mainMenu');
+  
   if (menuType === 'mainMenu') {
-    // هنا بدل التوست افتح المنيو الحقي
-    // لو المنيو لسه ما جهزته خليه ما يعمل شيء مؤقتاً
-    // showToast('قائمة الاعدادات قيد التطوير', '#00a884');
-    
-    // مثال لفتح المنيو لو عندك div id="mainMenu"
-    $('mainMenu')?.classList.toggle('hidden');
+    // افتح/اخفي قائمة الثلاث نقاط
+    menu.classList.toggle('hidden');
     
   } else if (menuType === 'chatMenu') {
-    // نفس الشيء للشات
-    // showToast('قائمة الشات قيد التطوير', '#00a884');
-    
-    // مثال لفتح منيو الشات لو عندك div id="chatMenu"
-    $('chatMenu')?.classList.toggle('hidden');
+    // لو عندك منيو ثاني للشات خليه هنا
+    const chatMenu = $('chatMenu');
+    chatMenu?.classList.toggle('hidden');
   }
 };
 
+// اخفاء القائمة لو ضغطت برا
+document.addEventListener('click', (e) => {
+  const menu = $('mainMenu');
+  const menuBtn = e.target.closest('[onclick*="showMenu(\'mainMenu\')"]');
+  
+  if (!e.target.closest('#mainMenu') && !menuBtn) {
+    menu.classList.add('hidden');
+  }
+});
+
 
 </script>
+<!-- قائمة الثلاث نقاط -->
+<div id="mainMenu" class="menu hidden">
+  <div class="menu-item" onclick="openModal('bgModal')">تغيير لون الخلفية</div>
+  <div class="menu-item" onclick="openModal('passModal')">تغيير كلمة المرور</div>
+  <div class="menu-item" onclick="openModal('logoutModal')">تسجيل الخروج</div>
+</div>
 
+<!-- الخلفية المعتمة -->
+<div id="overlay" class="overlay hidden" onclick="closeAllModals()"></div>
+
+<!-- نافذة تغيير الخلفية -->
+<div id="bgModal" class="modal hidden">
+  <h3>اختر لون الخلفية</h3>
+  <div class="colors">
+    <div class="color" style="background:#f0f0f0" onclick="setBg('#f0f0f0')"></div>
+    <div class="color" style="background:#e0f7fa" onclick="setBg('#e0f7fa')"></div>
+    <div class="color" style="background:#fce4ec" onclick="setBg('#fce4ec')"></div>
+    <div class="color" style="background:#fff3e0" onclick="setBg('#fff3e0')"></div>
+    <div class="color" style="background:#e8f5e9" onclick="setBg('#e8f5e9')"></div>
+    <div class="color" style="background:#ede7f6" onclick="setBg('#ede7f6')"></div>
+  </div>
+</div>
+
+<!-- نافذة تغيير كلمة المرور -->
+<div id="passModal" class="modal hidden">
+  <h3>تغيير كلمة المرور</h3>
+  <input type="password" id="newPass" placeholder="كلمة المرور الجديدة">
+  <button onclick="changePass()">حفظ</button>
+</div>
+
+<!-- نافذة تسجيل الخروج -->
+<div id="logoutModal" class="modal hidden">
+  <h3>هل تريد تسجيل الخروج؟</h3>
+  <button onclick="doLogout()">نعم</button>
+  <button onclick="closeAllModals()">إلغاء</button>
+</div>
 </body>
 </html>
