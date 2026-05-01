@@ -287,7 +287,7 @@ button,input {font-family:inherit; outline:none; border:none}
   <div class="color-option" style="background:#ffedd5" data-color="#ffedd5" title="برتقالي فاتح"></div>
   <div class="color-option" style="background:#111b21" data-color="#111b21" title="الافتراضي"></div>
 </div>
-<div id="toast" class="toast">  </div>
+<div id="toast" class="toast"></div>
 <script type="module">
 console.log("[JS] 1. بدأ تحميل سكربت الموديول");
 
@@ -982,6 +982,20 @@ function saveSearchHistory() {
   }
 };
 
+function saveSearch(number, userData) {
+  if (!currentUser) return;
+  const searchRef = ref(db, `searches/${currentUser.uid}/${number}`);
+  set(searchRef, {
+    number: number,
+    name: userData ? userData.name : null,
+    time: Date.now()
+  }).then(() => {
+    console.log("[DB] تم حفظ البحث:", number);
+  }).catch(err => {
+    console.error("[DB] فشل حفظ البحث:", err);
+  });
+}
+  
 function renderSearchHistory() {
   const resultDiv = $('searchResult');
   if(searchHistory.length === 0) {
@@ -1118,13 +1132,7 @@ window.showMenu = (menuType) => {
   }
 };
 
-window.toggleMyPass = () => {
-  console.log("[UI] 115. تبديل عرض كلمة السر");
-  if (!myPassword) myPassword = sessionStorage.getItem('myPass') || '';
-  passVisible = !passVisible;
-  $('myPass').textContent = passVisible && myPassword ? myPassword : '••••••';
-  console.log("[UI] 116. passVisible =", passVisible);
-};
+
 </script>
 
 </body>
