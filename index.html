@@ -874,6 +874,91 @@ const autoInstallAfterLogin = () => {
   }, 2000);
 };
 console.log("[PWA] 103. autoInstallAfterLogin معرفة وجاهزة");
+window.searchUser = async () => {
+  console.log("[SEARCH] 104. بدأ البحث");
+  const num = $('searchNumber').value.trim();
+  const resultDiv = $('searchResult');
+  
+  if (!/^\d{6}$/.test(num)) {
+    console.log("[SEARCH] 105. الرقم غلط");
+    showToast('ادخل رقم 6 خانات');
+    return;
+  }
+  
+  try {
+    console.log("[DB] 106. البحث عن UID:", num);
+    const snap = await get(ref(db, `uids/${num}`));
+    
+    if (!snap.exists()) {
+      console.log("[SEARCH] 107. الرقم غير موجود");
+      resultDiv.innerHTML = '<div style="padding:12px; color:#8696a0">الرقم غير موجود</div>';
+      resultDiv.classList.remove('hidden');
+      return;
+    }
+    
+    const realUid = snap.val();
+    console.log("[DB] 108. realUid:", realUid);
+    
+    const userSnap = await get(ref(db, `publicUsers/${realUid}`));
+    if (!userSnap.exists()) {
+      console.log("[SEARCH] 109. بيانات المستخدم غير موجودة");
+      resultDiv.innerHTML = '<div style="padding:12px; color:#8696a0">المستخدم غير موجود</div>';
+      resultDiv.classList.remove('hidden');
+      return;
+    }
+    
+    const user = userSnap.val();
+    console.log("[SEARCH] 110. وجدت المستخدم:", user.name);
+    
+    resultDiv.innerHTML = `
+      <div class="search-result-item" onclick="startChatFromSearch('${realUid}', '${user.name}')">
+        <div class="avatar">${user.name[0]}</div>
+        <div class="chat-info">
+          <div class="chat-name">${user.name}</div>
+          <div class="chat-last">رقم: ${num} • اضغط لبدء المحادثة</div>
+        </div>
+        <div style="color:#00a884; font-size:24px">💬</div>
+        <span style="color:#8696a0; font-size:22px; padding:0 8px" onclick="event.stopPropagation(); clearSearchResult()">×</span>
+      </div>
+    `;
+    resultDiv.classList.remove('hidden');
+    localStorage.setItem('lastSearchResult', JSON.stringify({uid: num, name: user.name}));
+    
+  } catch (e) {
+    console.error("[ERR] 111. خطأ في البحث:", e);
+    showToast('فشل البحث');
+  }
+};
+
+window.startChatFromSearch = (uid, name) => {
+  console.log("[CHAT] 112. فتح شات مع:", name, uid);
+  openChat({uid: uid, name: name});
+  clearSearchResult();
+};
+
+window.clearSearchResult = () => {
+  console.log("[UI] 113. مسح نتيجة البحث");
+  $('searchResult').classList.add('hidden');
+  $('searchNumber').value = '';
+  localStorage.removeItem('lastSearchResult');
+};
+
+window.showMenu = (menuType) => {
+  console.log("[MENU] 114. فتح قائمة:", menuType);
+  if (menuType === 'mainMenu') {
+    showToast('قائمة الاعدادات قيد التطوير', '#00a884');
+  } else if (menuType === 'chatMenu') {
+    showToast('قائمة الشات قيد التطوير', '#00a884');
+  }
+};
+
+window.toggleMyPass = () => {
+  console.log("[UI] 115. تبديل عرض كلمة السر");
+  if (!myPassword) myPassword = sessionStorage.getItem('myPass') || '';
+  passVisible = !passVisible;
+  $('myPass').textContent = passVisible && myPassword ? myPassword : '••••••';
+  console.log("[UI] 116. passVisible =", passVisible);
+};
 </script>
 </body>
 </html>
