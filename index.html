@@ -281,7 +281,13 @@ button,input {font-family:inherit; outline:none; border:none}
   </div>
   <div id="signupForm" class="auth-form flex-col hidden" style="width:100%; max-width:320px; gap:12px; margin-top:8px">
     <div class="input-group">
-      <input type="text" id="signupName" class="input-field" placeholder="اكتب اسمك هنا..." style="text-align:center" inputmode="text" onkeypress="return /^[\u0621-\u063A\u0641-\u064Aa-zA-Z\s]$/.test(event.key)">
+      
+      
+      <input type="text" id="signupName" class="input-field" placeholder="اكتب اسمك هنا..." 
+style="text-align:center" inputmode="text" 
+oninput="this.value = this.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '')">
+   
+   
     </div>
     <div class="input-group">
       <input type="password" id="signupPass" class="input-field" placeholder="كلمة المرور 6 أرقام+" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')" style="text-align:center" onkeypress="return /[0-9]/.test(event.key)">
@@ -538,10 +544,17 @@ window.toggleMyPass = () => {
 };
 
 window.toggleEye = id => {
-  console.log("[UI] toggleEye: تبديل نوع الحقل", id);
   const inp = $(id);
-  inp.type = inp.type === 'password'? 'text' : 'password';
-  console.log("[UI] toggleEye: النوع الآن", inp.type);
+  
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    inp.inputMode = 'numeric';
+    inp.pattern = '[0-9]*';
+  } else {
+    inp.type = 'password';
+    inp.inputMode = 'numeric';
+    inp.pattern = '[0-9]*';
+  }
 };
 
 let currentForm = null;
@@ -554,121 +567,119 @@ console.log("[VAR] 28. currentForm = null");
 
 window.createAccount = async () => {
   console.log("[ACC] createAccount: بدأ");
-  if(isCreatingAccount) {
-    console.log("[ACC] createAccount: مكرر - خروج");
-    return;
-  }
+  if(isCreatingAccount) return;
   isCreatingAccount = true;
+  
   const name = $('signupName').value.trim();
   const pass = $('signupPass').value.trim();
   const err = $('signupError');
   const btn = $('signupBtn');
   err.textContent = '';
-  console.log("[ACC] createAccount: name=", name, "pass=", pass? "****" : "");
   
   if(btn) btn.disabled = true;
   if(btn) btn.classList.add('loading');
-  console.log("[ACC] createAccount: تعطيل الزر");
-  
+
+  // 1. الاسم حروف فقط
   if(!/^[\u0600-\u06FFa-zA-Z\s]+$/.test(name)) {
-    console.log("[ACC] createAccount: الاسم غلط");
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'الاسم حروف عربية أو إنجليزية فقط'; 
   }
   
+  // 2. طول الاسم
   if(name.length < 3) { 
-    console.log("[ACC] createAccount: الاسم قصير");
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
     return err.textContent = 'الاسم 3 أحرف على الأقل'; 
   }
   
-  if(!/^\d+$/.test(pass)) { 
-    console.log("[ACC] createAccount: الباس مو أرقام");
+  // 3. فحص تكرار الاسم
+  const nameQuery = query(ref(db, 'publicUsers'), orderByChild('name'), equalTo(name));
+  const nameSnap = await get(nameQuery);
+  if(nameSnap.exists()) {
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
-    return err.textContent = 'كلمة المرور أرقام فقط'; 
+    return err.textContent = 'الاسم مستخدم مسبقاً، اختر اسم ثاني'; 
   }
   
-  if(pass.length < 6) { 
-    console.log("[ACC] createAccount: الباس قصير");
+  // 4. كلمة المرور 6 ارقام فقط
+  if(!/^\d{6}$/.test(pass)) { 
     isCreatingAccount = false; 
     if(btn) btn.disabled = false;
     if(btn) btn.classList.remove('loading');
-    return err.textContent = 'كلمة المرور 6 أرقام على الأقل'; 
+    return err.textContent = 'كلمة المرور 6 أرقام فقط'; 
+  }
+  
+  // 5. فحص كلمة المرور الضعيفة
+  if(!isStrongPassword(pass)) {
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور ضعيفة. ممنوع 123456 و 111 و 654321'; 
+  }
+  
+  // 6. فحص تكرار كلمة المرور
+  const passQuery = query(ref(db, 'publicUsers'), orderByChild('passHash'), equalTo(pass));
+  const passSnap = await get(passQuery);
+  if(passSnap.exists()) {
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور مستخدمة مسبقاً، اختر كلمة مرور مختلفة'; 
   }
   
   try {
-    console.log("[ACC] createAccount: توليد رقم فريد");
     const genUid = () => Math.floor(100000 + Math.random()*900000).toString();
     let uidNumber;
     let tries = 0;
     
     while(tries < 10){
       uidNumber = genUid();
-      console.log("[ACC] 29. جربت UID:", uidNumber, "محاولة:", tries + 1);
-      
-      console.log("[DB] 30. فحص وجود UID في قاعدة البيانات");
       const exists = await get(ref(db, `uids/${uidNumber}`));
-      console.log("[DB] 31. نتيجة الفحص:", exists.exists());
-      
-      if (!exists.exists()) {
-        console.log("[ACC] 32. UID متاح، كسر اللوب");
-        break;
-      }
+      if (!exists.exists()) break;
       tries++;
-      console.log("[ACC] 33. UID مستخدم، زيادة العداد");
     }
     
     if (tries >= 10) {
-      console.log("[ERR] 34. فشل توليد UID بعد 10 محاولات");
       isCreatingAccount = false; 
       if (btn) btn.disabled = false;
       if (btn) btn.classList.remove('loading');
       return err.textContent = 'فشل توليد رقم، حاول مرة ثانية';
     }
     
-    console.log("[ACC] 35. الرقم الفريد النهائي:", uidNumber);
     const email = `${Date.now()}@haroon.app`;
-    console.log("[ACC] 36. الإيميل المؤقت:", email);
-    
-    pendingUserData = { 
-      name: name, 
-      uid: uidNumber, 
-      email: email,
-      passHash: pass
-    };
-    console.log("[ACC] 37. حفظ بيانات مؤقتة في pendingUserData");
-    
+    pendingUserData = { name, uid: uidNumber, email, passHash: pass };
     myGeneratedUid = uidNumber;
-    console.log("[ACC] 38. حفظ myGeneratedUid:", myGeneratedUid);
     
-    console.log("[AUTH] 39. إنشاء المستخدم في Firebase Auth");
     await createUserWithEmailAndPassword(auth, email, pass);
-    console.log("[AUTH] 40. تم إنشاء المستخدم في Auth، onAuthStateChanged بيكمل");
     
   } catch (e) { 
-    console.error("[ERR] 41. خطأ في createAccount:", e.message, e.code);
-    if (e.code === 'auth/email-already-in-use') {
-      err.textContent = 'حدث خطأ نادر، جرب مرة ثانية';
-    } else {
-      err.textContent = 'خطأ: ' + e.message; 
-    }
+    console.error("[ERR] خطأ في createAccount:", e.message, e.code);
+    err.textContent = e.code === 'auth/email-already-in-use' 
+      ? 'حدث خطأ نادر، جرب مرة ثانية' 
+      : 'خطأ: ' + e.message; 
     pendingUserData = null;
     myGeneratedUid = null;
-    console.log("[ACC] 42. تصفير البيانات المؤقتة");
   } finally { 
-    console.log("[ACC] 43. دخل finally");
     isCreatingAccount = false;
     if (btn) btn.disabled = false;
     if (btn) btn.classList.remove('loading');
-    console.log("[ACC] 44. تفعيل الزر مرة ثانية");
   }
 };
+
+// حطها تحت الدالة
+function isStrongPassword(pass) {
+  const sequences = ['012345', '123456', '234567', '345678', '456789', 
+                     '987654', '876543', '765432', '654321', '543210'];
+  if(sequences.includes(pass)) return false;
+  if(/^(\d)\1{5}$/.test(pass)) return false;
+  const weak = ['000', '111', '123', '121212', '202020', '202106', '010101'];
+  if(weak.includes(pass)) return false;
+  return true;
+}
 
 window.restoreAccount = async () => {
   console.log("[ACC] 45. بدأ restoreAccount");
@@ -1276,14 +1287,18 @@ window.setBg = async (color) => {
 
 window.changePass = async () => {
   const newPass = $('newPass').value.trim();
-  if (newPass.length < 4) {
+  if (newPass.length < 6) {
     showToast('كلمة المرور قصيرة', '#f15c6d');
     return;
   }
+  
   const hash = await hashPassword(newPass);
   await set(ref(db, `users/${currentUser.uid}/passHash`), hash);
-  sessionStorage.setItem('myPass', hash);
-  myPassword = hash;
+  
+  // خزن الباس الاصلي للعرض فقط
+  sessionStorage.setItem('myPass', newPass);
+  myPassword = newPass;
+  
   $('newPass').value = '';
   closeAllModals();
   showToast('تم تغيير كلمة المرور', '#00a884');
@@ -1336,6 +1351,12 @@ async function hashPassword(pass) {
 }
 
 
+window.togglePass = (id) => {
+  const input = $(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+};
+
+
 </script>
 <!-- قائمة الثلاث نقاط -->
 <div id="mainMenu" class="menu hidden">
@@ -1364,7 +1385,9 @@ async function hashPassword(pass) {
 <div id="passModal" class="modal hidden">
   <h3>تغيير كلمة المرور</h3>
   <div class="password-wrapper">
-   <input type="password" id="newPass" placeholder="كلمة المرور الجديدة" style="text-align: center;">>
+ <input type="password" id="newPass" placeholder="كلمة المرور الجديدة" 
+style="text-align: center;" inputmode="numeric" pattern="[0-9]*" maxlength="6" 
+onkeypress="return /[0-9]/.test(event.key)">
     <span class="eye" onclick="togglePass('newPass')">👁️</span>
   </div>
   <button onclick="changePass()">حفظ</button>
