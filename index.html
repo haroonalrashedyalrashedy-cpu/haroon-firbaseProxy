@@ -851,6 +851,29 @@ const loadChats = () => {
   });
 };
 console.log("[JS] 98. انتهى تحميل الكود للآن");
+const autoInstallAfterLogin = () => {
+  console.log("[PWA] 99. بدأ autoInstallAfterLogin");
+  if(localStorage.getItem('appInstalled') === 'true') {
+    console.log("[PWA] 100. التطبيق مثبّت مسبقاً، خروج");
+    return;
+  }
+  
+  setTimeout(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    console.log("[PWA] 101. الجهاز iOS:", isIOS, "Android:", isAndroid);
+    
+    if(isIOS) {
+      showToast('للتثبيت: اضغط مشاركة ثم "إضافة إلى الشاشة الرئيسية"', '#00a884');
+    } else if(isAndroid) {
+      showToast('للتثبيت: اضغط القائمة ثم "تثبيت التطبيق"', '#00a884');
+    }
+    
+    localStorage.setItem('appInstalled', 'true');
+    console.log("[PWA] 102. تم تعيين appInstalled = true");
+  }, 2000);
+};
+console.log("[PWA] 103. autoInstallAfterLogin معرفة وجاهزة");
 </script>
 </body>
 </html>
