@@ -30,6 +30,27 @@
   padding: 10px;
   background: #202c33;
 }
+  .toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: #2a3942;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 * {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI','Noto Color Emoji',Tahoma,sans-serif; -webkit-tap-highlight-color:transparent}
 body {
   background:#111b21; color:#e9edef; overflow:hidden; height:100vh; padding-bottom:80px;
@@ -895,7 +916,23 @@ console.log("[PWA] 103. autoInstallAfterLogin معرفة وجاهزة");
 function saveSearchHistory() {
   localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
 }
-window.searchUser = async () => {
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+
+  // يختفي لحاله بعد 3 ثواني
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// داخل كود البحث، لما النتيجة تكون فاضية:
+if (!userFound) {
+  showToast('الرقم غير موجود');
+  return;
+}
+  window.searchUser = async () => {
   console.log("[SEARCH] 104. بدأ البحث");
   const num = $('searchNumber').value.trim();
   const resultDiv = $('searchResult');
@@ -913,8 +950,7 @@ window.searchUser = async () => {
     
     if (!snap.exists()) {
       console.log("[SEARCH] 107. الرقم غير موجود");
-      resultDiv.innerHTML = '<div style="padding:12px; color:#8696a0">الرقم غير موجود</div>';
-      resultDiv.classList.remove('hidden');
+      showToast('الرقم غير موجود');
       $('searchNumber').value = '';
       return;
     }
@@ -925,8 +961,7 @@ window.searchUser = async () => {
     const userSnap = await get(ref(db, `publicUsers/${realUid}`));
     if (!userSnap.exists()) {
       console.log("[SEARCH] 109. بيانات المستخدم غير موجودة");
-      resultDiv.innerHTML = '<div style="padding:12px; color:#8696a0">المستخدم غير موجود</div>';
-      resultDiv.classList.remove('hidden');
+      showToast('الرقم غير موجود');
       $('searchNumber').value = '';
       return;
     }
@@ -1096,5 +1131,6 @@ window.toggleMyPass = () => {
   console.log("[UI] 116. passVisible =", passVisible);
 };
 </script>
+<div id="toast" class="toast">الرقم غير موجود</div>
 </body>
 </html>
