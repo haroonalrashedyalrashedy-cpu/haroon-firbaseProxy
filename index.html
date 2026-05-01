@@ -1163,12 +1163,29 @@ onAuthStateChanged(auth, async user => {
           createdAt: serverTimestamp(), 
           lastSeen: serverTimestamp()
         }); 
+onAuthStateChanged(auth, async user => { 
+  console.log('onAuthStateChanged اشتغل، اليوزر:', user ? user.uid : 'لا يوجد');
+
+  if(user) {
+    // === التعديل المهم 1: معالجة الحساب الجديد ===
+    if(pendingUserData) { 
+      console.log('فيه pendingUserData - بأحفظه الحين');
+      try { 
+        // 1. البيانات الخاصة - محد يشوفها غير صاحبها
+        await set(ref(db, `users/${user.uid}`), { 
+          passHash: pendingUserData.passHash,
+          email: pendingUserData.email,
+          createdAt: serverTimestamp(), 
+          lastSeen: serverTimestamp()
+        }); 
         
+        // 2. البيانات العامة - للبحث
         await set(ref(db, `publicUsers/${user.uid}`), {
           name: pendingUserData.name,
           uid: pendingUserData.uid
         });
         
+        // 3. ربط الرقم بالـ UID الحقيقي
         await set(ref(db, `uids/${pendingUserData.uid}`), user.uid);
         
         currentUser = {uid: user.uid, name: pendingUserData.name, uidNumber: pendingUserData.uid};
@@ -1200,6 +1217,7 @@ onAuthStateChanged(auth, async user => {
         return;
       } 
     }
+    // === نهاية التعديل المهم ===
     
     // === التعديل المهم 2: نقرأ البيانات العامة من publicUsers ===
     const pubSnap = await get(ref(db, 'publicUsers/'+user.uid));
