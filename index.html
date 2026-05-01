@@ -712,7 +712,6 @@ onAuthStateChanged(auth, async user => {
     if (pendingUserData) {
       console.log("[DB] 68. فيه pendingUserData، بدأ الحفظ");
       try {
-        console.log("[DB] 69. حفظ users/", user.uid);
         await set(ref(db, `users/${user.uid}`), {
           passHash: pendingUserData.passHash,
           email: pendingUserData.email,
@@ -720,31 +719,25 @@ onAuthStateChanged(auth, async user => {
           lastSeen: serverTimestamp()
         });
 
-        console.log("[DB] 70. حفظ publicUsers/", user.uid);
         await set(ref(db, `publicUsers/${user.uid}`), {
           name: pendingUserData.name,
           uid: pendingUserData.uid
         });
 
-        console.log("[DB] 71. حفظ uids/", pendingUserData.uid);
         await set(ref(db, `uids/${pendingUserData.uid}`), user.uid);
 
         currentUser = { uid: user.uid, name: pendingUserData.name, uidNumber: pendingUserData.uid };
-        console.log("[STATE] 72. تحديث currentUser:", currentUser);
 
         $('myName').textContent = pendingUserData.name;
         $('myNumber').textContent = pendingUserData.uid;
-        console.log("[UI] 73. تحديث الاسم والرقم في الهيدر");
 
         myPassword = pendingUserData.passHash || '';
         sessionStorage.setItem('myPass', myPassword);
         $('myPass').textContent = '••••••';
         passVisible = false;
-        console.log("[UI] 74. إخفاء كلمة السر");
 
         $('authScreen').classList.add('hidden');
         $('chatsScreen').classList.remove('hidden');
-        console.log("[UI] 75. التحويل لشاشة المحادثات");
 
         showToast('تم إنشاء الحساب: رقمك هو ' + pendingUserData.uid, '#00a884');
         autoInstallAfterLogin();
@@ -752,13 +745,10 @@ onAuthStateChanged(auth, async user => {
         const userRef = ref(db, 'users/' + user.uid);
         onDisconnect(userRef).update({ lastSeen: serverTimestamp(), online: false });
         setInterval(() => update(userRef, { lastSeen: serverTimestamp() }), 15000);
-        console.log("[DB] 76. تفعيل onDisconnect و setInterval");
 
         loadChats();
-
         pendingUserData = null;
         myGeneratedUid = null;
-        console.log("[STATE] 77. تصفير البيانات المؤقتة");
         return;
       } catch (err) {
         console.error("[ERR] 78. فشل حفظ pendingUserData:", err);
@@ -775,37 +765,42 @@ onAuthStateChanged(auth, async user => {
     if (pubSnap.exists()) {
       const u = pubSnap.val();
       currentUser = { uid: user.uid, name: u.name, uidNumber: u.uid };
-      console.log("[STATE] 80. currentUser من قاعدة البيانات:", currentUser);
 
       $('myName').textContent = u.name;
       $('myNumber').textContent = u.uid;
       myPassword = sessionStorage.getItem('myPass') || '';
       $('myPass').textContent = '••••••';
       passVisible = false;
-      console.log("[UI] 81. تحديث بيانات المستخدم");
 
       $('authScreen').classList.add('hidden');
       $('chatsScreen').classList.remove('hidden');
-      console.log("[UI] 82. عرض شاشة المحادثات");
 
       const userRef = ref(db, 'users/' + user.uid);
       onDisconnect(userRef).update({ lastSeen: serverTimestamp(), online: false });
       setInterval(() => update(userRef, { lastSeen: serverTimestamp() }), 15000);
+      
       loadChats();
       autoInstallAfterLogin();
 
-      const lastSearchHistory = localStorage.getItem('searchHistory');
-if (lastSearchHistory) {
-  console.log("[STORAGE] 83. تحميل تاريخ البحث");
-  searchHistory = JSON.parse(lastSearchHistory);
-  renderSearchHistory();
-}
+      // جلب تاريخ البحث من Firebase
+      const searchesSnap = await get(ref(db, `searches/${user.uid}`));
+      if (searchesSnap.exists()) {
+        const data = searchesSnap.val();
+        searchHistory = Object.values(data).sort((a, b) => b.time - a.time);
+        saveSearchHistory(); // حدث localStorage
+        renderSearchHistory();
+      } else {
+        // لو مافي في Firebase شوف localStorage كـ backup
+        const lastSearchHistory = localStorage.getItem('searchHistory');
+        if (lastSearchHistory) {
+          searchHistory = JSON.parse(lastSearchHistory);
+          renderSearchHistory();
+        }
+      }
 
       onValue(ref(db, `calls/${auth.currentUser?.uid}`), snap => {
-        console.log("[CALL] 84. فحص المكالمات الواردة");
         if (snap.exists()) {
           const call = snap.val();
-          console.log("[CALL] 85. مكالمة واردة من:", call.fromName);
           if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
           if ($('callScreen')) return;
           const callScreen = document.createElement('div');
@@ -818,7 +813,6 @@ if (lastSearchHistory) {
           `;
           document.body.appendChild(callScreen);
           window.endCall = async () => {
-            console.log("[CALL] 86. إنهاء المكالمة");
             $('callScreen')?.remove();
             await remove(ref(db, `calls/${auth.currentUser.uid}`));
           };
@@ -827,24 +821,19 @@ if (lastSearchHistory) {
 
       const settingsSnap = await get(ref(db, `users/${user.uid}/settings`));
       if (settingsSnap.exists()) {
-        console.log("[DB] 87. جلب إعدادات المستخدم");
         const settings = settingsSnap.val();
         if (settings.bgChats) {
           $('chatsList').style.background = settings.bgChats;
-          console.log("[UI] 88. تغيير خلفية المحادثات");
         }
         if (settings.bgChat) {
           $('messagesList').style.background = settings.bgChat;
-          console.log("[UI] 89. تغيير خلفية الدردشة");
         }
       }
     } else {
-      console.log("[ERR] 90. المستخدم موجود في Auth بس مو في publicUsers");
       showToast('الحساب قديم، سجل حساب جديد', '#f15c6d');
       await signOut(auth);
     }
   } else {
-    console.log("[AUTH] 91. لا يوجد مستخدم، عرض شاشة الدخول");
     $('authScreen')?.classList.remove('hidden');
     $('chatsScreen')?.classList.add('hidden');
   }
@@ -964,11 +953,19 @@ function saveSearchHistory() {
     const user = userSnap.val();
     console.log("[SEARCH] 110. وجدت المستخدم:", user.name);
     
-    // اضف النتيجة للتاريخ لو مش موجودة - unshift يخليها فوق
+    // اضف النتيجة للتاريخ المحلي
     if(!searchHistory.find(u => u.uid === num)) {
       searchHistory.unshift({uid: num, name: user.name, realUid: realUid});
-   saveSearchHistory();
+      saveSearchHistory(); // localStorage
     }
+    
+    // حفظ في Firebase عشان ما تروح بعد تسجيل الخروج
+    await set(ref(db, `searches/${currentUser.uid}/${num}`), {
+      uid: num,
+      name: user.name,
+      realUid: realUid,
+      time: Date.now()
+    });
     
     // اعرض كل النتائج من فوق
     renderSearchHistory();
