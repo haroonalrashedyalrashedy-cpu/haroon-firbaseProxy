@@ -26,6 +26,24 @@
   background: #0b141a;
 }
 
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-wrapper input {
+  width: 100%;
+  padding-right: 35px;
+}
+.password-wrapper .eye {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+
 .menu {
   position: absolute;
   top: 60px;
@@ -352,6 +370,20 @@ button,input {font-family:inherit; outline:none; border:none}
 </div>
 <div id="toast" class="toast"></div>
 <script type="module">
+
+
+
+// ريفرش تلقائي مرة وحدة لو الصفحة جت من الكاش
+/*if (sessionStorage.getItem('doReload') === 'true') {
+  sessionStorage.removeItem('doReload');
+} else {
+  sessionStorage.setItem('doReload', 'true');
+  location.reload(true);
+}*/
+
+
+
+
 console.log("[JS] 1. بدأ تحميل سكربت الموديول");
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -1294,27 +1326,14 @@ window.toggleForm = (type) => {
   }
 };
 
+async function hashPassword(pass) {
+  const msgBuffer = new TextEncoder().encode(pass);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 
-window.changePass = async () => {
-  const newPass = $('newPass').value.trim();
-  if (newPass.length < 4) {
-    showToast('كلمة المرور قصيرة', '#f15c6d');
-    return;
-  }
-  const hash = await hashPassword(newPass);
-  await set(ref(db, `users/${currentUser.uid}/passHash`), hash);
-  sessionStorage.setItem('myPass', hash);
-  myPassword = hash;
-  $('newPass').value = '';
-  closeAllModals();
-  showToast('تم تغيير كلمة المرور', '#00a884');
-};
-
-window.doLogout = async () => {
-  await signOut(auth);
-  closeAllModals();
-};
 </script>
 <!-- قائمة الثلاث نقاط -->
 <div id="mainMenu" class="menu hidden">
@@ -1342,8 +1361,12 @@ window.doLogout = async () => {
 <!-- نافذة تغيير كلمة المرور -->
 <div id="passModal" class="modal hidden">
   <h3>تغيير كلمة المرور</h3>
-  <input type="password" id="newPass" placeholder="كلمة المرور الجديدة">
+  <div class="password-wrapper">
+    <input type="password" id="newPass" placeholder="كلمة المرور الجديدة">
+    <span class="eye" onclick="togglePass('newPass')">👁️</span>
+  </div>
   <button onclick="changePass()">حفظ</button>
+  <button onclick="closeAllModals()">إلغاء</button>
 </div>
 
 <!-- نافذة تسجيل الخروج -->
@@ -1351,6 +1374,7 @@ window.doLogout = async () => {
   <h3>هل تريد تسجيل الخروج؟</h3>
   <button onclick="doLogout()">نعم</button>
   <button onclick="closeAllModals()">إلغاء</button>
+</div>
 </div>
 </body>
 </html>
