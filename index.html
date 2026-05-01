@@ -1395,11 +1395,7 @@ const autoInstallAfterLogin = () => {
   }, 2000);
 };
 
-if('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('data:text/javascript,console.log("SW registered")');
-  });
-}
+
 </script>
 </body>
 </html>
