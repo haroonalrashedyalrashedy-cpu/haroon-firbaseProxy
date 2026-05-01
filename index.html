@@ -360,6 +360,15 @@ console.log("[JS] 2. تم استيراد Firebase App");
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 console.log("[JS] 3. تم استيراد Firebase Auth");
 
+
+
+
+openModal
+
+
+
+
+
 import { getDatabase, ref, set, get, push, onValue, onChildAdded, onDisconnect, serverTimestamp, remove, update, query, orderByChild, equalTo, increment, off, endBefore, limitToLast } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 console.log("[JS] 4. تم استيراد Firebase Database");
 
@@ -1214,7 +1223,47 @@ document.addEventListener('click', (e) => {
   }
 });
 
+window.openModal = (id) => {
+  $('mainMenu').classList.add('hidden');
+  $('overlay').classList.remove('hidden');
+  $(id).classList.remove('hidden');
+};
 
+window.closeAllModals = () => {
+  $('overlay').classList.add('hidden');
+  $('bgModal').classList.add('hidden');
+  $('passModal').classList.add('hidden');
+  $('logoutModal').classList.add('hidden');
+};
+
+window.setBg = async (color) => {
+  $('chatsList').style.background = color;
+  $('messagesList').style.background = color;
+  await set(ref(db, `users/${currentUser.uid}/settings/bgChats`), color);
+  await set(ref(db, `users/${currentUser.uid}/settings/bgChat`), color);
+  closeAllModals();
+  showToast('تم تغيير الخلفية', '#00a884');
+};
+
+window.changePass = async () => {
+  const newPass = $('newPass').value.trim();
+  if (newPass.length < 4) {
+    showToast('كلمة المرور قصيرة', '#f15c6d');
+    return;
+  }
+  const hash = await hashPassword(newPass);
+  await set(ref(db, `users/${currentUser.uid}/passHash`), hash);
+  sessionStorage.setItem('myPass', hash);
+  myPassword = hash;
+  $('newPass').value = '';
+  closeAllModals();
+  showToast('تم تغيير كلمة المرور', '#00a884');
+};
+
+window.doLogout = async () => {
+  await signOut(auth);
+  closeAllModals();
+};
 </script>
 <!-- قائمة الثلاث نقاط -->
 <div id="mainMenu" class="menu hidden">
