@@ -11,6 +11,25 @@
 <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22واتساب%20هارون%22,%22short_name%22:%22واتساب%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23111b21%22,%22theme_color%22:%22%23005c4b%22,%22icons%22:[{%22src%22:%22data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTE1IiBmaWxsPSIjMDBhODg0Ii8+CjxwYXRoIGQ9Ik0xNzIgMTYwQzE3MiAxMzguNCAxODkuNCAxMjEgMjExIDEyMUgxOTRDMTk0IDEyMSAxOTQgMTIxIDE5NCAxMjFIMjM2QzI1Ny42IDEyMSAyNzUgMTM4LjQgMjc1IDE2MFYzMjhDMjc1IDM0OS42IDI1Ny42IDM2NyAyMzYgMzY3SDE3NkMxNTQuNCAzNjcgMTM3IDM0OS42IDEzNyAzMjhWMTYwQzEzNyAxMzguNCAxNTQuNCAxMjEgMTc2IDEyMVYxMjFIMTcyVjE2MFpNMzA1IDE2MEMzMDUgMTM4LjQgMzIyLjQgMTIxIDM0NCAxMjFIMzQ3QzM0NyAxMjEgMzQ3IDEyMSAzNDcgMTIxSDM4OUM0MTAuNiAxMjEgNDI4IDEzOC40IDQyOCAxNjBWMTc2QzQyOCAxOTcuNiA0MTAuNiAyMTUgMzg5IDIxNUgzNDdDMzI1LjQgMjE1IDMwOCAxOTcuNiAzMDggMTc2VjE2MFpNMzA1IDI1NkMzMDUgMjM0LjQgMzIyLjQgMjE3IDM0NCAyMTdIMzg5QzQxMC42IDIxNyA0MjggMjM0LjQgNDI4IDI1NlYzMjhDNDI4IDM0OS42IDQxMC42IDM2NyAzODkgMzY3SDM0NEMzMjIuNCAzNjcgMzA1IDM0OS42IDMwNSAzMjhWMjU2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any%20maskable%22}]}">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
 <style>
+  .chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #202c33;
+  color: white;
+}
+.messages-container {
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 10px;
+  background: #0b141a;
+}
+.chat-input-bar {
+  display: flex;
+  padding: 10px;
+  background: #202c33;
+}
 * {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI','Noto Color Emoji',Tahoma,sans-serif; -webkit-tap-highlight-color:transparent}
 body {
   background:#111b21; color:#e9edef; overflow:hidden; height:100vh; padding-bottom:80px;
@@ -935,60 +954,48 @@ window.startChatFromSearch = (uid, name) => {
   openChat({uid: uid, name: name});
   clearSearchResult();
 };
+
+
 window.openChat = async (user) => {
-  console.log("[CHAT] 120. فتح المحادثة مع:", user.name, user.uid);
+  console.log(" 120. فتح المحادثة مع:", user.name, user.uid);
   
-  currentChat = user;
-  $('chatWithName').textContent = user.name;
-  $('chatScreen').classList.remove('hidden');
-  $('mainScreen').classList.add('hidden');
-  
-  // نظف الرسائل القديمة
-  $('messages').innerHTML = '';
-  
-  // حمّل الرسائل من Firebase
-  const chatId = [currentUser.uid, user.uid].sort().join('_');
-  console.log("[DB] 121. chatId:", chatId);
-  
-  try {
-    const msgsRef = ref(db, `chats/${chatId}/messages`);
-    const msgsSnap = await get(query(msgsRef, orderByChild('time'), limitToLast(50)));
-    
-    if (msgsSnap.exists()) {
-      const msgs = [];
-      msgsSnap.forEach(snap => msgs.push(snap.val()));
-      renderMessages(msgs);
-      console.log("[CHAT] 122. تم تحميل", msgs.length, "رسالة");
-    } else {
-      console.log("[CHAT] 123. لا توجد رسائل سابقة");
-    }
-    
-    // استمع للرسائل الجديدة
-    onValue(msgsRef, (snap) => {
-      if (snap.exists()) {
-        const msgs = [];
-        snap.forEach(s => msgs.push(s.val()));
-        renderMessages(msgs);
-      }
-    });
-    
-  } catch (e) {
-    console.error("[ERR] 124. خطأ في فتح الشات:", e);
-    showToast('فشل فتح المحادثة');
+  if (user.uid === currentUser.uid) {
+    showToast('ما تقدر تفتح شات مع نفسك', '#f44336');
+    return;
   }
+
+  currentChat = user;
+  $('chatName').textContent = user.name;
+  $('chatNumber').textContent = user.uid || '';
+  $('chatScreen').classList.remove('hidden');
+  $('chatsScreen').classList.add('hidden');
+
+  $('messagesList').innerHTML = '';
+  
+  const chatId = getChatID(currentUser.uid, user.uid);
+  const msgsRef = ref(db, `chats/${chatId}/messages`);
+  onValue(msgsRef, (snap) => {
+    const msgs = [];
+    snap.forEach(s => msgs.push(s.val()));
+    renderMessages(msgs);
+  });
 };
 
 window.renderMessages = (messages) => {
-  const container = $('messages');
+  const container = $('messagesList');
   container.innerHTML = '';
   
   messages.forEach(msg => {
     const isMe = msg.from === currentUser.uid;
     const msgDiv = document.createElement('div');
-    msgDiv.className = `message ${isMe ? 'me' : 'them'}`;
+    msgDiv.style.display = 'flex';
+    msgDiv.style.justifyContent = isMe ? 'flex-end' : 'flex-start';
+    msgDiv.style.margin = '8px 0';
     msgDiv.innerHTML = `
-      <div class="message-text">${msg.text}</div>
-      <div class="message-time">${new Date(msg.time).toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}</div>
+      <div style="background:${isMe ? '#005c4b' : '#202c33'}; padding:8px 12px; border-radius:8px; max-width:70%; color:white">
+        <div>${msg.text}</div>
+        <div style="font-size:11px; color:#8696a0; text-align:right">${formatTime(msg.time)}</div>
+      </div>
     `;
     container.appendChild(msgDiv);
   });
@@ -997,10 +1004,37 @@ window.renderMessages = (messages) => {
 };
 
 window.closeChat = () => {
-  console.log("[CHAT] 125. إغلاق المحادثة");
+  console.log(" 125. إغلاق المحادثة");
   $('chatScreen').classList.add('hidden');
-  $('mainScreen').classList.remove('hidden');
+  $('chatsScreen').classList.remove('hidden');
   currentChat = null;
+};
+
+window.sendMessage = async () => {
+  const text = $('msgInput').value.trim();
+  if (!text || !currentChat) return;
+  
+  const chatId = getChatID(currentUser.uid, currentChat.uid);
+  const msgRef = push(ref(db, `chats/${chatId}/messages`));
+  
+  await set(msgRef, {
+    text: text,
+    from: currentUser.uid,
+    time: Date.now()
+  });
+  
+  $('msgInput').value = '';
+  
+  await update(ref(db, `userChats/${currentUser.uid}/${currentChat.uid}`), {
+    lastMsg: text,
+    lastMsgTime: Date.now(),
+    unreadCount: 0
+  });
+  await update(ref(db, `userChats/${currentChat.uid}/${currentUser.uid}`), {
+    lastMsg: text,
+    lastMsgTime: Date.now(),
+    unreadCount: increment(1)
+  });
 };
 window.clearSearchResult = () => {
   console.log("[UI] 113. مسح نتيجة البحث");
