@@ -367,14 +367,19 @@ const $ = id => {
   return el;
 };
 
+
+
+
+
+  
 const showToast = (msg, color='#f15c6d') => {
   console.log("[TOAST] عرض رسالة:", msg, "اللون:", color);
   const t = $('toast');
   t.textContent = msg;
   t.style.background = color;
-  t.className = 'toast';
+  t.className = 'toast show';
   setTimeout(() => {
-    t.className = 'hidden';
+    t.className = 'toast';
     console.log("[TOAST] إخفاء الرسالة");
   }, 3000);
 };
@@ -916,22 +921,9 @@ console.log("[PWA] 103. autoInstallAfterLogin معرفة وجاهزة");
 function saveSearchHistory() {
   localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
 }
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
 
-  // يختفي لحاله بعد 3 ثواني
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
 
-// داخل كود البحث، لما النتيجة تكون فاضية:
-if (!userFound) {
-  showToast('الرقم غير موجود');
-  return;
-}
+
   window.searchUser = async () => {
   console.log("[SEARCH] 104. بدأ البحث");
   const num = $('searchNumber').value.trim();
