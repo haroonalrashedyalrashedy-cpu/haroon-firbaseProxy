@@ -335,7 +335,7 @@ oninput="this.value = this.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '')">
 </div>
 <div id="chatScreen" class="hidden flex-col" style="height:100vh">
 <div class="header">
-  <span class="icon-btn" onclick="backToChats()">←</span>
+  <span class="icon-btn" onclick="closeChat()">←</span>
   <div class="header-info" style="display:flex;align-items:center">
     <div id="chatAvatar" style="width:40px;height:40px;border-radius:50%;background:#00a884;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-left:10px;font-size:18px;color:#111b21"></div>
     <div>
@@ -754,14 +754,7 @@ window.restoreAccount = async () => {
     const userEmail = userData.email;
     console.log("[DB] 58. userEmail:", userEmail);
 
-    if (userData.passHash !== pass) {
-      console.log("[ERR] 59. كلمة السر غلط");
-      isRestoringAccount = false;
-      if (btn) btn.disabled = false;
-      if (btn) btn.classList.remove('loading');
-      return err.textContent = 'كلمة السر غلط';
-    }
-
+    // [تعديل] شلت فحص passHash من DB، Firebase Auth هو اللي بيفحص
     console.log("[AUTH] 60. تسجيل الدخول بـ Firebase Auth");
     await signInWithEmailAndPassword(auth, userEmail, pass);
     console.log("[AUTH] 61. تم تسجيل الدخول");
@@ -906,15 +899,22 @@ onAuthStateChanged(auth, async user => {
       });
 
       const settingsSnap = await get(ref(db, `users/${user.uid}/settings`));
-      if (settingsSnap.exists()) {
-        const settings = settingsSnap.val();
-        if (settings.bgChats) {
-          $('chatsList').style.background = settings.bgChats;
-        }
-        if (settings.bgChat) {
-          $('messagesList').style.background = settings.bgChat;
-        }
-      }
+if (settingsSnap.exists()) {
+  const settings = settingsSnap.val();
+  
+  if (settings.bgChats) {
+    $('chatsList').style.background = settings.bgChats;
+  }
+  if (settings.bgChat) {
+    $('messagesList').style.background = settings.bgChat;
+  }
+  
+  // [الجديد] هذا اللي تضيفه
+  if (settings.bgBody) {
+    document.body.style.background = settings.bgBody;
+    $('chatsScreen').style.background = settings.bgBody;
+  }
+}
     } else {
       showToast('الحساب قديم، سجل حساب جديد', '#f15c6d');
       await signOut(auth);
@@ -1124,30 +1124,7 @@ window.startChatFromSearch = (uid, name) => {
 };
 
 
-window.openChat = async (user) => {
-  console.log(" 120. فتح المحادثة مع:", user.name, user.uid);
-  
-  if (user.uid === currentUser.uid) {
-    showToast('ما تقدر تفتح شات مع نفسك', '#f44336');
-    return;
-  }
 
-  currentChat = user;
-  $('chatName').textContent = user.name;
-  $('chatNumber').textContent = user.uid || '';
-  $('chatScreen').classList.remove('hidden');
-  $('chatsScreen').classList.add('hidden');
-
-  $('messagesList').innerHTML = '';
-  
-  const chatId = getChatID(currentUser.uid, user.uid);
-  const msgsRef = ref(db, `chats/${chatId}/messages`);
-  onValue(msgsRef, (snap) => {
-    const msgs = [];
-    snap.forEach(s => msgs.push(s.val()));
-    renderMessages(msgs);
-  });
-};
 
 window.renderMessages = (messages) => {
   const container = $('messagesList');
@@ -1171,38 +1148,44 @@ window.renderMessages = (messages) => {
   container.scrollTop = container.scrollHeight;
 };
 
+
+
+window.openChat = async (user) => {
+  console.log(" 120. فتح المحادثة مع:", user.name, user.uid);
+  
+  if (user.uid === currentUser.uid) {
+    showToast('ما تقدر تفتح شات مع نفسك', '#f44336');
+    return;
+  }
+
+  currentChat = user;
+  $('chatName').textContent = user.name;
+  $('chatNumber').textContent = user.uid || '';
+  $('chatScreen').classList.remove('hidden');
+  $('chatsScreen').classList.add('hidden');
+
+  $('messagesList').innerHTML = '';
+  
+  const chatId = getChatID(currentUser.uid, user.uid);
+  const msgsRef = ref(db, `chats/${chatId}/messages`);
+  onValue(msgsRef, (snap) => {
+    const msgs = [];
+    snap.forEach(s => msgs.push(s.val()));
+    renderMessages(msgs);
+  });
+
+  // [جديد] نضيف حالة للهستوري عشان زر الرجوع يشتغل
+  history.pushState({screen: 'chat', uid: user.uid}, '', '#chat');
+};
+
 window.closeChat = () => {
   console.log(" 125. إغلاق المحادثة");
   $('chatScreen').classList.add('hidden');
   $('chatsScreen').classList.remove('hidden');
   currentChat = null;
-};
 
-window.sendMessage = async () => {
-  const text = $('msgInput').value.trim();
-  if (!text || !currentChat) return;
-  
-  const chatId = getChatID(currentUser.uid, currentChat.uid);
-  const msgRef = push(ref(db, `chats/${chatId}/messages`));
-  
-  await set(msgRef, {
-    text: text,
-    from: currentUser.uid,
-    time: Date.now()
-  });
-  
-  $('msgInput').value = '';
-  
-  await update(ref(db, `userChats/${currentUser.uid}/${currentChat.uid}`), {
-    lastMsg: text,
-    lastMsgTime: Date.now(),
-    unreadCount: 0
-  });
-  await update(ref(db, `userChats/${currentChat.uid}/${currentUser.uid}`), {
-    lastMsg: text,
-    lastMsgTime: Date.now(),
-    unreadCount: increment(1)
-  });
+  // [جديد] نرجع حالة الهستوري لشاشة المحادثات
+  history.replaceState({screen: 'chats'}, '', '#chats');
 };
 
 
@@ -1253,8 +1236,13 @@ window.closeAllModals = () => {
 window.setBg = async (color) => {
   $('chatsList').style.background = color;
   $('messagesList').style.background = color;
+  $('chatsScreen').style.background = color; // اضافة
+  document.body.style.background = color;   // اضافة
+  
   await set(ref(db, `users/${currentUser.uid}/settings/bgChats`), color);
   await set(ref(db, `users/${currentUser.uid}/settings/bgChat`), color);
+  await set(ref(db, `users/${currentUser.uid}/settings/bgBody`), color); // اضافة
+  
   closeAllModals();
   showToast('تم تغيير الخلفية', '#00a884');
 };
@@ -1276,32 +1264,42 @@ window.closeAllModals = () => {
   $('logoutModal').classList.add('hidden');
 };
 
-window.setBg = async (color) => {
-  $('chatsList').style.background = color;
-  $('messagesList').style.background = color;
-  await set(ref(db, `users/${currentUser.uid}/settings/bgChats`), color);
-  await set(ref(db, `users/${currentUser.uid}/settings/bgChat`), color);
-  closeAllModals();
-  showToast('تم تغيير الخلفية', '#00a884');
-};
+
 
 window.changePass = async () => {
   const newPass = $('newPass').value.trim();
-  if (newPass.length < 6) {
-    showToast('كلمة المرور قصيرة', '#f15c6d');
+  
+  // تحقق من الطول
+  if (!/^\d{6}$/.test(newPass)) {
+    showToast('كلمة المرور 6 أرقام فقط', '#f15c6d');
     return;
   }
   
-  const hash = await hashPassword(newPass);
-  await set(ref(db, `users/${currentUser.uid}/passHash`), hash);
-  
-  // خزن الباس الاصلي للعرض فقط
-  sessionStorage.setItem('myPass', newPass);
-  myPassword = newPass;
-  
-  $('newPass').value = '';
-  closeAllModals();
-  showToast('تم تغيير كلمة المرور', '#00a884');
+  // تحقق من القوة
+  if (!isStrongPassword(newPass)) {
+    showToast('كلمة المرور ضعيفة، اختر غيرها', '#f15c6d');
+    return;
+  }
+
+  try {
+    // 1. غير كلمة المرور في Firebase Auth
+    await updatePassword(auth.currentUser, newPass);
+    
+    // 2. غيرها في Realtime DB عشان العرض
+    await set(ref(db, `users/${currentUser.uid}/passHash`), newPass);
+    
+    // 3. حدث العرض والتخزين المؤقت
+    sessionStorage.setItem('myPass', newPass);
+    myPassword = newPass;
+    
+    $('newPass').value = '';
+    closeAllModals();
+    showToast('تم تغيير كلمة المرور بنجاح', '#00a884');
+    
+  } catch (e) {
+    console.error('changePass error:', e);
+    showToast('فشل التغيير: ' + e.message, '#f15c6d');
+  }
 };
 
 window.doLogout = async () => {
@@ -1355,6 +1353,26 @@ window.togglePass = (id) => {
   const input = $(id);
   input.type = input.type === 'password' ? 'text' : 'password';
 };
+
+// [جديد] إدارة زر الرجوع حق الجوال
+window.addEventListener('popstate', (e) => {
+  // لو ضغط رجوع وانت في شاشة الدردشة
+  if ($('chatScreen') && !$('chatScreen').classList.contains('hidden')) {
+    closeChat(); // بنادي الدالة اللي فوق فترجع لشاشة المحادثات
+    return;
+  }
+  
+  // لو ضغط رجوع وانت في شاشة المحادثات
+  if ($('chatsScreen') && !$('chatsScreen').classList.contains('hidden')) {
+    history.go(-1); // يطلع للهوم حق الجوال
+  }
+});
+
+// [جديد] نضيف حالة اولية للهستوري لما تفتح الصفحة
+if (!history.state) {
+  history.replaceState({screen: 'chats'}, '', '#chats');
+}
+
 
 
 </script>
