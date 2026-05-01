@@ -35,16 +35,19 @@
   top: 80px;
   left: 50%;
   transform: translateX(-50%) translateY(-20px);
-  background: #2a3942;
+  background: #f15c6d;
   color: #fff;
   padding: 12px 20px;
   border-radius: 8px;
-  font-size: 15px;
-  z-index: 9999;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s, transform 0.3s;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 9999;
+  
+  width: max-content;  /* يخليه على قد النص */
+  max-width: 80%;      /* ما يتعدى 80% من الشاشة */
+  text-align: center;
+  white-space: nowrap; /* يمنع التمطيط */
 }
 
 .toast.show {
