@@ -935,7 +935,73 @@ window.startChatFromSearch = (uid, name) => {
   openChat({uid: uid, name: name});
   clearSearchResult();
 };
+window.openChat = async (user) => {
+  console.log("[CHAT] 120. فتح المحادثة مع:", user.name, user.uid);
+  
+  currentChat = user;
+  $('chatWithName').textContent = user.name;
+  $('chatScreen').classList.remove('hidden');
+  $('mainScreen').classList.add('hidden');
+  
+  // نظف الرسائل القديمة
+  $('messages').innerHTML = '';
+  
+  // حمّل الرسائل من Firebase
+  const chatId = [currentUser.uid, user.uid].sort().join('_');
+  console.log("[DB] 121. chatId:", chatId);
+  
+  try {
+    const msgsRef = ref(db, `chats/${chatId}/messages`);
+    const msgsSnap = await get(query(msgsRef, orderByChild('time'), limitToLast(50)));
+    
+    if (msgsSnap.exists()) {
+      const msgs = [];
+      msgsSnap.forEach(snap => msgs.push(snap.val()));
+      renderMessages(msgs);
+      console.log("[CHAT] 122. تم تحميل", msgs.length, "رسالة");
+    } else {
+      console.log("[CHAT] 123. لا توجد رسائل سابقة");
+    }
+    
+    // استمع للرسائل الجديدة
+    onValue(msgsRef, (snap) => {
+      if (snap.exists()) {
+        const msgs = [];
+        snap.forEach(s => msgs.push(s.val()));
+        renderMessages(msgs);
+      }
+    });
+    
+  } catch (e) {
+    console.error("[ERR] 124. خطأ في فتح الشات:", e);
+    showToast('فشل فتح المحادثة');
+  }
+};
 
+window.renderMessages = (messages) => {
+  const container = $('messages');
+  container.innerHTML = '';
+  
+  messages.forEach(msg => {
+    const isMe = msg.from === currentUser.uid;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${isMe ? 'me' : 'them'}`;
+    msgDiv.innerHTML = `
+      <div class="message-text">${msg.text}</div>
+      <div class="message-time">${new Date(msg.time).toLocaleTimeString('ar-SA', {hour: '2-digit', minute: '2-digit'})}</div>
+    `;
+    container.appendChild(msgDiv);
+  });
+  
+  container.scrollTop = container.scrollHeight;
+};
+
+window.closeChat = () => {
+  console.log("[CHAT] 125. إغلاق المحادثة");
+  $('chatScreen').classList.add('hidden');
+  $('mainScreen').classList.remove('hidden');
+  currentChat = null;
+};
 window.clearSearchResult = () => {
   console.log("[UI] 113. مسح نتيجة البحث");
   $('searchResult').classList.add('hidden');
