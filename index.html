@@ -757,24 +757,12 @@ onAuthStateChanged(auth, async user => {
       loadChats();
       autoInstallAfterLogin();
 
-      const lastSearch = localStorage.getItem('lastSearchResult');
-      if (lastSearch) {
-        console.log("[STORAGE] 83. فيه نتيجة بحث محفوظة، عرضها");
-        const foundUser = JSON.parse(lastSearch);
-        const resultDiv = $('searchResult');
-        resultDiv.innerHTML = `
-          <div class="search-result-item" onclick="startChatFromSearch('${foundUser.uid}', '${foundUser.name}')">
-            <div class="avatar">${foundUser.name[0]}</div>
-            <div class="chat-info">
-              <div class="chat-name">${foundUser.name}</div>
-              <div class="chat-last">رقم: ${foundUser.uid} • اضغط لبدء المحادثة</div>
-            </div>
-            <div style="color:#00a884; font-size:24px">💬</div>
-            <span style="color:#8696a0; font-size:22px; padding:0 8px" onclick="event.stopPropagation(); clearSearchResult()">×</span>
-          </div>
-        `;
-        resultDiv.classList.remove('hidden');
-      }
+      const lastSearchHistory = localStorage.getItem('searchHistory');
+if (lastSearchHistory) {
+  console.log("[STORAGE] 83. تحميل تاريخ البحث");
+  searchHistory = JSON.parse(lastSearchHistory);
+  renderSearchHistory();
+}
 
       onValue(ref(db, `calls/${auth.currentUser?.uid}`), snap => {
         console.log("[CALL] 84. فحص المكالمات الواردة");
@@ -896,7 +884,9 @@ console.log("[PWA] 103. autoInstallAfterLogin معرفة وجاهزة");
 
 
      let searchHistory = []; // خله فوق مع المتغيرات حقك
-
+function saveSearchHistory() {
+  localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+}
 window.searchUser = async () => {
   console.log("[SEARCH] 104. بدأ البحث");
   const num = $('searchNumber').value.trim();
@@ -939,6 +929,7 @@ window.searchUser = async () => {
     // اضف النتيجة للتاريخ لو مش موجودة - unshift يخليها فوق
     if(!searchHistory.find(u => u.uid === num)) {
       searchHistory.unshift({uid: num, name: user.name, realUid: realUid});
+   saveSearchHistory();
     }
     
     // اعرض كل النتائج من فوق
@@ -981,11 +972,13 @@ function renderSearchHistory() {
 
 window.removeSearchResult = (uid) => {
   searchHistory = searchHistory.filter(u => u.uid !== uid);
+  saveSearchHistory();
   renderSearchHistory();
 }
 
 window.clearSearchResult = () => {
   searchHistory = [];
+  saveSearchHistory();
   $('searchResult').classList.add('hidden');
   $('searchNumber').value = '';
 }
