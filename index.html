@@ -1249,7 +1249,9 @@ window.setBg = async (color) => {
 };
 
 
-// الدوال اللي لازم يشوفها HTML - حطها قبل </script>
+// الدوال اللي لازم يشوفها HTML - حطها قبل
+
+   
 window.openModal = (id) => {
   $('mainMenu').classList.add('hidden');
   $('overlay').classList.remove('hidden');
@@ -1362,7 +1364,7 @@ async function hashPassword(pass) {
 <div id="passModal" class="modal hidden">
   <h3>تغيير كلمة المرور</h3>
   <div class="password-wrapper">
-    <input type="password" id="newPass" placeholder="كلمة المرور الجديدة">
+   <input type="password" id="newPass" placeholder="كلمة المرور الجديدة" style="text-align: center;">>
     <span class="eye" onclick="togglePass('newPass')">👁️</span>
   </div>
   <button onclick="changePass()">حفظ</button>
