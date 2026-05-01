@@ -103,6 +103,14 @@ button,input {font-family:inherit; outline:none; border:none}
   padding:8px 8px calc(8px + env(safe-area-inset-bottom));
   display:flex; gap:8px; align-items:center; z-index:999; max-width: 768px; margin: 0 auto;
 }
+
+  #searchResult {
+  max-height: 50vh; /* 50% من ارتفاع الشاشة فقط */
+  overflow-y: auto; /* سكرول داخل المربع نفسه */
+  -webkit-overflow-scrolling: touch; /* سحب ناعم للايفون والاندرويد */
+  background: #111b21; /* نفس لون الخلفية عشان مايبين فراغ */
+}
+  
 #emojiPanel {
   position: fixed; bottom: 0; left: 0; right: 0; height: 280px;
   background: #202c33; border-top: 1px solid #2a3942; overflow-y: auto;
