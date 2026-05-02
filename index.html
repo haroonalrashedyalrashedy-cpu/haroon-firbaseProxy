@@ -171,6 +171,30 @@ input, textarea {
       animation: fadeInOut 3s forwards;
     }
 
+.send-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #25d366; /* أخضر الواتساب */
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.send-btn:active {
+  background: #1ebc57;
+}
+
+.send-btn svg {
+  transform: rotate(-45deg); /* يميل السهم 45 درجة */
+  margin-left: 2px; /* يضبطه في النص */
+}
+
     @keyframes fadeInOut {
       0% { opacity: 0; }
       10% { opacity: 1; }
@@ -631,7 +655,11 @@ flex-direction: row;
       <!-- هذا الحقل الوحيد اللي بنسمح فيه بالنسخ واللصق -->
       
       <button id="btnVoice" class="icon-btn">🎤</button>
-      <button id="btnSend">إرسال</button>
+      <button id="btnSend" class="send-btn" aria-label="إرسال">
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+  </svg>
+</button>
     </footer>
 
     <!-- بانل الايموجي - مخفي بالبداية وتظهر فوق الشريط السفلي -->
