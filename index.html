@@ -191,8 +191,9 @@ input, textarea {
 }
 
 .send-btn svg {
-  transform: rotate(-45deg); /* يميل السهم 45 درجة */
-  margin-left: 2px; /* يضبطه في النص */
+  transform: rotate(180deg); /* يميل السهم 45 درجة */
+  margin-left: 0; 
+  margin-right: 2px; /* يضبطه في النص */
 }
 
     @keyframes fadeInOut {
@@ -423,22 +424,24 @@ input, textarea {
   gap: 8px;
 }
 
+/* رسائلك انت - خليها على اليسار */
 .msg-me {
-  align-self: flex-end;
+  align-self: flex-start;  /* كان flex-end */
   background: var(--bg-message-me);
   color: var(--text-primary);
   padding: 8px 12px;
-  border-radius: 8px 8px 0 8px;
+  border-radius: 12px 12px 12px 0; /* خلي الزاوية المربعة من اليسار تحت زي الواتساب */
   max-width: 75%;
   word-wrap: break-word;
 }
 
+/* رسائل الطرف الثاني - خليها على اليمين */
 .msg-other {
-  align-self: flex-start;
+  align-self: flex-end;  /* كان flex-start */
   background: var(--bg-message-other);
   color: var(--text-primary);
   padding: 8px 12px;
-  border-radius: 8px 8px 8px 0;
+  border-radius: 12px 12px 0 12px; /* الزاوية المربعة من اليمين تحت */
   max-width: 75%;
   word-wrap: break-word;
 }
@@ -1087,6 +1090,47 @@ function listenMessages(chatId, otherId) {
   });
 }
 
+
+function addOrUpdateChat(userId, name, lastMsg) {
+  const chatsList = document.getElementById('chatsList');
+  const existing = document.getElementById('chat-' + userId);
+
+  if (existing) {
+    existing.querySelector('.last-msg').textContent = lastMsg;
+    chatsList.prepend(existing);
+    return;
+  }
+
+  get(ref(db, `users/${userId}`)).then(userSnap => {
+    if (!userSnap.exists()) return;
+    const user = userSnap.val();
+    const chatDiv = document.createElement('div');
+    chatDiv.className = 'chat-item';
+    chatDiv.id = 'chat-' + userId;
+    chatDiv.innerHTML = `
+      <div class="avatar">${user.name[0]}</div>
+      <div class="chat-info">
+        <div class="chat-top">
+          <span class="chat-name">${user.name}</span>
+          <span class="chat-time"></span>
+        </div>
+        <div class="chat-bottom">
+          <span class="last-msg">${lastMsg || ''}</span>
+        </div>
+      </div>
+    `;
+    chatDiv.addEventListener('click', () => {
+      const chatId = [currentUser.uid, userId].sort().join('_');
+      listenMessages(chatId, userId);
+      showScreen('chatScreen');
+      document.getElementById('chatUserName').textContent = user.name;
+    });
+    chatsList.prepend(chatDiv);
+  });
+}
+
+
+
 /* ===== 7. تحميل قائمة المحادثات ===== */
 function loadChatsList() {
   if (!currentUser) return;
@@ -1094,7 +1138,7 @@ function loadChatsList() {
   const chatsRef = ref(db, `userChats/${currentUser.uid}`);
   onValue(chatsRef, (snapshot) => {
     const chatsList = document.getElementById('chatsList');
-    chatsList.innerHTML = '';
+    chatsList.innerHTML = ''; // يمسح القديم عشان ما يتكرر
     
     if (snapshot.exists()) {
       const chats = snapshot.val();
@@ -1102,8 +1146,14 @@ function loadChatsList() {
         get(ref(db, `users/${otherId}`)).then(userSnap => {
           if (userSnap.exists()) {
             const user = userSnap.val();
+            const chatId = 'chat-' + otherId;
+            
+            // شيك إذا المحادثة موجودة اصلاً لا تعيد إضافتها
+            if (document.getElementById(chatId)) return;
+            
             const chatDiv = document.createElement('div');
             chatDiv.className = 'chat-item';
+            chatDiv.id = chatId; // اعطيه id فريد
             chatDiv.innerHTML = `
               <div class="avatar">${user.name[0]}</div>
               <div class="chat-info">
@@ -1122,7 +1172,7 @@ function loadChatsList() {
               showScreen('chatScreen');
               document.getElementById('chatUserName').textContent = user.name;
             });
-            chatsList.appendChild(chatDiv);
+            chatsList.prepend(chatDiv); // prepend بدل appendChild عشان الجديد يطلع فوق
           }
         });
       });
@@ -1157,7 +1207,8 @@ document.getElementById('btnSearch').addEventListener('click', async () => {
     lastMsgTime: serverTimestamp()
   });
   
-  loadChatsList();
+  // استدعي addOrUpdateChat بدل loadChatsList عشان ما يتكرر
+  addOrUpdateChat(uid, userData.name, "");
   document.getElementById('searchNumber').value = '';
 });
 
