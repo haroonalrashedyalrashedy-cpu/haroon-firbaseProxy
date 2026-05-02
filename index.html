@@ -26,7 +26,30 @@
   background: #0b141a;
 }
 
+.msg {
+  max-width: 65%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #ffffff; /* رسائل الطرف الثاني بيضاء */
+  color: #000;
+  margin-bottom: 6px;
+  word-wrap: break-word;
+  align-self: flex-start; /* يخليها يسار */
+}
 
+.msg.me {
+  background: #dcf8c6; /* رسائلك اخضر فاتح مثل واتساب */
+  color: #000;
+  align-self: flex-end; /* يخليها يمين */
+  margin-left: auto; /* يدفعها لليمين */
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 4px;
+}
 .password-wrapper {
   position: relative;
   display: flex;
@@ -174,22 +197,72 @@ button,input {font-family:inherit; outline:none; border:none}
 }
 .header-info {flex:1; font-size:14px; line-height:1.4}
 .header-info div {white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.header-name {font-weight:600; font-size:16px}
-.header-sub {color:#8696a0; font-size:13px}
+.header-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #000; /* كان #e9edef */
+}
+
+.header-sub {
+  color: #000; /* كان #8696a0 */
+  font-size: 13px;
+  font-weight: 500;
+}
 .icon-btn {font-size:24px; color:#aebac1; cursor:pointer; padding:8px}
 #chatsScreen {height:100vh; flex-direction:column; padding-top:60px}
 .chats-list {flex:1; overflow-y:auto; background:#111b21}
-.chat-item {display:flex; padding:12px 16px; gap:12px; border-bottom:1px solid #222d34; cursor:pointer; align-items:center}
-.chat-item:active {background:#202c33}
+
+
 .avatar {
   width:50px; height:50px; background:#005c4b; border-radius:50%;
   display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:bold
 }
 .chat-info {flex:1; overflow:hidden}
-.chat-name {font-size:17px; font-weight:500; margin-bottom:3px}
-.chat-last {font-size:14px; color:#8696a0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.chat-meta {text-align:left; font-size:12px; color:#8696a0}
-.chat-status {color:#00a884; font-size:13px}
+
+.chat-item {
+  display: flex; 
+  padding: 12px 16px; 
+  gap: 12px; 
+  border-bottom: 1px solid #222d34; 
+  cursor: pointer; 
+  align-items: center;
+  background: #fce4ec; /* خلفية وردي فاتح عشان تبان */
+}
+
+.chat-item:active {
+  background: #f8bbd9; /* وردي اغمق شوي عند الضغط */
+}
+
+.chat-name {
+  font-size: 17px; 
+  font-weight: 600; /* كان 500 */
+  color: #000; /* كان افتراضي */
+  margin-bottom: 3px;
+}
+
+.chat-last {
+  font-size: 14px; 
+  color: #000; /* كان #8696a0 */
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis;
+  font-weight: 500; /* اضافة */
+}
+
+.chat-meta {
+  text-align: left; 
+  font-size: 12px; 
+  color: #000; /* كان #8696a0 */
+  font-weight: 500; /* اضافة */
+}
+
+.chat-status {
+  color: #000; /* كان #00a884 */
+  font-size: 13px;
+  font-weight: 500; /* اضافة */
+}
+
+
 .search-bar {
   position:fixed; bottom:0; left:0; right:0; background:#202c33!important;
   padding:8px 10px; display:flex; gap:8px; border-top:1px solid #2a3942
@@ -211,12 +284,22 @@ button,input {font-family:inherit; outline:none; border:none}
   background: #111b21; /* نفس لون الخلفية عشان مايبين فراغ */
 }
   
-#emojiPanel {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 280px;
-  background: #202c33; border-top: 1px solid #2a3942; overflow-y: auto;
-  padding: 10px; z-index: 998; max-width: 768px; margin: 0 auto;
-  display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px;
+#sendBtn {
+  color: #00a884;
+  transform: rotate(180deg); /* يلف السهم للاتجاه الصحيح */
+  display: inline-block; /* ضروري عشان التحويل يشتغل */
 }
+#emojiPanel {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 280px; background: #202c33; border-top: 1px solid #2a3942;
+  overflow-y: auto; padding: 10px; z-index: 998;
+  max-width: 768px; margin: 0 auto;
+  display: none; grid-template-columns: repeat(8, 1fr); gap: 8px;
+}
+#emojiPanel span { font-size: 28px; text-align: center; cursor: pointer; padding: 8px; }
+#emojiPanel span:active { background: #2a3942; border-radius: 8px; }
+#chatInputBar.emoji-open { bottom: 280px; }
+
 #chatInputBar.emoji-open { bottom: 280px; }
 #colorPanel {
   position: fixed; top: 60px; left: 10px; background: #233138;
@@ -333,6 +416,7 @@ oninput="this.value = this.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '')">
     <button class="submit-btn" style="width:80px" onclick="searchUser()">بحث</button>
   </div>
 </div>
+
 <div id="chatScreen" class="hidden flex-col" style="height:100vh">
 <div class="header">
   <span class="icon-btn" onclick="closeChat()">←</span>
@@ -348,22 +432,71 @@ oninput="this.value = this.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '')">
   </div>
   <span class="icon-btn" onclick="showMenu('chatMenu')">⋮</span>
 </div>
+
 <div id="messagesList"></div>
-  <div id="chatInputBar">
-    <button class="icon-btn" id="emojiToggleBtn" onclick="toggleEmojiPanel()">
-      <svg id="emojiIcon" viewBox="0 0 24 24" width="24" height="24" fill="#8696a0">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-8c.83 0 1.5-.67 1.5-1.5S8.83 9 8 9s-1.5.67-1.5 1.5S7.17 12 8 12zm8 0c.83 0 1.5-.67 1.5-1.5S16.83 9 16 9s-1.5.67-1.5 1.5.67 1.5zm-4 4c2.21 0 4-1.79 4-4h-8c0 2.21 1.79 4 4 4z"/>
-      </svg>
-      <svg id="keyboardIcon" class="hidden" viewBox="0 0 24 24" width="24" height="24" fill="#8696a0">
-        <path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/>
-      </svg>
-    </button>
-    <input type="text" id="msgInput" class="input-field" placeholder="اكتب رسالة..." style="flex:1">
-    <span class="icon-btn" id="micBtn" onmousedown="startRecord()" onmouseup="stopRecord()" ontouchstart="startRecord()" ontouchend="stopRecord()">🎤</span>
-    <span class="icon-btn" id="sendBtn" onclick="sendMessage()" style="color:#00a884">➤</span>
-  </div>
+
+<div id="chatInputBar">
+  <button class="icon-btn" id="emojiToggleBtn" onclick="toggleEmojiPanel()">
+    <svg id="emojiIcon" viewBox="0 0 24 24" width="24" height="24" fill="#8696a0">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-8c.83 0 1.5-.67 1.5-1.5S8.83 9 8 9s-1.5.67-1.5 1.5S7.17 12 8 12zm8 0c.83 0 1.5-.67 1.5-1.5S16.83 9 16 9s-1.5.67-1.5 1.5.67 1.5zm-4 4c2.21 0 4-1.79 4-4h-8c0 2.21 1.79 4 4 4z"/>
+    </svg>
+    <svg id="keyboardIcon" class="hidden" viewBox="0 0 24 24" width="24" height="24" fill="#8696a0">
+      <path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/>
+    </svg>
+  </button>
+  
+  <input type="text" id="msgInput" class="input-field" placeholder="اكتب رسالة..." style="flex:1">
+  
+  <span class="icon-btn" id="micBtn" 
+        onmousedown="startRecord()" 
+        onmouseup="stopRecord()" 
+        ontouchstart="startRecord()" 
+        ontouchend="stopRecord()">🎤</span>
+  
+  <span class="icon-btn" id="sendBtn" onclick="sendMessage()" style="color:#00a884">➤</span>
 </div>
-<div id="emojiPanel" class="hidden"></div>
+</div>
+
+<!-- التعديل هنا: حطيت الايموجي داخل البانل -->
+<div id="emojiPanel" class="hidden">
+  <span onclick="insertEmoji('😀')">😀</span><span onclick="insertEmoji('😃')">😃</span><span onclick="insertEmoji('😄')">😄</span>
+  <span onclick="insertEmoji('😁')">😁</span><span onclick="insertEmoji('😆')">😆</span><span onclick="insertEmoji('😅')">😅</span>
+  <span onclick="insertEmoji('😂')">😂</span><span onclick="insertEmoji('🤣')">🤣</span><span onclick="insertEmoji('😊')">😊</span>
+  <span onclick="insertEmoji('😇')">😇</span><span onclick="insertEmoji('🙂')">🙂</span><span onclick="insertEmoji('🙃')">🙃</span>
+  <span onclick="insertEmoji('😉')">😉</span><span onclick="insertEmoji('😌')">😌</span><span onclick="insertEmoji('😍')">😍</span>
+  <span onclick="insertEmoji('🥰')">🥰</span><span onclick="insertEmoji('😘')">😘</span><span onclick="insertEmoji('😗')">😗</span>
+  <span onclick="insertEmoji('😚')">😚</span><span onclick="insertEmoji('😋')">😋</span><span onclick="insertEmoji('😛')">😛</span>
+  <span onclick="insertEmoji('😝')">😝</span><span onclick="insertEmoji('😜')">😜</span><span onclick="insertEmoji('🤪')">🤪</span>
+  <span onclick="insertEmoji('🤨')">🤨</span><span onclick="insertEmoji('🧐')">🧐</span><span onclick="insertEmoji('🤓')">🤓</span>
+  <span onclick="insertEmoji('😎')">😎</span><span onclick="insertEmoji('🤩')">🤩</span><span onclick="insertEmoji('🥳')">🥳</span>
+  
+  <!-- مشاعر سلبية -->
+  <span onclick="insertEmoji('😢')">😢</span><span onclick="insertEmoji('😭')">😭</span><span onclick="insertEmoji('😤')">😤</span>
+  <span onclick="insertEmoji('😠')">😠</span><span onclick="insertEmoji('😡')">😡</span><span onclick="insertEmoji('🤬')">🤬</span>
+  <span onclick="insertEmoji('😳')">😳</span><span onclick="insertEmoji('😱')">😱</span><span onclick="insertEmoji('😨')">😨</span>
+  <span onclick="insertEmoji('😰')">😰</span><span onclick="insertEmoji('😥')">😥</span><span onclick="insertEmoji('😓')">😓</span>
+  
+  <!-- قلوب ويدين -->
+  <span onclick="insertEmoji('❤️')">❤️</span><span onclick="insertEmoji('🧡')">🧡</span><span onclick="insertEmoji('💛')">💛</span>
+  <span onclick="insertEmoji('💚')">💚</span><span onclick="insertEmoji('💙')">💙</span><span onclick="insertEmoji('💜')">💜</span>
+  <span onclick="insertEmoji('🖤')">🖤</span><span onclick="insertEmoji('💔')">💔</span><span onclick="insertEmoji('❣️')">❣️</span>
+  <span onclick="insertEmoji('💕')">💕</span><span onclick="insertEmoji('💞')">💞</span><span onclick="insertEmoji('💓')">💓</span>
+  <span onclick="insertEmoji('👍')">👍</span><span onclick="insertEmoji('👎')">👎</span><span onclick="insertEmoji('👌')">👌</span>
+  <span onclick="insertEmoji('✌️')">✌️</span><span onclick="insertEmoji('🤞')">🤞</span><span onclick="insertEmoji('🤙')">🤙</span>
+  <span onclick="insertEmoji('👏')">👏</span><span onclick="insertEmoji('🙌')">🙌</span><span onclick="insertEmoji('🙏')">🙏</span>
+  
+  <!-- اشياء ونار -->
+  <span onclick="insertEmoji('🔥')">🔥</span><span onclick="insertEmoji('💯')">💯</span><span onclick="insertEmoji('✨')">✨</span>
+  <span onclick="insertEmoji('⭐')">⭐</span><span onclick="insertEmoji('🌟')">🌟</span><span onclick="insertEmoji('⚡')">⚡</span>
+  <span onclick="insertEmoji('💥')">💥</span><span onclick="insertEmoji('💫')">💫</span><span onclick="insertEmoji('🌈')">🌈</span>
+  <span onclick="insertEmoji('🎉')">🎉</span><span onclick="insertEmoji('🎊')">🎊</span><span onclick="insertEmoji('🎈')">🎈</span>
+  
+  <!-- حيوانات واكل -->
+  <span onclick="insertEmoji('🐶')">🐶</span><span onclick="insertEmoji('🐱')">🐱</span><span onclick="insertEmoji('🐭')">🐭</span>
+  <span onclick="insertEmoji('🐹')">🐹</span><span onclick="insertEmoji('🐰')">🐰</span><span onclick="insertEmoji('🦊')">🦊</span>
+  <span onclick="insertEmoji('🍎')">🍎</span><span onclick="insertEmoji('🍌')">🍌</span><span onclick="insertEmoji('🍕')">🍕</span>
+  <span onclick="insertEmoji('🍔')">🍔</span><span onclick="insertEmoji('🍰')">🍰</span><span onclick="insertEmoji('☕')">☕</span>
+</div>
 <div id="colorPanel" class="hidden">
   <div class="color-option" style="background:#ffe4e6" data-color="#ffe4e6" title="وردي فاتح"></div>
   <div class="color-option" style="background:#dbeafe" data-color="#dbeafe" title="سماوي فاتح"></div>
@@ -374,7 +507,9 @@ oninput="this.value = this.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '')">
   <div class="color-option" style="background:#ffedd5" data-color="#ffedd5" title="برتقالي فاتح"></div>
   <div class="color-option" style="background:#111b21" data-color="#111b21" title="الافتراضي"></div>
 </div>
+
 <div id="toast" class="toast"></div>
+  
 <script type="module">
 
 
@@ -438,11 +573,13 @@ console.log("[FIREBASE] 12. تهيئة getDatabase");
 const db = getDatabase(app);
 console.log("[FIREBASE] 13. Database جاهز");
 
+
+
 window.showMainApp = () => {
   console.log("[UI] showMainApp: إخفاء authScreen وإظهار chatsScreen");
   $('authScreen').classList.add('hidden');
   $('chatsScreen').classList.remove('hidden');
-};
+}; // ← القوس الناقص هنا
 
 let currentUser = null;
 console.log("[VAR] 14. currentUser = null");
@@ -479,8 +616,6 @@ const $ = id => {
   console.log("[DOM] $(): النتيجة", !!el);
   return el;
 };
-
-
 
 
 
@@ -754,7 +889,6 @@ window.restoreAccount = async () => {
     const userEmail = userData.email;
     console.log("[DB] 58. userEmail:", userEmail);
 
-    // [تعديل] شلت فحص passHash من DB، Firebase Auth هو اللي بيفحص
     console.log("[AUTH] 60. تسجيل الدخول بـ Firebase Auth");
     await signInWithEmailAndPassword(auth, userEmail, pass);
     console.log("[AUTH] 61. تم تسجيل الدخول");
@@ -768,7 +902,14 @@ window.restoreAccount = async () => {
 
   } catch (e) {
     console.error("[ERR] 64. خطأ في restoreAccount:", e.message, e.code);
-    if (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
+    
+    // [جديد] تعامل مع invalid-credential
+    if (e.code === 'auth/invalid-credential') {
+      localStorage.removeItem('userCreds');
+      err.textContent = 'انتهت الجلسة، سجل دخول من جديد';
+      showLoginScreen();
+    }
+    else if (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
       err.textContent = 'كلمة السر غلط';
     } else if (e.code === 'auth/invalid-email') {
       err.textContent = 'مشكلة في الحساب';
@@ -783,6 +924,18 @@ window.restoreAccount = async () => {
     console.log("[ACC] 66. تفعيل الزر");
   }
 };
+
+function addOrMoveChat(newChat) {
+  // شل المحادثة لو موجودة من قبل
+  chats = chats.filter(chat => chat.uid !== newChat.uid);
+  
+  // اضفها اول القائمة
+  chats.unshift(newChat);
+  
+  // ارسم القائمة من جديد
+  renderChats();
+}
+
 
 onAuthStateChanged(auth, async user => {
   console.log("[AUTH] 67. onAuthStateChanged اشتغل، user:", user ? user.uid : "لا يوجد");
@@ -925,50 +1078,68 @@ if (settingsSnap.exists()) {
   }
 });
 
+// خلي chats مصفوفة عامة فوق مع المتغيرات
+let chats = [];
+
 const loadChats = () => {
   console.log("[DB] 92. بدأ loadChats للمستخدم:", currentUser?.uid);
   const chatsRef = query(ref(db, 'userChats/' + currentUser.uid), orderByChild('lastMsgTime'), limitToLast(15));
-  onValue(chatsRef, snap => {
+  
+  onValue(chatsRef, async snap => {
     console.log("[DB] 93. استلمت بيانات المحادثات");
-    const chats = [];
+    chats = []; // فضي المصفوفة العامة بدل ما تعمل const جديدة
+    
+    // جيب البيانات كلها اول
+    const tempChats = [];
     snap.forEach(child => { 
-      chats.push({ uid: child.key, ...child.val() }); 
+      tempChats.push({ uid: child.key, ...child.val() }); 
     });
-    chats.reverse();
-    console.log("[DB] 94. عدد المحادثات:", chats.length);
+    tempChats.reverse();
 
-    const list = $('chatsList');
-    list.innerHTML = '';
-    console.log("[UI] 95. تصفير قائمة المحادثات");
-
-    chats.forEach(chat => {
-      get(ref(db, 'publicUsers/' + chat.uid)).then(uSnap => {
-        if (!uSnap.exists()) {
-          console.log("[DB] 96. مستخدم المحادثة غير موجود:", chat.uid);
-          return;
-        }
+    // جيب بيانات اليوزر لكل محادثة واضفها بالدالة الجديدة
+    for (let chat of tempChats) {
+      const uSnap = await get(ref(db, 'publicUsers/' + chat.uid));
+      if (uSnap.exists()) {
         const u = uSnap.val();
-        const div = document.createElement('div');
-        div.className = 'chat-item';
-        div.onclick = () => openChat({ uid: chat.uid, name: u.name });
-        const unreadBadge = chat.unreadCount > 0 ? `<span style="background:#00a884; color:#111b21; border-radius:10px; padding:2px 6px; font-size:12px; font-weight:bold">${chat.unreadCount}</span>` : '';
-        div.innerHTML = `
-          <div class="avatar">${u.name[0]}</div>
-          <div class="chat-info">
-            <div class="chat-name">${u.name}<span style="font-size:13px; color:#8696a0; font-weight:400; margin-right:8px">${u.uid}</span></div>
-            <div class="chat-last">${chat.lastMsg || 'اضغط للدردشة'}</div>
-          </div>
-          <div class="chat-meta">
-            <div>${chat.lastMsgTime ? formatTime(chat.lastMsgTime) : ''}</div>
-            <div class="chat-status">${unreadBadge || formatLastSeen(u.lastSeen)}</div>
-          </div>
-        `;
-        list.appendChild(div);
-        console.log("[UI] 97. إضافة محادثة:", u.name);
-      });
-    });
+        addOrMoveChat({ ...chat, ...u }); // استخدم addOrMoveChat بدل append المباشر
+      }
+    }
   });
 };
+
+// حط هذي الدالتين فوق loadChats
+function addOrMoveChat(newChat) {
+  chats = chats.filter(chat => chat.uid !== newChat.uid);
+  chats.unshift(newChat);
+  renderChats();
+}
+
+function renderChats() {
+  const list = $('chatsList');
+  list.innerHTML = ''; // امسح القديم
+  
+  chats.forEach(chat => {
+    const div = document.createElement('div');
+    div.className = 'chat-item';
+    div.onclick = () => openChat({ uid: chat.uid, name: chat.name });
+    
+    const unreadBadge = chat.unreadCount > 0 ? 
+      `<span style="background:#00a884; color:#111b21; border-radius:10px; padding:2px 6px; font-size:12px; font-weight:bold">${chat.unreadCount}</span>` : '';
+    
+    div.innerHTML = `
+      <div class="avatar">${chat.name[0]}</div>
+      <div class="chat-info">
+        <div class="chat-name">${chat.name}<span style="font-size:13px; color:#8696a0; font-weight:400; margin-right:8px">${chat.uid}</span></div>
+        <div class="chat-last">${chat.lastMsg || 'اضغط للدردشة'}</div>
+      </div>
+      <div class="chat-meta">
+        <div>${chat.lastMsgTime ? formatTime(chat.lastMsgTime) : ''}</div>
+        <div class="chat-status">${unreadBadge || formatLastSeen(chat.lastSeen)}</div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
 console.log("[JS] 98. انتهى تحميل الكود للآن");
 const autoInstallAfterLogin = () => {
   console.log("[PWA] 99. بدأ autoInstallAfterLogin");
@@ -1178,6 +1349,36 @@ window.openChat = async (user) => {
   history.pushState({screen: 'chat', uid: user.uid}, '', '#chat');
 };
 
+window.sendMessage = async () => {
+  const text = $('msgInput').value.trim();
+  if (!text || !currentChat || !currentUser) return;
+
+  const chatId = getChatID(currentUser.uid, currentChat.uid);
+  const msg = {
+    text: text,
+    from: currentUser.uid,
+    time: Date.now()
+  };
+
+  // ارسل الرسالة للفاير بيس
+  await push(ref(db, `chats/${chatId}/messages`), msg);
+
+  // حدث اخر رسالة في قائمة المحادثات للطرفين
+  await update(ref(db, `userChats/${currentUser.uid}/${currentChat.uid}`), {
+    lastMsg: text,
+    lastMsgTime: msg.time,
+    unreadCount: 0
+  });
+  
+  await update(ref(db, `userChats/${currentChat.uid}/${currentUser.uid}`), {
+    lastMsg: text,
+    lastMsgTime: msg.time,
+    unreadCount: increment(1)
+  });
+
+  $('msgInput').value = ''; // فضي خانة الكتابة
+};
+
 window.closeChat = () => {
   console.log(" 125. إغلاق المحادثة");
   $('chatScreen').classList.add('hidden');
@@ -1220,18 +1421,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-window.openModal = (id) => {
-  $('mainMenu').classList.add('hidden');
-  $('overlay').classList.remove('hidden');
-  $(id).classList.remove('hidden');
-};
 
-window.closeAllModals = () => {
-  $('overlay').classList.add('hidden');
-  $('bgModal').classList.add('hidden');
-  $('passModal').classList.add('hidden');
-  $('logoutModal').classList.add('hidden');
-};
 
 window.setBg = async (color) => {
   $('chatsList').style.background = color;
@@ -1372,7 +1562,69 @@ window.addEventListener('popstate', (e) => {
 if (!history.state) {
   history.replaceState({screen: 'chats'}, '', '#chats');
 }
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let emojiOpen = false;
 
+// تسجيل الصوت
+window.startRecord = async () => {
+  if (isRecording) return;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = async () => {
+      // مؤقتاً يرسل نص، لو تبغى يرسل صوت فعلي قولي اكمل لك كود Storage
+      await sendMessage('[رسالة صوتية]');
+      stream.getTracks().forEach(track => track.stop());
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    $('micBtn').style.color = '#f15c6d';
+  } catch (e) {
+    showToast('تعذر الوصول للمايك');
+  }
+};
+
+window.stopRecord = () => {
+  if (!isRecording || !mediaRecorder) return;
+  mediaRecorder.stop();
+  isRecording = false;
+  $('micBtn').style.color = '#8696a0';
+};
+
+// تبديل الايموجي والكيبورد
+window.toggleEmojiPanel = () => {
+  const panel = $('emojiPanel');
+  const emojiIcon = $('emojiIcon');
+  const keyboardIcon = $('keyboardIcon');
+  const input = $('msgInput');
+  
+  emojiOpen = !emojiOpen;
+  panel.classList.toggle('hidden', !emojiOpen);
+  emojiIcon.classList.toggle('hidden', emojiOpen);
+  keyboardIcon.classList.toggle('hidden', !emojiOpen);
+  
+  if (emojiOpen) {
+    input.blur();
+  } else {
+    input.focus();
+  }
+};
+
+// ادخال الايموجي
+window.insertEmoji = (emoji) => {
+  const input = $('msgInput');
+  input.value += emoji;
+  input.focus();
+};
+
+// لما تضغط على مربع الكتابة اخفي الايموجي
+$('msgInput').addEventListener('focus', () => {
+  if (emojiOpen) toggleEmojiPanel();
+});
 
 
 </script>
