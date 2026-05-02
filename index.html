@@ -775,6 +775,59 @@ document.getElementById('btnShowRestore').addEventListener('click', () => {
   toggleForm('restore');
 });
 
+/* ===== 17. نظام تغيير الالوان ===== */
+const themeColors = ['#111b21', '#202c33', '#0b141a', '#075e54', '#128c7e', '#25d366'];
+let activeTab = 'header'; // header, chat, footer
+
+function initThemeTabs() {
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+    };
+  });
+}
+
+function initThemeColors() {
+  const colorsDiv = document.querySelector('.colors');
+  colorsDiv.innerHTML = '';
+  themeColors.forEach(color => {
+    const div = document.createElement('div');
+    div.className = 'color-item';
+    div.style.background = color;
+    div.onclick = () => {
+      applyThemeColor(color, activeTab);
+      closeModal();
+    };
+    colorsDiv.appendChild(div);
+  });
+}
+
+function applyThemeColor(color, target) {
+  if (target === 'header') {
+    document.getElementById('chatsHeader').style.background = color;
+    document.getElementById('chatHeader').style.background = color;
+    document.documentElement.style.setProperty('--bg-dark', color);
+  }
+  if (target === 'chat') {
+    document.getElementById('chatsList').style.background = color;
+    document.getElementById('messagesList').style.background = color;
+    document.documentElement.style.setProperty('--bg-chat', color);
+  }
+  if (target === 'footer') {
+    document.getElementById('chatsFooter').style.background = color;
+    document.getElementById('chatInputBar').style.background = color;
+    document.documentElement.style.setProperty('--bg-panel', color);
+  }
+  // حفظ الالوان
+  localStorage.setItem('wa_theme', JSON.stringify({
+    header: document.documentElement.style.getPropertyValue('--bg-dark'),
+    chat: document.documentElement.style.getPropertyValue('--bg-chat'),
+    footer: document.documentElement.style.getPropertyValue('--bg-panel')
+  }));
+}
+
 /* ===== 5. دوال المودالات والقوائم ===== */
 function openModal(modalId) {
   closeModal(); // نغلق أي مودال مفتوح أول
@@ -800,6 +853,10 @@ document.querySelectorAll('.modal').forEach(modal => {
     e.stopPropagation(); // يوقف انتشار الحدث للأب
   });
 });
+
+
+
+
 
 /* ===== 7. ربط أزرار قائمة الـ 3 نقاط ===== */
 document.getElementById('btnChatsMenu').addEventListener('click', (e) => {
@@ -862,7 +919,16 @@ window.addEventListener('load', () => {
     document.getElementById('currentUserName').textContent = currentUser.name;
     document.getElementById('currentUserNumber').textContent = currentUser.number;
     showToast(`أهلاً ${currentUser.name}`);
-    loadChatsList(); // ضيف هذا السطر عشان تحمل المحادثات
+    loadChatsList();
+    
+const savedTheme = localStorage.getItem('wa_theme');
+if (savedTheme) {
+  const theme = JSON.parse(savedTheme);
+  applyThemeColor(theme.header, 'header');
+  applyThemeColor(theme.chat, 'chat');
+  applyThemeColor(theme.footer, 'footer');
+}
+    // ضيف هذا السطر عشان تحمل المحادثات
   } else {
     showScreen('loginScreen');
   }
@@ -930,7 +996,39 @@ import { getDatabase, ref, set, get, push, onValue, update, remove, serverTimest
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 
+/* ===== 18. تغيير كلمة المرور ===== */
+document.getElementById('btnSavePass').addEventListener('click', async () => {
+  const oldPass = document.getElementById('oldPass').value;
+  const newPass = document.getElementById('newPass').value;
+  const confirmPass = document.getElementById('confirmPass').value;
 
+  if (!oldPass || !newPass || !confirmPass) {
+    showToast('املأ كل الحقول');
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    showToast('كلمات المرور غير متطابقة');
+    return;
+  }
+
+  if (newPass.length < 5 || /(.)\1{4,}/.test(newPass) || newPass === "12345") {
+    showToast('كلمة المرور ضعيفة');
+    return;
+  }
+
+  const userRef = ref(db, `users/${currentUser.uid}`);
+  const snap = await get(userRef);
+  
+  if (!snap.exists() || snap.val().password !== oldPass) {
+    showToast('كلمة المرور القديمة خطأ');
+    return;
+  }
+
+  await update(userRef, { password: newPass });
+  showToast('تم تغيير كلمة المرور بنجاح');
+  closeModal();
+});
 
 
 /* ===== 1. إعدادات Firebase ===== */
@@ -1021,6 +1119,10 @@ async function createAccount(name, password) {
   
 loadChatsList();
 }
+
+
+
+
 
 /* ===== 4. استعادة حساب ===== */
 async function restoreAccount(number, password) {
@@ -1183,6 +1285,12 @@ function loadChatsList() {
   });
 }
 
+
+
+
+
+
+
 // دالة تنسيق الوقت
 function formatTime(timestamp) {
   if (!timestamp) return '';
@@ -1197,6 +1305,33 @@ function formatTime(timestamp) {
 }
 
 /* ===== 8. البحث عن مستخدم برقمه ===== */
+/* ===== 8. البحث عن مستخدم برقمه ===== */
+/* ===== 7.1 ربط عناصر قائمة الـ 3 نقاط ===== */
+document.getElementById('btnChangeTheme').addEventListener('click', (e) => {
+  e.stopPropagation();
+  closeModal(); // اقفل قائمة الـ 3 نقاط
+  openModal('themeModal'); // افتح مودال الالوان
+  initThemeTabs(); // فعل التبويبات
+  initThemeColors(); // ارسم الالوان
+});
+
+document.getElementById('btnChangePass').addEventListener('click', (e) => {
+  e.stopPropagation();
+  closeModal(); // اقفل قائمة الـ 3 نقاط
+  openModal('changePassModal'); // افتح مودال تغيير الباسورد
+  // امسح الحقول القديمة
+  document.getElementById('oldPass').value = '';
+  document.getElementById('newPass').value = '';
+  document.getElementById('confirmPass').value = '';
+});
+
+
+
+
+
+
+
+
 document.getElementById('btnSearch').addEventListener('click', async () => {
   const number = document.getElementById('searchNumber').value.trim();
   if (!number) {
@@ -1213,9 +1348,6 @@ document.getElementById('btnSearch').addEventListener('click', async () => {
   const users = usersSnap.val();
   const userEntry = Object.entries(users).find(([uid, u]) => u.number === number);
   
-  const chatsList = document.getElementById('chatsList');
-  chatsList.innerHTML = ''; // امسح القائمة القديمة
-  
   if (!userEntry) {
     showToast("لا يوجد مستخدم بهذا الرقم");
     return;
@@ -1227,21 +1359,36 @@ document.getElementById('btnSearch').addEventListener('click', async () => {
     return;
   }
   
-  // اعرض المستخدم اللي لقيته بس
+  const chatsList = document.getElementById('chatsList');
+  
+  // شلنا مسح القائمة كاملة. بنفحص لو النتيجة موجودة مسبقاً
+  const existingItem = document.getElementById('search_' + uid);
+  if (existingItem) {
+    existingItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    existingItem.style.background = 'var(--bg-panel)';
+    setTimeout(() => existingItem.style.background = '', 1000);
+    document.getElementById('searchNumber').value = '';
+    return;
+  }
+  
+  // اعرض المستخدم اللي لقيته فوق القائمة
   const chatDiv = document.createElement('div');
   chatDiv.className = 'chat-item';
+  chatDiv.id = 'search_' + uid; // ID مميز عشان ما يتكرر
+  chatDiv.style.borderBottom = '2px solid var(--accent-green)'; // خط اخضر عشان يبين انه نتيجة بحث
   chatDiv.innerHTML = `
     <div class="avatar">${userData.name[0]}</div>
     <div class="chat-info">
       <div class="chat-top">
         <span class="chat-name">${userData.name}</span>
-        <span class="chat-time"></span>
+        <span class="chat-time">بحث</span>
       </div>
       <div class="chat-bottom">
         <span class="last-msg">اضغط لبدء المحادثة</span>
       </div>
     </div>
   `;
+  
   chatDiv.addEventListener('click', async () => {
     const chatId = [currentUser.uid, uid].sort().join('_');
     await set(ref(db, `userChats/${currentUser.uid}/${uid}`), {
@@ -1251,9 +1398,16 @@ document.getElementById('btnSearch').addEventListener('click', async () => {
     listenMessages(chatId, uid);
     showScreen('chatScreen');
     document.getElementById('chatUserName').textContent = userData.name;
-    loadChatsList(); // ارجع اعرض كل المحادثات
+    document.getElementById('searchNumber').value = '';
+    // شلنا loadChatsList() من هنا عشان ما يعيد رسم القائمة كلها
   });
-  chatsList.appendChild(chatDiv);
+  
+  // حطه اول عنصر في القائمة
+  if (chatsList.firstChild) {
+    chatsList.insertBefore(chatDiv, chatsList.firstChild);
+  } else {
+    chatsList.appendChild(chatDiv);
+  }
   
   document.getElementById('searchNumber').value = '';
 });
