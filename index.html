@@ -852,15 +852,17 @@ document.getElementById('signupName').addEventListener('input', (e) => {
 });
 
 /* ===== 12. التحقق من الجلسة عند فتح الموقع ===== */
+/* ===== 12. التحقق من الجلسة عند فتح الموقع ===== */
 window.addEventListener('load', () => {
   const savedUser = localStorage.getItem('wa_haroon_user');
   
   if (savedUser) {
     currentUser = JSON.parse(savedUser);
-    showScreen('chatsScreen'); // يروح مباشرة للمحادثات
+    showScreen('chatsScreen');
     document.getElementById('currentUserName').textContent = currentUser.name;
     document.getElementById('currentUserNumber').textContent = currentUser.number;
     showToast(`أهلاً ${currentUser.name}`);
+    loadChatsList(); // ضيف هذا السطر عشان تحمل المحادثات
   } else {
     showScreen('loginScreen');
   }
@@ -1092,11 +1094,16 @@ async function sendMessage(text) {
 
 /* ===== 6. سماع الرسائل لحظياً ===== */
 function listenMessages(chatId, otherId) {
+  // افصل الاشتراك القديم لو موجود
+  if (messagesUnsubscribe) messagesUnsubscribe();
+
   currentChatId = chatId;
   currentChatOtherId = otherId;
   
   const messagesRef = ref(db, `chats/${chatId}/messages`);
-  onValue(messagesRef, (snapshot) => {
+  
+  // خزن دالة الالغاء في المتغير
+  messagesUnsubscribe = onValue(messagesRef, (snapshot) => {
     const messagesList = document.getElementById('messagesList');
     messagesList.innerHTML = '';
     
@@ -1115,6 +1122,7 @@ function listenMessages(chatId, otherId) {
 
 /* ===== 7. تحميل قائمة المحادثات ===== */
 let chatsUnsubscribe = null;
+let messagesUnsubscribe = null;
 
 function loadChatsList() {
   if (!currentUser) return;
@@ -1132,7 +1140,7 @@ function loadChatsList() {
     const chats = snapshot.val();
 
     // حولها لمصفوفة عشان نقدر نرتبها
-    for (const [otherId][chatData] of Object.entries(chats)) {
+    for (const [otherId, chatData] of Object.entries(chats)) {
       const userSnap = await get(ref(db, `users/${otherId}`));
       if (userSnap.exists()) {
         chatsArr.push({
