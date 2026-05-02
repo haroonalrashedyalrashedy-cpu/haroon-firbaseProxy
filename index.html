@@ -191,7 +191,7 @@ input, textarea {
 }
 
 .send-btn svg {
-  transform: rotate(180deg); /* يميل السهم 45 درجة */
+  transform: rotate(0deg); /* يميل السهم 45 درجة */
   margin-left: 0; 
   margin-right: 2px; /* يضبطه في النص */
 }
@@ -905,9 +905,10 @@ emojis.forEach(emoji => {
   span.className = 'emoji-item';
   span.textContent = emoji;
   span.addEventListener('click', () => {
-    messageInput.value += emoji; // يضيف الإيموجي للحقل
-    messageInput.focus();
-  });
+  messageInput.value += emoji; // يضيف الإيموجي للحقل
+  messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length); // يخلي المؤشر بآخر النص
+  messageInput.blur(); // يقفل الكيبورد
+});
   emojiPanel.appendChild(span);
 });
 </script>
@@ -973,7 +974,7 @@ async function createAccount(name, password) {
   }
   
   if (!/^\d{5,}$/.test(password) || /(.)\1{4,}/.test(password) || password === "12345") {
-    showToast("كلمة المرور ضعيفة. استخدم 5 أرقام غير متتالية");
+    showToast("كلمة المرور ضعيفة");
     return;
   }
   
@@ -1002,9 +1003,21 @@ async function createAccount(name, password) {
   localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
   
   showToast(`تم التسجيل! رقمك هو ${number}`);
+  
+Hh
+  // ==== ضيف هذي الـ 3 الأسطر هنا ====
+  document.getElementById('signupName').value = '';   // يمسح حقل الاسم
+  document.getElementById('signupPass').value = '';   // يمسح حقل كلمة المرور
+  document.getElementById('signupForm').style.display = 'none'; 
+
+// يخفي الفورم
+  
+
   showScreen('chatsScreen');
   document.getElementById('currentUserName').textContent = name;
   document.getElementById('currentUserNumber').textContent = number;
+  
+loadChatsList();
 }
 
 /* ===== 4. استعادة حساب ===== */
@@ -1033,6 +1046,16 @@ async function restoreAccount(number, password) {
   localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
   
   showToast("تم استعادة حسابك");
+  
+Hh
+  // ==== ضيف هذي الـ 3 الأسطر هنا ====
+  document.getElementById('signupName').value = '';   // يمسح حقل الاسم
+  document.getElementById('signupPass').value = '';   // يمسح حقل كلمة المرور
+  document.getElementById('signupForm').style.display = 'none'; 
+
+// يخفي الفورم
+  
+
   showScreen('chatsScreen');
   document.getElementById('currentUserName').textContent = userData.name;
   document.getElementById('currentUserNumber').textContent = number;
@@ -1090,47 +1113,6 @@ function listenMessages(chatId, otherId) {
   });
 }
 
-
-function addOrUpdateChat(userId, name, lastMsg) {
-  const chatsList = document.getElementById('chatsList');
-  const existing = document.getElementById('chat-' + userId);
-
-  if (existing) {
-    existing.querySelector('.last-msg').textContent = lastMsg;
-    chatsList.prepend(existing);
-    return;
-  }
-
-  get(ref(db, `users/${userId}`)).then(userSnap => {
-    if (!userSnap.exists()) return;
-    const user = userSnap.val();
-    const chatDiv = document.createElement('div');
-    chatDiv.className = 'chat-item';
-    chatDiv.id = 'chat-' + userId;
-    chatDiv.innerHTML = `
-      <div class="avatar">${user.name[0]}</div>
-      <div class="chat-info">
-        <div class="chat-top">
-          <span class="chat-name">${user.name}</span>
-          <span class="chat-time"></span>
-        </div>
-        <div class="chat-bottom">
-          <span class="last-msg">${lastMsg || ''}</span>
-        </div>
-      </div>
-    `;
-    chatDiv.addEventListener('click', () => {
-      const chatId = [currentUser.uid, userId].sort().join('_');
-      listenMessages(chatId, userId);
-      showScreen('chatScreen');
-      document.getElementById('chatUserName').textContent = user.name;
-    });
-    chatsList.prepend(chatDiv);
-  });
-}
-
-
-
 /* ===== 7. تحميل قائمة المحادثات ===== */
 function loadChatsList() {
   if (!currentUser) return;
@@ -1138,7 +1120,7 @@ function loadChatsList() {
   const chatsRef = ref(db, `userChats/${currentUser.uid}`);
   onValue(chatsRef, (snapshot) => {
     const chatsList = document.getElementById('chatsList');
-    chatsList.innerHTML = ''; // يمسح القديم عشان ما يتكرر
+    chatsList.innerHTML = '';
     
     if (snapshot.exists()) {
       const chats = snapshot.val();
@@ -1146,14 +1128,8 @@ function loadChatsList() {
         get(ref(db, `users/${otherId}`)).then(userSnap => {
           if (userSnap.exists()) {
             const user = userSnap.val();
-            const chatId = 'chat-' + otherId;
-            
-            // شيك إذا المحادثة موجودة اصلاً لا تعيد إضافتها
-            if (document.getElementById(chatId)) return;
-            
             const chatDiv = document.createElement('div');
             chatDiv.className = 'chat-item';
-            chatDiv.id = chatId; // اعطيه id فريد
             chatDiv.innerHTML = `
               <div class="avatar">${user.name[0]}</div>
               <div class="chat-info">
@@ -1172,7 +1148,7 @@ function loadChatsList() {
               showScreen('chatScreen');
               document.getElementById('chatUserName').textContent = user.name;
             });
-            chatsList.prepend(chatDiv); // prepend بدل appendChild عشان الجديد يطلع فوق
+            chatsList.appendChild(chatDiv);
           }
         });
       });
@@ -1207,8 +1183,7 @@ document.getElementById('btnSearch').addEventListener('click', async () => {
     lastMsgTime: serverTimestamp()
   });
   
-  // استدعي addOrUpdateChat بدل loadChatsList عشان ما يتكرر
-  addOrUpdateChat(uid, userData.name, "");
+  loadChatsList();
   document.getElementById('searchNumber').value = '';
 });
 
