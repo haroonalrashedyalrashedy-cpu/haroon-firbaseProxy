@@ -907,7 +907,7 @@ window.restoreAccount = async () => {
     if (e.code === 'auth/invalid-credential') {
       localStorage.removeItem('userCreds');
       err.textContent = 'انتهت الجلسة، سجل دخول من جديد';
-      showLoginScreen();
+      showAuthForm('login');
     }
     else if (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
       err.textContent = 'كلمة السر غلط';
@@ -1108,11 +1108,7 @@ const loadChats = () => {
 };
 
 // حط هذي الدالتين فوق loadChats
-function addOrMoveChat(newChat) {
-  chats = chats.filter(chat => chat.uid !== newChat.uid);
-  chats.unshift(newChat);
-  renderChats();
-}
+
 
 function renderChats() {
   const list = $('chatsList');
@@ -1562,8 +1558,7 @@ window.addEventListener('popstate', (e) => {
 if (!history.state) {
   history.replaceState({screen: 'chats'}, '', '#chats');
 }
-let mediaRecorder = null;
-let audioChunks = [];
+
 let isRecording = false;
 let emojiOpen = false;
 
