@@ -1,1153 +1,1718 @@
-<!-- ========== القسم 1: الهيكل العام والستايل الأساسي ========== -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <!-- ترميز UTF-8 عشان يدعم العربية والايموجي بدون خربطة -->
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <!-- width=device-width: يخلي العرض على قد شاشة الجوال -->
-  <!-- viewport-fit=cover: يملأ الشاشة كاملة حتى تحت النوتش في الايفون -->
-  
-  <meta name="theme-color" content="#111b21">
-  <!-- لون الشريط العلوي للمتصفح على الجوال -->
-  
-  <title>واتساب هارون</title>
-
-  <style>
-    /* ====== 1. متغيرات الألوان العامة ====== */
-    /* نستخدم متغيرات عشان نغير الثيم كامل بتغيير سطر واحد */
-    :root {
-      --bg-dark: #111b21;      /* خلفية الهيدر والشاشات الداكنة */
-      --bg-panel: #202c33;     /* خلفية الشريط السفلي والبانلات */
-      --bg-chat: #0b141a;      /* خلفية منطقة الدردشة */
-      --bg-message-me: #005c4b; /* لون رسائلي */
-      --bg-message-other: #202c33; /* لون رسائل الطرف الثاني */
-      --text-primary: #e9edef;  /* لون النص الأساسي */
-      --text-secondary: #8696a0; /* لون النص الثانوي */
-      --accent-green: #25d366;  /* لون الزر والأكشن */
-      --border-color: #2a3942;  /* لون الحدود الفاصلة */
-    }
-
-    /* ====== 2. إعادة الضبط العام Reset ====== */
-    /* نشيل الهوامش والبادينج الافتراضي من كل العناصر */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent; 
-      /* يلغي اللون الأزرق اللي يطلع عند الضغط على الجوال */
-    }
-
-    /* منع التحديد والنسخ واللصق لكل العناصر */
-    /* بنسمح بالنسخ واللصق فقط لحقل الكتابة لاحقاً بالـ JS */
-    body, div, span, p, h1, h2, h3, button, li {
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-    }
-
-    /* ====== 3. إعدادات الجسم الأساسي Body ====== */
-    body {
-      height: 100dvh; /* dvh = Dynamic Viewport Height. يحل مشكلة شريط المتصفح بالجوال */
-      width: 100vw;
-      background: var(--bg-dark);
-      color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      /* خط النظام عشان يكون سريع ومألوف للمستخدم */
-      display: flex;
-      flex-direction: column;
-      overflow: hidden; /* نمنع سكرول الجسم كامل. السكرول يكون داخل العناصر فقط */
-    }
-
-    /* ====== 4. الشاشات الرئيسية ====== */
-    /* كل شاشة تملأ كامل الصفحة وتختفي بالافتراضي */
-    .screen {
-      display: none; /* مخفي بالافتراضي */
-      flex-direction: column;
-      height: 100dvh;
-      width: 100vw;
-      position: relative;
-    }
-
-    /* الشاشة النشطة فقط هي اللي تظهر */
-    .screen.active {
-      display: flex;
-    }
-
-    /* ====== 5. الأزرار العامة ====== */
-    button {
-      background: var(--accent-green);
-      color: var(--bg-dark);
-      border: none;
-      border-radius: 8px;
-      padding: 12px 20px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s; 
-      /* تأثير خفيف عند الضغط */
-    }
-
-    button:active {
-      opacity: 0.8; /* يخفت الزر لما تضغطه */
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* ====== 6. الحقول العامة Input ====== */
-    input {
-      background: var(--bg-panel);
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 16px;
-      outline: none; /* نشيل الخط الأزرق عند التركيز */
-    }
-
-    input:focus {
-      border-color: var(--accent-green); /* يتلون الحد أخضر لما تضغط على الحقل */
-    }
-
-    /* ====== 7. المودال والاوفرلاي ====== */
-    /* الطبقة الشفافة اللي تغطي الشاشة لما يفتح مودال */
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5); /* أسود شفاف */
-      z-index: 1000; /* يخليه فوق كل شيء */
-    }
-
-    .overlay.active {
-      display: block; /* يظهر لما نضيف class active */
-    }
-
-    /* الصندوق المنبثق نفسه */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%); /* يخلي المودال وسط الشاشة تماماً */
-      background: var(--bg-panel);
-      border-radius: 12px;
-      padding: 20px;
-      z-index: 1001;
-      min-width: 280px;
-      max-width: 90%;
-    }
-
-    .modal.active {
-      display: block;
-    }
-
-    /* ====== 8. التوست Toast للرسائل المؤقتة ====== */
-    .toast {
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--bg-panel);
-      color: var(--text-primary);
-      padding: 12px 24px;
-      border-radius: 8px;
-      display: none;
-      z-index: 2000;
-    }
-
-    .toast.show {
-      display: block;
-      animation: fadeInOut 3s forwards;
-    }
-
-    @keyframes fadeInOut {
-      0% { opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-  </style>
-  
-  
-  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#005c4b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>واتساب هارون</title>
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22واتساب%20هارون%22,%22short_name%22:%22واتساب%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23111b21%22,%22theme_color%22:%22%23005c4b%22,%22icons%22:[{%22src%22:%22data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTE1IiBmaWxsPSIjMDBhODg0Ii8+CjxwYXRoIGQ9Ik0xNzIgMTYwQzE3MiAxMzguNCAxODkuNCAxMjEgMjExIDEyMUgxOTRDMTk0IDEyMSAxOTQgMTIxIDE5NCAxMjFIMjM2QzI1Ny42IDEyMSAyNzUgMTM4LjQgMjc1IDE2MFYzMjhDMjc1IDM0OS42IDI1Ny42IDM2NyAyMzYgMzY3SDE3NkMxNTQuNCAzNjcgMTM3IDM0OS42IDEzNyAzMjhWMTYwQzEzNyAxMzguNCAxNTQuNCAxMjEgMTc2IDEyMVYxMjFIMTcyVjE2MFpNMzA1IDE2MEMzMDUgMTM4LjQgMzIyLjQgMTIxIDM0NCAxMjFIMzQ3QzM0NyAxMjEgMzQ3IDEyMSAzNDcgMTIxSDM4OUM0MTAuNiAxMjEgNDI4IDEzOC40IDQyOCAxNjBWMTc2QzQyOCAxOTcuNiA0MTAuNiAyMTUgMzg5IDIxNUgzNDdDMzI1LjQgMjE1IDMwOCAxOTcuNiAzMDggMTc2VjE2MFpNMzA1IDI1NkMzMDUgMjM0LjQgMzIyLjQgMjE3IDM0NCAyMTdIMzg5QzQxMC42IDIxNyA0MjggMjM0LjQgNDI4IDI1NlYzMjhDNDI4IDM0OS42IDQxMC42IDM2NyAzODkgMzY3SDM0NEMzMjIuNCAzNjcgMzA1IDM0OS42IDMwNSAzMjhWMjU2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22,%22purpose%22:%22any%20maskable%22}]}">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
 <style>
-/* ========== القسم 1.1: ستايل العناصر الداخلية لواجهات التطبيق ========== */
-
-/* ===== 1. واجهة تسجيل الدخول ===== */
-.login-container {
+  .chat-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 24px;
-  gap: 20px;
-  max-width: 400px;
-  margin: 0 auto;
-  /* يخلي المحتوى في النص ومايتمد على كل العرض */
-}
-
-.logo {
-  font-size: 64px;
-  /* حجم الايموجي/اللوجو */
-}
-
-.app-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.app-subtitle {
-  font-size: 15px;
-  color: var(--text-secondary);
-  text-align: center;
-}
-
-.login-buttons {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-}
-
-.login-buttons button {
-  flex: 1;
-  /* الزرين ياخذو نفس العرض جنب بعض */
-}
-
-.auth-form {
-  display: none;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  animation: fadeIn 0.3s ease;
-  /* يظهر بسلاسة لما يفتح */
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== 2. واجهة المحادثات ===== */
-#chatsHeader {
-  height: 60px;
-  background: var(--bg-dark);
-  display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-}
-
-#currentUserName {
-  font-size: 17px;
-  font-weight: 600;
-}
-
-#currentUserNumber {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  padding: 8px;
-  color: var(--text-primary);
-}
-
-#chatsList {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--bg-chat);
-}
-
-.chat-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  gap: 12px;
-  border-bottom: 1px solid var(--border-color);
-  cursor: pointer;
-}
-
-.chat-item:active {
-  background: var(--bg-panel);
-}
-
-.avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--bg-panel);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.chat-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.chat-top {
-  display: flex;
-  justify-content: space-between;
-}
-
-.chat-name {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.chat-time {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.chat-bottom {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 4px;
-}
-
-.last-msg {
-  font-size: 14px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 70%;
-}
-
-.unread-count {
-  background: var(--accent-green);
-  color: var(--bg-dark);
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 12px;
-  font-weight: 600;
-}
-
-#chatsFooter {
-  height: 64px;
-  background: var(--bg-panel);
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  gap: 8px;
-  padding-bottom: calc(8px + env(safe-area-inset-bottom));
-  /* يحسب مساحة الشريط السفلي للايفون */
-}
-
-/* ===== 3. واجهة الدردشة ===== */
-#chatHeader {
-  height: 60px;
-  background: var(--bg-dark);
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  gap: 12px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.chat-user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.chat-user-details {
-  display: flex;
-  flex-direction: column;
-}
-
-#chatUserStatus {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-#messagesList {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--bg-chat);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.msg-me {
-  align-self: flex-end;
-  background: var(--bg-message-me);
-  color: var(--text-primary);
-  padding: 8px 12px;
-  border-radius: 8px 8px 0 8px;
-  max-width: 75%;
-  word-wrap: break-word;
-}
-
-.msg-other {
-  align-self: flex-start;
-  background: var(--bg-message-other);
-  color: var(--text-primary);
-  padding: 8px 12px;
-  border-radius: 8px 8px 8px 0;
-  max-width: 75%;
-  word-wrap: break-word;
-}
-
-#chatInputBar {
-  background: var(--bg-panel);
-  display: flex;
-  align-items: flex-end;
-  padding: 8px 12px;
-  gap: 8px;
-  padding-bottom: calc(8px + env(safe-area-inset-bottom));
-}
-
-#messageInput {
-  flex: 1;
-  min-height: 40px;
-  max-height: 120px;
-  resize: none;
-  user-select: text;
-  -webkit-user-select: text;
-  /* نسمح بالنسخ واللصق هنا فقط */
-}
-
-#emojiPanel {
-  display: none;
-  height: 240px;
-  background: var(--bg-dark);
-  overflow-y: auto;
-  
-  grid-template-columns: repeat(8, 1fr);
   padding: 12px;
-  gap: 8px;
+  background: #202c33;
+  color: white;
 }
 
-.emoji-item {
-  font-size: 28px;
-  text-align: center;
-  cursor: pointer;
-  padding: 8px;
-}
 
-.emoji-item:active {
-  background: var(--bg-panel);
+.msg {
+  max-width: 65%;
+  padding: 8px 12px;
   border-radius: 8px;
+  background: #ffffff;
+  color: #000;
+  margin-bottom: 6px;
+  word-wrap: break-word;
+  align-self: flex-start;
 }
 
-/* ===== 4. المودالات ===== */
-.menu-item {
-  width: 100%;
+.msg.me {
+  background: #dcf8c6;
+  color: #000;
+  
+  
+  align-self: flex-end;   /* يرميها يمين */
+  margin-left: auto;      /* يدفعها لليمين */
+}
+
+.msg-text {
+  word-wrap: break-word;
+}
+
+.msg-time {
+  font-size: 11px;
+  color: #8696a0;
   text-align: right;
-  background: none;
-  color: var(--text-primary);
-  padding: 14px 16px;
-  border-radius: 0;
-  font-weight: 400;
+  margin-top: 2px;
 }
 
-.menu-item:active {
-  background: var(--bg-dark);
-}
-
-.tabs {
+.messages {
   display: flex;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 16px;
-}
+  flex-direction: column;
+  align-items: flex-start; /* كل الرسايل تبدأ يسار افتراضي */
 
-.tab {
-  flex: 1;
-  background: none;
-  color: var(--text-secondary);
   padding: 12px;
-  border-radius: 0;
+  gap: 4px;
+}
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-wrapper input {
+  width: 100%;
+  padding-right: 35px;
+}
+.password-wrapper .eye {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  user-select: none;
 }
 
-.tab.active {
-  color: var(--accent-green);
-  border-bottom: 2px solid var(--accent-green);
+
+.menu {
+  position: absolute;
+  top: 60px;
+  left: 10px;
+  background: #2a3942;
+  border-radius: 8px;
+  padding: 5px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 100;
+  width: 200px;
+}
+.menu-item {
+  padding: 12px 16px;
+  color: #e9edef;
+  cursor: pointer;
+}
+.menu-item:hover { background: #3a4a52; }
+
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
 }
 
+.modal {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #2a3942;
+  padding: 20px;
+  border-radius: 12px;
+  z-index: 201;
+  width: 300px;
+  text-align: center;
+}
+.modal h3 { margin: 0 0 15px; color: #e9edef; }
+.modal input, .modal button {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
 .colors {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
-
-.color-item {
-  height: 48px;
+.color {
+  height: 60px;
   border-radius: 8px;
   cursor: pointer;
+  border: 2px solid transparent;
 }
-
-.confirm-buttons {
+.color:hover { border: 2px solid #00a884; }
+.hidden { display: none; }
+.chat-input-bar {
   display: flex;
-  gap: 12px;
-  margin-top: 16px;
+  padding: 10px;
+  background: #202c33;
+}
+  .toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: #f15c6d;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 9999;
+  
+  width: max-content;  /* يخليه على قد النص */
+  max-width: 80%;      /* ما يتعدى 80% من الشاشة */
+  text-align: center;
+  white-space: nowrap; /* يمنع التمطيط */
 }
 
-.confirm-buttons button {
-  flex: 1;
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI','Noto Color Emoji',Tahoma,sans-serif; -webkit-tap-highlight-color:transparent}
+body {
+  background:#111b21; color:#e9edef; overflow:hidden; height:100vh; padding-bottom:80px;
+  max-width: 768px; margin: 0 auto;
+  -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+  -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+}
+@media (min-width: 769px) { body { border-left: 1px solid #2a3942; border-right: 1px solid #2a3942; } }
+button,input {font-family:inherit; outline:none; border:none}
+.hidden {display:none!important}
+.flex {display:flex}
+.flex-col {flex-direction:column}
+.items-center {align-items:center}
+.justify-center {justify-content:center}
+.w-full {width:100%}
+.text-center {text-align:center}
+.auth-form {margin-top:15px; gap:10px; width:280px}
+.input-group {position:relative; width:100%}
+.input-field {
+  width:100%; padding:14px 45px 14px 14px; background:#202c33;
+  color:#e9edef; border-radius:8px; font-size:16px; border:1px solid #2a3942;
+  -webkit-user-select: text!important; -moz-user-select: text!important; user-select: text!important;
+}
+.input-field::placeholder {color:#8696a0}
+.input-field:focus {border-color:#00a884}
+.eye-icon {position:absolute; left:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#8696a0; font-size:20px}
+.submit-btn {
+  width:100%; padding:14px; background:#00a884; color:#111b21;
+  font-weight:bold; border-radius:8px; font-size:17px; cursor:pointer
+}
+.auth-tab.active {background: #00a884!important; color: #000!important; border: 2px solid #00a884!important;}
+.auth-tab:not(.active) {background: transparent!important; color: #00a884!important; border: 2px solid #00a884!important;}
+#loginBtn.loading, #signupBtn.loading,.submit-btn.loading {
+  background: #008069!important; transform: scale(0.98); transition: all 0.2s; pointer-events: none;
+}
+.submit-btn:disabled, #loginBtn:disabled, #signupBtn:disabled {opacity: 0.7; cursor: not-allowed;}
+.submit-btn:active {background:#06cf9c}
+.error-msg {color:#f15c6d; font-size:14px; text-align:center; min-height:20px}
+.header {
+  position:fixed; top:0; left:0; right:0; z-index:1000; background:#202c33!important;
+  padding:10px 16px; height:60px; display:flex; align-items:center; gap:12px
+}
+.header-info {flex:1; font-size:14px; line-height:1.4}
+.header-info div {white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.header-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #000; /* كان #e9edef */
+}
+
+.header-sub {
+  color: #000; /* كان #8696a0 */
+  font-size: 13px;
+  font-weight: 500;
+}
+.icon-btn {font-size:24px; color:#aebac1; cursor:pointer; padding:8px}
+#chatsScreen {height:100vh; flex-direction:column; padding-top:60px}
+.chats-list {flex:1; overflow-y:auto; background:#111b21}
+
+
+.avatar {
+  width:50px; height:50px; background:#005c4b; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:bold
+}
+.chat-info {flex:1; overflow:hidden}
+
+.chat-item {
+  display: flex; 
+  padding: 12px 16px; 
+  gap: 12px; 
+  border-bottom: 1px solid #222d34; 
+  cursor: pointer; 
+  align-items: center;
+  background: #fce4ec; /* خلفية وردي فاتح عشان تبان */
+}
+
+.chat-item:active {
+  background: #f8bbd9; /* وردي اغمق شوي عند الضغط */
+}
+
+.chat-name {
+  font-size: 17px; 
+  font-weight: 600; /* كان 500 */
+  color: #000; /* كان افتراضي */
+  margin-bottom: 3px;
+}
+
+.chat-last {
+  font-size: 14px; 
+  color: #000; /* كان #8696a0 */
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis;
+  font-weight: 500; /* اضافة */
+}
+
+.chat-meta {
+  text-align: left; 
+  font-size: 12px; 
+  color: #000; /* كان #8696a0 */
+  font-weight: 500; /* اضافة */
+}
+
+.chat-status {
+  color: #000; /* كان #00a884 */
+  font-size: 13px;
+  font-weight: 500; /* اضافة */
+}
+
+
+.search-bar {
+  position:fixed; bottom:0; left:0; right:0; background:#202c33!important;
+  padding:8px 10px; display:flex; gap:8px; border-top:1px solid #2a3942
+}
+.search-bar input {flex:1}
+.menu-item{padding:14px 20px; cursor:pointer; font-size:16px}
+.menu-item:active{background:#1f2c33}
+#messagesList {
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 10px; 
+  background: #0b141a;
+  padding-top: 0; /* شيل اي padding-top زائد */
+
+  min-height: 0;  
+}
+#chatInputBar {
+  background: #202c33;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  max-width: 768px;
+  margin: 0 auto;
+  order: 2; /* تحت الايموجي */
+}
+
+
+#chatScreen {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 60; /* شيل اي padding-top زائد */
+}
+  #searchResult {
+  max-height: 50vh; /* 50% من ارتفاع الشاشة فقط */
+  overflow-y: auto; /* سكرول داخل المربع نفسه */
+  -webkit-overflow-scrolling: touch; /* سحب ناعم للايفون والاندرويد */
+  background: #111b21; /* نفس لون الخلفية عشان مايبين فراغ */
+}
+  
+#sendBtn {
+  color: #00a884;
+  transform: rotate(180deg); /* يلف السهم للاتجاه الصحيح */
+  display: inline-block; /* ضروري عشان التحويل يشتغل */
+}
+#emojiPanel {
+  display: none;
+  height: 280px;
+  background: #202c33;
+  border-top: 1px solid #2a3942;
+  overflow-y: auto;
+  padding: 10px;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+  order: 1; /* قبل شريط الكتابة */
+}
+
+#emojiPanel span { 
+  font-size: 28px; 
+  text-align: center; 
+  cursor: pointer; 
+  padding: 8px; 
+}
+
+#emojiPanel span:active { 
+  background: #2a3942; 
+  border-radius: 8px; 
+}
+
+
+/* امسح هذا السطر كامل */
+#
+#colorPanel {
+  position: fixed; top: 60px; left: 10px; background: #233138;
+  border-radius: 8px; padding: 12px; z-index: 10001;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.4); display: grid;
+  grid-template-columns: repeat(4, 1fr); gap: 10px; width: 200px;
+}
+.color-option {
+  width: 38px; height: 38px; border-radius: 50%; cursor: pointer;
+  border: 2px solid #2a3942; transition: 0.2s;
+}
+.color-option:active { transform: scale(0.9); }
+.color-option.selected { border: 3px solid #00a884; }
+.toast {
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+  background:#f15c6d; color:#fff; padding:10px 20px; border-radius:8px;
+  z-index:9999; font-size:15px; animation:fadeIn 0.3s
+}
+#searchResult {
+  background:#1f2c33; margin:0 10px 8px; border-radius:8px;
+  border:1px solid #2a3942; max-width:768px; margin:0 auto 8px;
+}
+.search-result-item {
+  display:flex; padding:12px 16px; gap:12px; cursor:pointer; align-items:center
+}
+.search-result-item:active {background:#2a3942}
+#callScreen {
+  position:fixed; top:0; left:0; right:0; bottom:0; background:#111b21; z-index:99999;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px
+}
+@keyframes fadeIn {from{opacity:0; transform:translateX(-50%) translateY(20px)} to{opacity:1}}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+#signupForm, #loginForm {
+  min-height: clamp(200px, 28vh, 260px);
+  width: 100%; max-width: min(320px, 90vw); transition: all 0.3s ease;
+}
+#authScreen { display:flex; flex-direction:column; }
+#authScreen.hidden, #chatsScreen.hidden { display:none!important; }
+@media (max-height: 600px) {
+  #authScreen { padding-top: 5vh!important; gap: 12px!important; }
+  #signupForm, #loginForm { min-height: 180px; }
+}
+@media (min-height: 900px) { #authScreen { padding-top: 20vh!important; } }
 </style>
-  
-  
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>console.log("[INIT] 1. تشغيل Eruda"); eruda.init(); console.log("[INIT] 2. Eruda اشتغل");</script>
 </head>
-
-
-
-
-
-<!-- ========== القسم 2: هيكل HTML للواجهات الثلاث ========== -->
 <body>
-  
-  <!-- 1. واجهة تسجيل الدخول / إنشاء حساب / استعادة حساب -->
-  <div id="loginScreen" class="screen active">
-    <!-- active: عشان تظهر أول ما يفتح الموقع -->
-    
-    <!-- الحاوية الوسطى -->
-    <div class="login-container">
-      <!-- لوجو التطبيق -->
-      <div class="logo">💬</div>
+<div id="authScreen" class="flex-col" style="min-height:100vh; min-height:100dvh; overflow-y:auto; box-sizing:border-box; background:linear-gradient(180deg,#0b141a 0%,#111b21 100%); align-items:center; justify-content:flex-start; padding:clamp(8vh,15vh,20vh) 20px 20px; gap:clamp(16px,3vh,24px)">
+  <div style="text-align:center; margin-bottom:10px">
+    <div style="width:80px; height:80px; background:#00a884; border-radius:20px; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,168,132,0.3)">
+      <svg viewBox="0 24 24" width="50" height="50" fill="white">
+        <path d="M12 2C6.48 2 6.48 2 12s4.48 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-.8 5.42-.36 2.53-.74 3.09-1.5 3.09-.75 0-1.85-.8-1.85-.8s-1.65-.97-2.59-1.6c-.93-.63-1.65-1.31-1.65-1.31s-.8-.61-.55-1.26c.25-.65 1.05-1.21 1.05-1.21s3.49-2.65 5.39-4.04c1.9-1.39 2.3-1.14 2.3-1.14.44.1.7.59.7 1.05 0.45-.1 1.1-.1 1.1z"/>
+      </svg>
+    </div>
+    <div style="font-size:28px; font-weight:600; color:#e9edef; margin-bottom:8px">واتساب هارون</div>
+    <div style="font-size:15px; color:#8696a0">مرحباً بك، سجل دخولك للمتابعة</div>
+  </div>
+  <div class="flex" style="width:100%; max-width:320px; gap:12px; margin-top:20px">
+    <button id="signupTab" class="auth-tab submit-btn" onclick="toggleForm('signup')" style="flex:1; border-radius:25px; padding:14px">إنشاء حساب جديد</button>
+    <button id="loginTab" class="auth-tab submit-btn" onclick="toggleForm('login')" style="flex:1; border-radius:25px; padding:14px">استعادة حساب</button>
+  </div>
+  <div id="signupForm" class="auth-form flex-col hidden" style="width:100%; max-width:320px; gap:12px; margin-top:8px">
+    <div class="input-group">
       
-      <!-- عنوان التطبيق -->
-      <h1 class="app-title">واتساب هارون</h1>
-      <p class="app-subtitle">مرحباً بك، سجل دخولك للمتابعة</p>
-
-      <!-- أزرار Toggle: تضغط يفتح الفورم، تضغط ثاني يخفيه -->
-      <div class="login-buttons">
-        <button id="btnShowSignup">إنشاء حساب</button>
-        <button id="btnShowRestore">استعادة حساب</button>
-      </div>
-
-      <!-- فورم إنشاء حساب - مخفي بالبداية -->
-      <div id="signupForm" class="auth-form">
-        <input type="text" id="signupName" placeholder="الاسم" inputmode="text" maxlength="20">
-        <!-- inputmode=text: يطلع كيبورد حروف فقط -->
-        <!-- JS بيمنع الأرقام والرموز أثناء الكتابة -->
-        
-        <input type="password" id="signupPass" placeholder="كلمة المرور" inputmode="numeric" maxlength="10">
-        <!-- inputmode=numeric: يطلع كيبورد أرقام فقط -->
-        
-        <button id="btnSignup">تسجيل</button>
-      </div>
-
-      <!-- فورم استعادة حساب - مخفي بالبداية -->
-      <div id="restoreForm" class="auth-form">
-        <input type="text" id="restoreNumber" placeholder="رقم المستخدم 7 أرقام" inputmode="numeric" maxlength="7">
-        <input type="password" id="restorePass" placeholder="كلمة المرور" inputmode="numeric" maxlength="10">
-        <button id="btnRestore">دخول</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2. واجهة المحادثات -->
-  <div id="chatsScreen" class="screen">
-    <!-- الشريط العلوي -->
-    <header id="chatsHeader">
-      <div class="user-info">
-        <span id="currentUserName">الاسم</span>
-        <span id="currentUserNumber">1234567</span>
-      </div>
-      <button id="btnChatsMenu" class="icon-btn">⋮</button>
-      <!-- ⋮ = أيقونة 3 نقاط -->
-    </header>
-
-    <!-- قائمة المحادثات - تاخذ كل المساحة المتبقية -->
-    <div id="chatsList">
-      <!-- JS بيضيف المحادثات هنا ديناميكياً -->
-      <!-- كل محادثة فيها: أيقونة الحرف، الاسم، الرقم، آخر رسالة، الوقت، العداد -->
-    </div>
-
-    <!-- الشريط السفلي: بحث برقم -->
-    <footer id="chatsFooter">
-      <input type="text" id="searchNumber" placeholder="ابحث برقم المستخدم" inputmode="numeric" maxlength="7">
-      <button id="btnSearch">بحث</button>
-    </footer>
-  </div>
-
-  <!-- 3. واجهة الدردشة -->
-  <div id="chatScreen" class="screen">
-    <!-- الشريط العلوي -->
-    <header id="chatHeader">
-      <button id="btnBackToChats" class="icon-btn">←</button>
-      <div class="chat-user-info">
-        <div class="avatar" id="chatAvatar">H</div>
-        <div class="chat-user-details">
-          <span id="chatUserName">اسم المستخدم</span>
-          <span id="chatUserStatus">متصل الآن</span>
-        </div>
-      </div>
-      <button id="btnChatMenu" class="icon-btn">⋮</button>
-    </header>
-
-    <!-- منطقة الرسائل - تاخذ كل المساحة وتعمل سكرول -->
-    <div id="messagesList">
-      <!-- JS بيضيف الرسائل هنا -->
-      <!-- الرسائل: يمين أخضر، يسار رمادي، صحين، وقت -->
-    </div>
-
-    <!-- الشريط السفلي: كتابة وإرسال -->
-    <footer id="chatInputBar">
-      <button id="btnEmoji" class="icon-btn">😀</button>
-      <input type="text" id="messageInput" placeholder="اكتب رسالة...">
-      <!-- هذا الحقل الوحيد اللي بنسمح فيه بالنسخ واللصق -->
       
-      <button id="btnVoice" class="icon-btn">🎤</button>
-      <button id="btnSend">إرسال</button>
-    </footer>
+      <input type="text" id="signupName" class="input-field" placeholder="اكتب اسمك هنا..." 
+style="text-align:center" inputmode="text" 
+oninput="this.value = this.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '')">
+   
+   
+    </div>
+    <div class="input-group">
+      <input type="password" id="signupPass" class="input-field" placeholder="كلمة المرور 6 أرقام+" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')" style="text-align:center" onkeypress="return /[0-9]/.test(event.key)">
+      <span class="eye-icon" onclick="toggleEye('signupPass')">👁️</span>
+    </div>
+    <div class="error-msg" id="signupError"></div>
+    <button id="signupBtn" class="submit-btn" type="button" onclick="createAccount()" style="height:50px; border-radius:25px">إنشاء الحساب</button>
+  </div>
+  <div id="loginForm" class="auth-form flex-col hidden" style="width:100%; max-width:320px; gap:12px; margin-top:8px">
+    <div class="input-group">
+      <input type="tel" id="loginUid" class="input-field" placeholder="ادخل رقمك 6 خانات" inputmode="numeric" pattern="[0-9]*" maxlength="6" style="text-align:center" onkeypress="return /[0-9]/.test(event.key)">
+    </div>
+    <div class="input-group">
+      <input type="password" id="loginPass" class="input-field" placeholder="ادخل كلمة المرور" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly')" style="text-align:center" onkeypress="return /[0-9]/.test(event.key)">
+      <span class="eye-icon" onclick="toggleEye('loginPass')">👁️</span>
+    </div>
+    <div class="error-msg" id="loginError"></div>
+    <button id="loginBtn" class="submit-btn" type="button" onclick="restoreAccount()" style="height:50px; border-radius:25px">تسجيل الدخول</button>
+  </div>
+</div>
+<div id="chatsScreen" class="hidden flex-col">
+  <div class="header">
+  <div class="header-info">
+    <div class="header-name" id="myName">-</div>
+    <div class="header-sub">رقمي: <span id="myNumber">-</span></div>
+  </div>
+  <div style="display:flex; align-items:center; gap:8px; background:#1f2c33; padding:6px 10px; border-radius:6px">
+    <span style="color:#8696a0; font-size:13px">كلمة السر:</span>
+    <span id="myPass" style="font-size:14px; letter-spacing:2px">••••••</span>
+    <span class="icon-btn" style="font-size:18px; padding:0" onclick="toggleMyPass()">👁️</span>
+  </div>
+  
 
-    <!-- بانل الايموجي - مخفي بالبداية وتظهر فوق الشريط السفلي -->
-    <div id="emojiPanel">
-      <!-- JS بيضيف 60+ ايموجي هنا -->
+ <span class="icon-btn" onclick="showMenu('mainMenu')" 
+      style="font-size:24px; cursor:pointer; padding:0 8px;">⋮</span>
+</div>
+
+
+  <div class="chats-list" id="chatsList"></div>
+  <div id="searchResult" class="hidden"></div>
+  <div class="search-bar">
+    <input type="number" id="searchNumber" class="input-field" placeholder="ابحث عن مستلم هنا..">
+    <button class="submit-btn" style="width:80px" onclick="searchUser()">بحث</button>
+  </div>
+</div>
+
+<div id="chatScreen" class="hidden" style="height:100vh; display:flex; flex-direction:column;">
+<div class="header">
+  <span class="icon-btn" onclick="closeChat()">←</span>
+  <div class="header-info" style="display:flex;align-items:center">
+    <div id="chatAvatar" style="width:40px;height:40px;border-radius:50%;background:#00a884;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-left:10px;font-size:18px;color:#111b21"></div>
+    <div>
+      <div class="header-name">
+        <span id="chatName">-</span>
+        <span id="chatNumber" style="font-size:13px; color:#8696a0; font-weight:400; margin-right:8px"></span>
+      </div>
+      <div class="header-sub" id="chatStatus">-</div>
     </div>
   </div>
+  <span class="icon-btn" onclick="showMenu('chatMenu')">⋮</span>
+</div>
 
-  <!-- 4. المودالات والقوائم المنبثقة - موجودة برا الشاشات عشان تغطي الكل -->
-  <div id="modalOverlay" class="overlay"></div>
-  <!-- overlay: الطبقة الشفافة اللي تغطي الشاشة وتقفل المودال لو ضغطت عليها -->
+<div id="messagesList" class="messages"></div>
 
-  <!-- مودال قائمة الـ 3 نقاط في المحادثات -->
-  <div id="chatsMenuModal" class="modal">
-    <button class="menu-item" id="btnChangeTheme">تغيير الألوان</button>
-    <button class="menu-item" id="btnChangePass">تغيير كلمة المرور</button>
-    <button class="menu-item" id="btnLogout">تسجيل الخروج</button>
-  </div>
-
-  <!-- مودال تغيير الألوان -->
-  <div id="themeModal" class="modal">
-    <div class="tabs">
-      <button class="tab active" data-tab="header">الشريط العلوي</button>
-      <button class="tab" data-tab="chat">وسط الواجهة</button>
-      <button class="tab" data-tab="footer">الشريط السفلي</button>
-    </div>
-    <div class="colors">
-      <!-- JS بيضيف 6 ألوان قابلة للاختيار -->
-    </div>
-  </div>
-
-  <!-- مودال تغيير كلمة المرور -->
-  <div id="changePassModal" class="modal">
-    <input type="password" id="oldPass" placeholder="كلمة المرور القديمة" inputmode="numeric">
-    <input type="password" id="newPass" placeholder="كلمة المرور الجديدة" inputmode="numeric">
-    <input type="password" id="confirmPass" placeholder="تأكيد كلمة المرور" inputmode="numeric">
-    <button id="btnSavePass">حفظ</button>
-  </div>
-
-  <!-- مودال تأكيد الحذف والمسح -->
-  <div id="confirmModal" class="modal">
-    <p id="confirmText">هل أنت متأكد؟</p>
-    <div class="confirm-buttons">
-      <button id="btnConfirmYes">نعم</button>
-      <button id="btnConfirmNo">لا</button>
-    </div>
-  </div>
-
-  <!-- 5. التوست للرسائل المؤقتة -->
-  <div id="toast" class="toast"></div>
-
-
-
-
-
-
-
-
-
-
-<script>
-/* ========== القسم 3: JavaScript - المنطق والتحكم بالواجهة ========== */
-
-/* ===== 1. متغيرات الحالة العامة ===== */
-let currentUser = null; 
-// بيانات المستخدم الحالي: uid, name, number. نقراه من localStorage
-
-let activeScreen = 'login'; 
-// يتتبع الشاشة الظاهرة الحين: login, chats, chat
-
-let activeModal = null; 
-// يتتبع المودال المفتوح الحين عشان نقفله لو ضغط المستخدم برا
-
-/* ===== 2. دالة الانتقال بين الشاشات ===== */
-function showScreen(screenId) {
-  // يخفي كل الشاشات
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  // يظهر الشاشة المطلوبة
-  document.getElementById(screenId).classList.add('active');
-  activeScreen = screenId;
-  console.log('[UI] تم الانتقال إلى:', screenId);
-}
-
-/* ===== 3. دوال Toggle للفورمات في صفحة تسجيل الدخول ===== */
-function toggleForm(formType) {
-  const signupForm = document.getElementById('signupForm');
-  const restoreForm = document.getElementById('restoreForm');
+<div id="chatInputBar">
+  <button class="icon-btn" id="emojiToggleBtn" onclick="toggleEmojiPanel()">
+    <svg id="emojiIcon" viewBox="0 0 24 24" width="24" height="24" fill="#8696a0">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-4-8c.83 0 1.5-.67 1.5-1.5S8.83 9 8 9s-1.5.67-1.5 1.5S7.17 12 8 12zm8 0c.83 0 1.5-.67 1.5-1.5S16.83 9 16 9s-1.5.67-1.5 1.5.67 1.5zm-4 4c2.21 0 4-1.79 4-4h-8c0 2.21 1.79 4 4 4z"/>
+    </svg>
+    <svg id="keyboardIcon" class="hidden" viewBox="0 0 24 24" width="24" height="24" fill="#8696a0">
+      <path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/>
+    </svg>
+  </button>
   
-  // لو ضغط إنشاء حساب
-  if (formType === 'signup') {
-    const isOpen = signupForm.style.display === 'flex';
-    signupForm.style.display = isOpen ? 'none' : 'flex'; // يفتح ويخفي بنفسه
-    restoreForm.style.display = 'none'; // يخفي الثاني
-  }
+  <input type="text" id="msgInput" class="input-field" placeholder="اكتب رسالة..." style="flex:1">
   
-  // لو ضغط استعادة حساب
-  if (formType === 'restore') {
-    const isOpen = restoreForm.style.display === 'flex';
-    restoreForm.style.display = isOpen ? 'none' : 'flex';
-    signupForm.style.display = 'none';
-  }
-}
-
-/* ===== 4. ربط أزرار Toggle ===== */
-document.getElementById('btnShowSignup').addEventListener('click', () => {
-  toggleForm('signup');
-});
-
-document.getElementById('btnShowRestore').addEventListener('click', () => {
-  toggleForm('restore');
-});
-
-/* ===== 5. دوال المودالات والقوائم ===== */
-function openModal(modalId) {
-  closeModal(); // نغلق أي مودال مفتوح أول
-  document.getElementById('modalOverlay').classList.add('active');
-  document.getElementById(modalId).classList.add('active');
-  activeModal = modalId;
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('active');
-  document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-  activeModal = null;
-}
-
-/* ===== 6. إغلاق المودال عند الضغط خارجها ===== */
-document.getElementById('modalOverlay').addEventListener('click', () => {
-  closeModal();
-});
-
-// نمنع إغلاق المودال لو ضغط المستخدم داخل المودال نفسه
-document.querySelectorAll('.modal').forEach(modal => {
-  modal.addEventListener('click', (e) => {
-    e.stopPropagation(); // يوقف انتشار الحدث للأب
-  });
-});
-
-/* ===== 7. ربط أزرار قائمة الـ 3 نقاط ===== */
-document.getElementById('btnChatsMenu').addEventListener('click', (e) => {
-  e.stopPropagation();
-  openModal('chatsMenuModal');
-});
-
-document.getElementById('btnChatMenu').addEventListener('click', (e) => {
-  e.stopPropagation();
-  openModal('chatsMenuModal');
-});
-
-/* ===== 8. دالة عرض التوست للرسائل المؤقتة ===== */
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
+  <span class="icon-btn" id="micBtn" 
+        onmousedown="startRecord()" 
+        onmouseup="stopRecord()" 
+        ontouchstart="startRecord()" 
+        ontouchend="stopRecord()">🎤</span>
   
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
+  <span class="icon-btn" id="sendBtn" onclick="sendMessage()" style="color:#00a884">➤</span>
+</div>
+</div>
 
-/* ===== 9. منع النسخ واللصق والضغط اليمين ===== */
-document.addEventListener('contextmenu', e => e.preventDefault()); // منع كليك يمين
-document.addEventListener('copy', e => e.preventDefault()); // منع النسخ
-
-document.addEventListener('paste', e => {
-  // نسمح باللصق فقط لو العنصر هو حقل الرسالة
-  if (e.target.id !== 'messageInput') {
-    e.preventDefault();
-  }
-});
-
-/* ===== 10. منع إدخال أرقام/رموز في حقل الاسم ===== */
-document.getElementById('signupName').addEventListener('input', (e) => {
-  // يسمح فقط بالحروف العربية والإنجليزية
-  e.target.value = e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '');
-});
-
-/* ===== 11. منع إدخال حروف/رموز في حقول الأرقام وكلمة المرور ===== */
-['signupPass', 'restoreNumber', 'restorePass', 'searchNumber', 'oldPass', 'newPass', 'confirmPass']
-.forEach(id => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/\D/g, ''); // يمسح أي شي غير رقم
-    });
-  }
-});
-
-/* ===== 12. التحقق من الجلسة عند فتح الموقع ===== */
-window.addEventListener('load', () => {
-  const savedUser = localStorage.getItem('wa_haroon_user');
+<!-- التعديل هنا: حطيت الايموجي داخل البانل -->
+<div id="emojiPanel" style="display:none;">
+  <span onclick="insertEmoji('😀')">😀</span><span onclick="insertEmoji('😃')">😃</span><span onclick="insertEmoji('😄')">😄</span>
+  <span onclick="insertEmoji('😁')">😁</span><span onclick="insertEmoji('😆')">😆</span><span onclick="insertEmoji('😅')">😅</span>
+  <span onclick="insertEmoji('😂')">😂</span><span onclick="insertEmoji('🤣')">🤣</span><span onclick="insertEmoji('😊')">😊</span>
+  <span onclick="insertEmoji('😇')">😇</span><span onclick="insertEmoji('🙂')">🙂</span><span onclick="insertEmoji('🙃')">🙃</span>
+  <span onclick="insertEmoji('😉')">😉</span><span onclick="insertEmoji('😌')">😌</span><span onclick="insertEmoji('😍')">😍</span>
+  <span onclick="insertEmoji('🥰')">🥰</span><span onclick="insertEmoji('😘')">😘</span><span onclick="insertEmoji('😗')">😗</span>
+  <span onclick="insertEmoji('😚')">😚</span><span onclick="insertEmoji('😋')">😋</span><span onclick="insertEmoji('😛')">😛</span>
+  <span onclick="insertEmoji('😝')">😝</span><span onclick="insertEmoji('😜')">😜</span><span onclick="insertEmoji('🤪')">🤪</span>
+  <span onclick="insertEmoji('🤨')">🤨</span><span onclick="insertEmoji('🧐')">🧐</span><span onclick="insertEmoji('🤓')">🤓</span>
+  <span onclick="insertEmoji('😎')">😎</span><span onclick="insertEmoji('🤩')">🤩</span><span onclick="insertEmoji('🥳')">🥳</span>
   
-  if (savedUser) {
-    currentUser = JSON.parse(savedUser);
-    showScreen('chatsScreen'); // يروح مباشرة للمحادثات
-    document.getElementById('currentUserName').textContent = currentUser.name;
-    document.getElementById('currentUserNumber').textContent = currentUser.number;
-    showToast(`أهلاً ${currentUser.name}`);
-  } else {
-    showScreen('loginScreen');
-  }
-});
+  <!-- مشاعر سلبية -->
+  <span onclick="insertEmoji('😢')">😢</span><span onclick="insertEmoji('😭')">😭</span><span onclick="insertEmoji('😤')">😤</span>
+  <span onclick="insertEmoji('😠')">😠</span><span onclick="insertEmoji('😡')">😡</span><span onclick="insertEmoji('🤬')">🤬</span>
+  <span onclick="insertEmoji('😳')">😳</span><span onclick="insertEmoji('😱')">😱</span><span onclick="insertEmoji('😨')">😨</span>
+  <span onclick="insertEmoji('😰')">😰</span><span onclick="insertEmoji('😥')">😥</span><span onclick="insertEmoji('😓')">😓</span>
+  
+  <!-- قلوب ويدين -->
+  <span onclick="insertEmoji('❤️')">❤️</span><span onclick="insertEmoji('🧡')">🧡</span><span onclick="insertEmoji('💛')">💛</span>
+  <span onclick="insertEmoji('💚')">💚</span><span onclick="insertEmoji('💙')">💙</span><span onclick="insertEmoji('💜')">💜</span>
+  <span onclick="insertEmoji('🖤')">🖤</span><span onclick="insertEmoji('💔')">💔</span><span onclick="insertEmoji('❣️')">❣️</span>
+  <span onclick="insertEmoji('💕')">💕</span><span onclick="insertEmoji('💞')">💞</span><span onclick="insertEmoji('💓')">💓</span>
+  <span onclick="insertEmoji('👍')">👍</span><span onclick="insertEmoji('👎')">👎</span><span onclick="insertEmoji('👌')">👌</span>
+  <span onclick="insertEmoji('✌️')">✌️</span><span onclick="insertEmoji('🤞')">🤞</span><span onclick="insertEmoji('🤙')">🤙</span>
+  <span onclick="insertEmoji('👏')">👏</span><span onclick="insertEmoji('🙌')">🙌</span><span onclick="insertEmoji('🙏')">🙏</span>
+  
+  <!-- اشياء ونار -->
+  <span onclick="insertEmoji('🔥')">🔥</span><span onclick="insertEmoji('💯')">💯</span><span onclick="insertEmoji('✨')">✨</span>
+  <span onclick="insertEmoji('⭐')">⭐</span><span onclick="insertEmoji('🌟')">🌟</span><span onclick="insertEmoji('⚡')">⚡</span>
+  <span onclick="insertEmoji('💥')">💥</span><span onclick="insertEmoji('💫')">💫</span><span onclick="insertEmoji('🌈')">🌈</span>
+  <span onclick="insertEmoji('🎉')">🎉</span><span onclick="insertEmoji('🎊')">🎊</span><span onclick="insertEmoji('🎈')">🎈</span>
+  
+  <!-- حيوانات واكل -->
+  <span onclick="insertEmoji('🐶')">🐶</span><span onclick="insertEmoji('🐱')">🐱</span><span onclick="insertEmoji('🐭')">🐭</span>
+  <span onclick="insertEmoji('🐹')">🐹</span><span onclick="insertEmoji('🐰')">🐰</span><span onclick="insertEmoji('🦊')">🦊</span>
+  <span onclick="insertEmoji('🍎')">🍎</span><span onclick="insertEmoji('🍌')">🍌</span><span onclick="insertEmoji('🍕')">🍕</span>
+  <span onclick="insertEmoji('🍔')">🍔</span><span onclick="insertEmoji('🍰')">🍰</span><span onclick="insertEmoji('☕')">☕</span>
+</div>
+<div id="colorPanel" class="hidden">
+  <div class="color-option" style="background:#ffe4e6" data-color="#ffe4e6" title="وردي فاتح"></div>
+  <div class="color-option" style="background:#dbeafe" data-color="#dbeafe" title="سماوي فاتح"></div>
+  <div class="color-option" style="background:#e0f2fe" data-color="#e0f2fe" title="أزرق فاتح"></div>
+  <div class="color-option" style="background:#fef9c3" data-color="#fef9c3" title="أصفر فاتح"></div>
+  <div class="color-option" style="background:#dcfce7" data-color="#dcfce7" title="أخضر شجري"></div>
+  <div class="color-option" style="background:#fae8ff" data-color="#fae8ff" title="بنفسجي فاتح"></div>
+  <div class="color-option" style="background:#ffedd5" data-color="#ffedd5" title="برتقالي فاتح"></div>
+  <div class="color-option" style="background:#111b21" data-color="#111b21" title="الافتراضي"></div>
+</div>
 
-/* ===== 13. زر الرجوع في شاشة الدردشة ===== */
-document.getElementById('btnBackToChats').addEventListener('click', () => {
-  showScreen('chatsScreen');
-});
-
-/* ===== 14. التعامل مع زر الرجوع في المتصفح/الجوال ===== */
-window.addEventListener('popstate', () => {
-  if (activeScreen === 'chatScreen') {
-    showScreen('chatsScreen');
-    history.pushState(null, null, location.href); // يمنع الخروج
-  } else if (activeScreen === 'chatsScreen') {
-    // لو ضغط رجوع مرة ثانية يطلع من الموقع
-    window.close(); 
-  }
-});
-history.pushState(null, null, location.href); // يفعّل التعامل مع زر الرجوع
-
-/* ===== 15. فتح/إغلاق بانل الإيموجي ===== */
-const btnEmoji = document.getElementById('btnEmoji');
-const emojiPanel = document.getElementById('emojiPanel');
-const messageInput = document.getElementById('messageInput');
-
-btnEmoji.addEventListener('click', () => {
-  const isOpen = emojiPanel.style.display === 'grid';
-  emojiPanel.style.display = isOpen ? 'none' : 'grid';
-  btnEmoji.textContent = isOpen ? '😀' : '⌨️'; // يغير الأيقونة
-  if (isOpen) messageInput.focus(); // يرجع الكيبورد
-});
-
-/* ===== 16. إنشاء الإيموجيات 60+ ===== */
-const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰',
-'😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞',
-'😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳',
-'🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯'];
-emojis.forEach(emoji => {
-  const span = document.createElement('span');
-  span.className = 'emoji-item';
-  span.textContent = emoji;
-  span.addEventListener('click', () => {
-    messageInput.value += emoji; // يضيف الإيموجي للحقل
-    messageInput.focus();
-  });
-  emojiPanel.appendChild(span);
-});
-</script>
-
-
-
-
-
-
-
-
-
+<div id="toast" class="toast"></div>
+  
 <script type="module">
-/* ========== القسم 4: Firebase + منطق البيانات اللحظية ========== */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, get, push, onValue, update, remove, serverTimestamp } 
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+
+
+// ريفرش تلقائي مرة وحدة لو الصفحة جت من الكاش
+/*if (sessionStorage.getItem('doReload') === 'true') {
+  sessionStorage.removeItem('doReload');
+} else {
+  sessionStorage.setItem('doReload', 'true');
+  location.reload(true);
+}*/
+
+
+
+
+console.log("[JS] 1. بدأ تحميل سكربت الموديول");
+
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+console.log("[JS] 2. تم استيراد Firebase App");
+
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+console.log("[JS] 3. تم استيراد Firebase Auth");
 
 
 
 
 
-/* ===== 1. إعدادات Firebase ===== */
-/* غير هذي القيم بإعدادات مشروعك من Firebase Console > Project Settings */
+
+
+
+
+
+import { getDatabase, ref, set, get, push, onValue, onChildAdded, onDisconnect, serverTimestamp, remove, update, query, orderByChild, equalTo, increment, off, endBefore, limitToLast } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+console.log("[JS] 4. تم استيراد Firebase Database");
+
+let pendingUserData = null;
+console.log("[VAR] 5. pendingUserData = null");
+let myGeneratedUid = null;
+console.log("[VAR] 6. myGeneratedUid = null");
+
 const firebaseConfig = {
   apiKey: "AIzaSyDSWYRUfeO0ruDXO-2lv4tnrqxBVUHXFIs",
   authDomain: "watsapp-haroon.firebaseapp.com",
   databaseURL: "https://watsapp-haroon-default-rtdb.firebaseio.com",
   projectId: "watsapp-haroon",
-  storageBucket: "watsapp-haroon.firebasestorage.app",
+  storageBucket: "watsapp-haroon.appspot.com",
   messagingSenderId: "85603158090",
   appId: "1:85603158090:web:001303416bd3a68879feb3"
+};
+console.log("[CONFIG] 7. firebaseConfig جاهز");
+
+console.log("[FIREBASE] 8. تهيئة initializeApp");
+const app = initializeApp(firebaseConfig);
+console.log("[FIREBASE] 9. تم تهيئة التطبيق");
+
+console.log("[FIREBASE] 10. تهيئة getAuth");
+const auth = getAuth(app);
+console.log("[FIREBASE] 11. Auth جاهز");
+
+console.log("[FIREBASE] 12. تهيئة getDatabase");
+const db = getDatabase(app);
+console.log("[FIREBASE] 13. Database جاهز");
+
+
+
+window.showMainApp = () => {
+  console.log("[UI] showMainApp: إخفاء authScreen وإظهار chatsScreen");
+  $('authScreen').classList.add('hidden');
+  $('chatsScreen').classList.remove('hidden');
+}; // ← القوس الناقص هنا
+
+let currentUser = null;
+console.log("[VAR] 14. currentUser = null");
+let currentChat = null;
+console.log("[VAR] 15. currentChat = null");
+let myPassword = '';
+console.log("[VAR] 16. myPassword = ''");
+let passVisible = false;
+console.log("[VAR] 17. passVisible = false");
+let typingTimeout = null;
+console.log("[VAR] 18. typingTimeout = null");
+let replyTo = null;
+console.log("[VAR] 19. replyTo = null");
+let mediaRecorder, audioChunks = [];
+console.log("[VAR] 20. mediaRecorder و audioChunks جاهزين");
+let emojiPanelOpen = false;
+console.log("[VAR] 21. emojiPanelOpen = false");
+let oldestMsgTime = null;
+console.log("[VAR] 22. oldestMsgTime = null");
+let statusListener = null, typingListener = null, msgListener = null;
+console.log("[VAR] 23. listeners = null");
+let colorTarget = 'chats';
+console.log("[VAR] 24. colorTarget = 'chats'");
+let loadingOld = false;
+console.log("[VAR] 25. loadingOld = false");
+let isCreatingAccount = false;
+console.log("[VAR] 26. isCreatingAccount = false");
+let isRestoringAccount = false;
+console.log("[VAR] 27. isRestoringAccount = false");
+
+const $ = id => {
+  console.log("[DOM] $(): جلب العنصر", id);
+  const el = document.getElementById(id);
+  console.log("[DOM] $(): النتيجة", !!el);
+  return el;
+};
+
+
+
+  
+const showToast = (msg, color='#f15c6d') => {
+  console.log("[TOAST] عرض رسالة:", msg, "اللون:", color);
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.background = color;
+  t.className = 'toast show';
+  setTimeout(() => {
+    t.className = 'toast';
+    console.log("[TOAST] إخفاء الرسالة");
+  }, 3000);
+};
+
+const formatTime = ts => {
+  if(!ts) return '';
+  const d = new Date(ts);
+  const timeStr = d.toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'});
+  console.log("[FORMAT] formatTime:", ts, "=>", timeStr);
+  return timeStr;
+};
+
+const formatLastSeen = ts => {
+  if(!ts) return 'غير متصل';
+  const diff = Date.now() - ts;
+  if(diff < 20000) return 'متصل الآن';
+  const d = new Date(ts);
+  const timeStr = 'آخر ظهور ' + d.toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'});
+  console.log("[FORMAT] formatLastSeen:", ts, "=>", timeStr);
+  return timeStr;
+};
+
+const generateUID = () => {
+  const uid = Math.floor(100000 + Math.random() * 900000).toString();
+  console.log("[UTIL] generateUID:", uid);
+  return uid;
+};
+
+const getChatID = (u1, u2) => {
+  const chatID = [u1, u2].sort().join('_');
+  console.log("[UTIL] getChatID:", u1, u2, "=>", chatID);
+  return chatID;
+};
+
+window.showAuthForm = type => {
+  console.log("[UI] showAuthForm:", type);
+  $('signupForm').classList.add('hidden');
+  $('loginForm').classList.add('hidden');
+  $(type+'Form').classList.remove('hidden');
+  console.log("[UI] showAuthForm: تم العرض");
+};
+
+window.toggleMyPass = () => {
+  console.log("[UI] toggleMyPass: تبديل إظهار كلمة السر");
+  if(!myPassword) myPassword = sessionStorage.getItem('myPass') || '';
+  passVisible =!passVisible;
+  $('myPass').textContent = passVisible && myPassword? myPassword : '••••••';
+  console.log("[UI] toggleMyPass: passVisible =", passVisible);
+};
+
+window.toggleEye = id => {
+  const inp = $(id);
+  
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    inp.inputMode = 'numeric';
+    inp.pattern = '[0-9]*';
+  } else {
+    inp.type = 'password';
+    inp.inputMode = 'numeric';
+    inp.pattern = '[0-9]*';
+  }
+};
+
+let currentForm = null;
+console.log("[VAR] 28. currentForm = null");
+
+
+
+
+
+
+window.createAccount = async () => {
+  console.log("[ACC] createAccount: بدأ");
+  if(isCreatingAccount) return;
+  isCreatingAccount = true;
+  
+  const name = $('signupName').value.trim();
+  const pass = $('signupPass').value.trim();
+  const err = $('signupError');
+  const btn = $('signupBtn');
+  err.textContent = '';
+  
+  if(btn) btn.disabled = true;
+  if(btn) btn.classList.add('loading');
+
+  // 1. الاسم حروف فقط
+  if(!/^[\u0600-\u06FFa-zA-Z\s]+$/.test(name)) {
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'الاسم حروف عربية أو إنجليزية فقط'; 
+  }
+  
+  // 2. طول الاسم
+  if(name.length < 3) { 
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'الاسم 3 أحرف على الأقل'; 
+  }
+  
+  // 3. فحص تكرار الاسم
+  const nameQuery = query(ref(db, 'publicUsers'), orderByChild('name'), equalTo(name));
+  const nameSnap = await get(nameQuery);
+  if(nameSnap.exists()) {
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'الاسم مستخدم مسبقاً، اختر اسم ثاني'; 
+  }
+  
+  // 4. كلمة المرور 6 ارقام فقط
+  if(!/^\d{6}$/.test(pass)) { 
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور 6 أرقام فقط'; 
+  }
+  
+  // 5. فحص كلمة المرور الضعيفة
+  if(!isStrongPassword(pass)) {
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور ضعيفة. ممنوع 123456 و 111 و 654321'; 
+  }
+  
+  // 6. فحص تكرار كلمة المرور
+  const passQuery = query(ref(db, 'publicUsers'), orderByChild('passHash'), equalTo(pass));
+  const passSnap = await get(passQuery);
+  if(passSnap.exists()) {
+    isCreatingAccount = false; 
+    if(btn) btn.disabled = false;
+    if(btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة المرور مستخدمة مسبقاً، اختر كلمة مرور مختلفة'; 
+  }
+  
+  try {
+    const genUid = () => Math.floor(100000 + Math.random()*900000).toString();
+    let uidNumber;
+    let tries = 0;
+    
+    while(tries < 10){
+      uidNumber = genUid();
+      const exists = await get(ref(db, `uids/${uidNumber}`));
+      if (!exists.exists()) break;
+      tries++;
+    }
+    
+    if (tries >= 10) {
+      isCreatingAccount = false; 
+      if (btn) btn.disabled = false;
+      if (btn) btn.classList.remove('loading');
+      return err.textContent = 'فشل توليد رقم، حاول مرة ثانية';
+    }
+    
+    const email = `${Date.now()}@haroon.app`;
+    pendingUserData = { name, uid: uidNumber, email, passHash: pass };
+    myGeneratedUid = uidNumber;
+    
+    await createUserWithEmailAndPassword(auth, email, pass);
+    
+  } catch (e) { 
+    console.error("[ERR] خطأ في createAccount:", e.message, e.code);
+    err.textContent = e.code === 'auth/email-already-in-use' 
+      ? 'حدث خطأ نادر، جرب مرة ثانية' 
+      : 'خطأ: ' + e.message; 
+    pendingUserData = null;
+    myGeneratedUid = null;
+  } finally { 
+    isCreatingAccount = false;
+    if (btn) btn.disabled = false;
+    if (btn) btn.classList.remove('loading');
+  }
+};
+
+// حطها تحت الدالة
+function isStrongPassword(pass) {
+  const sequences = ['012345', '123456', '234567', '345678', '456789', 
+                     '987654', '876543', '765432', '654321', '543210'];
+  if(sequences.includes(pass)) return false;
+  if(/^(\d)\1{5}$/.test(pass)) return false;
+  const weak = ['000', '111', '123', '121212', '202020', '202106', '010101'];
+  if(weak.includes(pass)) return false;
+  return true;
+}
+
+window.restoreAccount = async () => {
+  console.log("[ACC] 45. بدأ restoreAccount");
+  if (isRestoringAccount) {
+    console.log("[ACC] 46. restoreAccount مكرر - خروج");
+    return;
+  }
+  isRestoringAccount = true;
+  const uidNum = $('loginUid').value.trim();
+  const pass = $('loginPass').value.trim();
+  const err = $('loginError');
+  const btn = $('loginBtn');
+  err.textContent = '';
+  console.log("[ACC] 47. uidNum:", uidNum, "pass:", pass ? "****" : "");
+
+  if (btn) btn.disabled = true;
+  if (btn) btn.classList.add('loading');
+  console.log("[ACC] 48. تعطيل زر الدخول");
+
+  if (!/^\d{6}$/.test(uidNum)) {
+    console.log("[ERR] 49. الرقم مو 6 خانات");
+    isRestoringAccount = false;
+    if (btn) btn.disabled = false;
+    if (btn) btn.classList.remove('loading');
+    return err.textContent = 'الرقم 6 خانات أرقام فقط';
+  }
+
+  if (!/^\d+$/.test(pass)) {
+    console.log("[ERR] 50. الباس مو أرقام");
+    isRestoringAccount = false;
+    if (btn) btn.disabled = false;
+    if (btn) btn.classList.remove('loading');
+    return err.textContent = 'كلمة السر أرقام فقط';
+  }
+
+  if (!pass) {
+    console.log("[ERR] 51. الباس فاضي");
+    isRestoringAccount = false;
+    if (btn) btn.disabled = false;
+    if (btn) btn.classList.remove('loading');
+    return err.textContent = 'اكتب كلمة المرور';
+  }
+
+  try {
+    console.log("[DB] 52. البحث عن UID في uids/", uidNum);
+    const uidSnap = await get(ref(db, `uids/${uidNum}`));
+    console.log("[DB] 53. موجود؟", uidSnap.exists());
+
+    if (!uidSnap.exists()) {
+      console.log("[ERR] 54. الرقم غير موجود");
+      isRestoringAccount = false;
+      if (btn) btn.disabled = false;
+      if (btn) btn.classList.remove('loading');
+      return err.textContent = 'الرقم غلط';
+    }
+
+    const realUid = uidSnap.val();
+    console.log("[DB] 55. realUid:", realUid);
+
+    console.log("[DB] 56. جلب بيانات المستخدم من users/");
+    const userSnap = await get(ref(db, `users/${realUid}`));
+
+    if (!userSnap.exists()) {
+      console.log("[ERR] 57. بيانات المستخدم غير موجودة");
+      isRestoringAccount = false;
+      if (btn) btn.disabled = false;
+      if (btn) btn.classList.remove('loading');
+      return err.textContent = 'الحساب غير موجود';
+    }
+
+    const userData = userSnap.val();
+    const userEmail = userData.email;
+    console.log("[DB] 58. userEmail:", userEmail);
+
+    console.log("[AUTH] 60. تسجيل الدخول بـ Firebase Auth");
+    await signInWithEmailAndPassword(auth, userEmail, pass);
+    console.log("[AUTH] 61. تم تسجيل الدخول");
+
+    myPassword = pass;
+    sessionStorage.setItem('myPass', pass);
+    console.log("[STORAGE] 62. حفظ كلمة السر في sessionStorage");
+
+    console.log("[ACC] 63. onAuthStateChanged بيكمل الباقي");
+    autoInstallAfterLogin();
+
+  } catch (e) {
+    console.error("[ERR] 64. خطأ في restoreAccount:", e.message, e.code);
+    
+    // [جديد] تعامل مع invalid-credential
+    if (e.code === 'auth/invalid-credential') {
+      localStorage.removeItem('userCreds');
+      err.textContent = 'انتهت الجلسة، سجل دخول من جديد';
+      showAuthForm('login');
+    }
+    else if (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
+      err.textContent = 'كلمة السر غلط';
+    } else if (e.code === 'auth/invalid-email') {
+      err.textContent = 'مشكلة في الحساب';
+    } else {
+      err.textContent = 'صار خطأ: ' + e.message;
+    }
+  } finally {
+    console.log("[ACC] 65. دخل finally restoreAccount");
+    isRestoringAccount = false;
+    if (btn) btn.disabled = false;
+    if (btn) btn.classList.remove('loading');
+    console.log("[ACC] 66. تفعيل الزر");
+  }
+};
+
+function addOrMoveChat(newChat) {
+  // شل المحادثة لو موجودة من قبل
+  chats = chats.filter(chat => chat.uid !== newChat.uid);
+  
+  // اضفها اول القائمة
+  chats.unshift(newChat);
+  
+  // ارسم القائمة من جديد
+  renderChats();
+}
+
+
+onAuthStateChanged(auth, async user => {
+  console.log("[AUTH] 67. onAuthStateChanged اشتغل، user:", user ? user.uid : "لا يوجد");
+
+  if (user) {
+    if (pendingUserData) {
+      console.log("[DB] 68. فيه pendingUserData، بدأ الحفظ");
+      try {
+        await set(ref(db, `users/${user.uid}`), {
+          passHash: pendingUserData.passHash,
+          email: pendingUserData.email,
+          createdAt: serverTimestamp(),
+          lastSeen: serverTimestamp()
+        });
+
+        await set(ref(db, `publicUsers/${user.uid}`), {
+          name: pendingUserData.name,
+          uid: pendingUserData.uid
+        });
+
+        await set(ref(db, `uids/${pendingUserData.uid}`), user.uid);
+
+        currentUser = { uid: user.uid, name: pendingUserData.name, uidNumber: pendingUserData.uid };
+
+        $('myName').textContent = pendingUserData.name;
+        $('myNumber').textContent = pendingUserData.uid;
+
+        myPassword = pendingUserData.passHash || '';
+        sessionStorage.setItem('myPass', myPassword);
+        $('myPass').textContent = '••••••';
+        passVisible = false;
+
+        $('authScreen').classList.add('hidden');
+        $('chatsScreen').classList.remove('hidden');
+
+        showToast('تم إنشاء الحساب: رقمك هو ' + pendingUserData.uid, '#00a884');
+        autoInstallAfterLogin();
+
+        const userRef = ref(db, 'users/' + user.uid);
+        onDisconnect(userRef).update({ lastSeen: serverTimestamp(), online: false });
+        setInterval(() => update(userRef, { lastSeen: serverTimestamp() }), 15000);
+
+        loadChats();
+        pendingUserData = null;
+        myGeneratedUid = null;
+        return;
+      } catch (err) {
+        console.error("[ERR] 78. فشل حفظ pendingUserData:", err);
+        showToast('فشل إنشاء الحساب');
+        await signOut(auth);
+        pendingUserData = null;
+        myGeneratedUid = null;
+        return;
+      }
+    }
+
+    console.log("[DB] 79. جلب publicUsers/", user.uid);
+    const pubSnap = await get(ref(db, 'publicUsers/' + user.uid));
+    if (pubSnap.exists()) {
+      const u = pubSnap.val();
+      currentUser = { uid: user.uid, name: u.name, uidNumber: u.uid };
+
+      $('myName').textContent = u.name;
+      $('myNumber').textContent = u.uid;
+      myPassword = sessionStorage.getItem('myPass') || '';
+      $('myPass').textContent = '••••••';
+      passVisible = false;
+
+      $('authScreen').classList.add('hidden');
+      $('chatsScreen').classList.remove('hidden');
+
+      const userRef = ref(db, 'users/' + user.uid);
+      onDisconnect(userRef).update({ lastSeen: serverTimestamp(), online: false });
+      setInterval(() => update(userRef, { lastSeen: serverTimestamp() }), 15000);
+      
+      loadChats();
+      autoInstallAfterLogin();
+
+      // جلب تاريخ البحث من Firebase
+      const searchesSnap = await get(ref(db, `searches/${user.uid}`));
+      if (searchesSnap.exists()) {
+        const data = searchesSnap.val();
+        searchHistory = Object.values(data).sort((a, b) => b.time - a.time);
+        saveSearchHistory(); // حدث localStorage
+        renderSearchHistory();
+      } else {
+        // لو مافي في Firebase شوف localStorage كـ backup
+        const lastSearchHistory = localStorage.getItem('searchHistory');
+        if (lastSearchHistory) {
+          searchHistory = JSON.parse(lastSearchHistory);
+          renderSearchHistory();
+        }
+      }
+
+      onValue(ref(db, `calls/${auth.currentUser?.uid}`), snap => {
+        if (snap.exists()) {
+          const call = snap.val();
+          if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+          if ($('callScreen')) return;
+          const callScreen = document.createElement('div');
+          callScreen.id = 'callScreen';
+          callScreen.innerHTML = `
+            <div style="font-size:20px; color:#8696a0">مكالمة واردة</div>
+            <div class="avatar" style="width:120px; height:120px; font-size:50px">${call.fromName[0]}</div>
+            <div style="font-size:28px; font-weight:600">${call.fromName}</div>
+            <button onclick="endCall()" style="width:70px; height:70px; background:#f15c6d; border-radius:50%; font-size:30px; margin-top:40px; cursor:pointer">✕</button>
+          `;
+          document.body.appendChild(callScreen);
+          window.endCall = async () => {
+            $('callScreen')?.remove();
+            await remove(ref(db, `calls/${auth.currentUser.uid}`));
+          };
+        }
+      });
+
+      const settingsSnap = await get(ref(db, `users/${user.uid}/settings`));
+if (settingsSnap.exists()) {
+  const settings = settingsSnap.val();
+  
+  if (settings.bgChats) {
+    $('chatsList').style.background = settings.bgChats;
+  }
+  if (settings.bgChat) {
+    $('messagesList').style.background = settings.bgChat;
+  }
+  
+  // [الجديد] هذا اللي تضيفه
+  if (settings.bgBody) {
+    document.body.style.background = settings.bgBody;
+    $('chatsScreen').style.background = settings.bgBody;
+  }
+}
+    } else {
+      showToast('الحساب قديم، سجل حساب جديد', '#f15c6d');
+      await signOut(auth);
+    }
+  } else {
+    $('authScreen')?.classList.remove('hidden');
+    $('chatsScreen')?.classList.add('hidden');
+  }
+});
+
+// خلي chats مصفوفة عامة فوق مع المتغيرات
+let chats = [];
+
+const loadChats = () => {
+  console.log("[DB] 92. بدأ loadChats للمستخدم:", currentUser?.uid);
+  const chatsRef = query(ref(db, 'userChats/' + currentUser.uid), orderByChild('lastMsgTime'), limitToLast(15));
+  
+  onValue(chatsRef, async snap => {
+    console.log("[DB] 93. استلمت بيانات المحادثات");
+    chats = []; // فضي المصفوفة العامة بدل ما تعمل const جديدة
+    
+    // جيب البيانات كلها اول
+    const tempChats = [];
+    snap.forEach(child => { 
+      tempChats.push({ uid: child.key, ...child.val() }); 
+    });
+    tempChats.reverse();
+
+    // جيب بيانات اليوزر لكل محادثة واضفها بالدالة الجديدة
+    for (let chat of tempChats) {
+      const uSnap = await get(ref(db, 'publicUsers/' + chat.uid));
+      if (uSnap.exists()) {
+        const u = uSnap.val();
+        addOrMoveChat({ ...chat, ...u }); // استخدم addOrMoveChat بدل append المباشر
+      }
+    }
+  });
+};
+
+// حط هذي الدالتين فوق loadChats
+
+
+function renderChats() {
+  const list = $('chatsList');
+  list.innerHTML = ''; // امسح القديم
+  
+  chats.forEach(chat => {
+    const div = document.createElement('div');
+    div.className = 'chat-item';
+    div.onclick = () => openChat({ uid: chat.uid, name: chat.name });
+    
+    const unreadBadge = chat.unreadCount > 0 ? 
+      `<span style="background:#00a884; color:#111b21; border-radius:10px; padding:2px 6px; font-size:12px; font-weight:bold">${chat.unreadCount}</span>` : '';
+    
+    div.innerHTML = `
+      <div class="avatar">${chat.name[0]}</div>
+      <div class="chat-info">
+        <div class="chat-name">${chat.name}<span style="font-size:13px; color:#8696a0; font-weight:400; margin-right:8px">${chat.uid}</span></div>
+        <div class="chat-last">${chat.lastMsg || 'اضغط للدردشة'}</div>
+      </div>
+      <div class="chat-meta">
+        <div>${chat.lastMsgTime ? formatTime(chat.lastMsgTime) : ''}</div>
+        <div class="chat-status">${unreadBadge || formatLastSeen(chat.lastSeen)}</div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+console.log("[JS] 98. انتهى تحميل الكود للآن");
+const autoInstallAfterLogin = () => {
+  console.log("[PWA] 99. بدأ autoInstallAfterLogin");
+  if(localStorage.getItem('appInstalled') === 'true') {
+    console.log("[PWA] 100. التطبيق مثبّت مسبقاً، خروج");
+    return;
+  }
+  
+  setTimeout(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    console.log("[PWA] 101. الجهاز iOS:", isIOS, "Android:", isAndroid);
+    
+    if(isIOS) {
+      showToast('للتثبيت: اضغط مشاركة ثم "إضافة إلى الشاشة الرئيسية"', '#00a884');
+    } else if(isAndroid) {
+      showToast('للتثبيت: اضغط القائمة ثم "تثبيت التطبيق"', '#00a884');
+    }
+    
+    localStorage.setItem('appInstalled', 'true');
+    console.log("[PWA] 102. تم تعيين appInstalled = true");
+  }, 2000);
+};
+console.log("[PWA] 103. autoInstallAfterLogin معرفة وجاهزة");
+
+
+     let searchHistory = []; // خله فوق مع المتغيرات حقك
+function saveSearchHistory() {
+  localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+}
+
+
+
+  window.searchUser = async () => {
+  console.log("[SEARCH] 104. بدأ البحث");
+  const num = $('searchNumber').value.trim();
+  const resultDiv = $('searchResult');
+  
+  if (!/^\d{6}$/.test(num)) {
+    console.log("[SEARCH] 105. الرقم غلط");
+    showToast('ادخل رقم 6 خانات');
+    $('searchNumber').value = '';
+    return;
+  }
+  
+  try {
+    console.log("[DB] 106. البحث عن UID:", num);
+    const snap = await get(ref(db, `uids/${num}`));
+    
+    if (!snap.exists()) {
+      console.log("[SEARCH] 107. الرقم غير موجود");
+      showToast('الرقم غير موجود');
+      $('searchNumber').value = '';
+      return;
+    }
+    
+    const realUid = snap.val();
+    console.log("[DB] 108. realUid:", realUid);
+    
+    const userSnap = await get(ref(db, `publicUsers/${realUid}`));
+    if (!userSnap.exists()) {
+      console.log("[SEARCH] 109. بيانات المستخدم غير موجودة");
+      showToast('الرقم غير موجود');
+      $('searchNumber').value = '';
+      return;
+    }
+    
+    const user = userSnap.val();
+    console.log("[SEARCH] 110. وجدت المستخدم:", user.name);
+    
+    // اضف النتيجة للتاريخ المحلي
+    if(!searchHistory.find(u => u.uid === num)) {
+      searchHistory.unshift({uid: num, name: user.name, realUid: realUid});
+      saveSearchHistory(); // localStorage
+    }
+    
+    // حفظ في Firebase عشان ما تروح بعد تسجيل الخروج
+    await set(ref(db, `searches/${currentUser.uid}/${num}`), {
+      uid: num,
+      name: user.name,
+      realUid: realUid,
+      time: Date.now()
+    });
+    
+    // اعرض كل النتائج من فوق
+    renderSearchHistory();
+    
+    $('searchNumber').value = ''; // يمسح المربع بعد البحث
+    
+  } catch (e) {
+    console.error("[ERR] 111. خطأ في البحث:", e);
+    showToast('فشل البحث');
+    $('searchNumber').value = '';
+  }
+};
+
+function saveSearch(number, userData) {
+  if (!currentUser) return;
+  const searchRef = ref(db, `searches/${currentUser.uid}/${number}`);
+  set(searchRef, {
+    number: number,
+    name: userData ? userData.name : null,
+    time: Date.now()
+  }).then(() => {
+    console.log("[DB] تم حفظ البحث:", number);
+  }).catch(err => {
+    console.error("[DB] فشل حفظ البحث:", err);
+  });
+}
+  
+function renderSearchHistory() {
+  const resultDiv = $('searchResult');
+  if(searchHistory.length === 0) {
+    resultDiv.classList.add('hidden');
+    return;
+  }
+  
+  let html = '';
+  searchHistory.forEach(u => {
+    html += `
+      <div class="search-result-item" onclick="startChatFromSearch('${u.realUid}', '${u.name}')">
+        <div class="avatar">${u.name[0]}</div>
+        <div class="chat-info">
+          <div class="chat-name">${u.name}</div>
+          <div class="chat-last">رقم: ${u.uid} • اضغط لبدء المحادثة</div>
+        </div>
+        <div style="color:#00a884; font-size:24px">💬</div>
+        <span style="color:#8696a0; font-size:22px; padding:0 8px" onclick="event.stopPropagation(); removeSearchResult('${u.uid}')">×</span>
+      </div>
+    `;
+  });
+  
+  resultDiv.innerHTML = html;
+  resultDiv.classList.remove('hidden');
+}
+
+window.removeSearchResult = (uid) => {
+  searchHistory = searchHistory.filter(u => u.uid !== uid);
+  saveSearchHistory();
+  renderSearchHistory();
+}
+
+window.clearSearchResult = () => {
+  searchHistory = [];
+  saveSearchHistory();
+  $('searchResult').classList.add('hidden');
+  $('searchNumber').value = '';
+}
+window.startChatFromSearch = (uid, name) => {
+  console.log("[CHAT] 112. فتح شات مع:", name, uid);
+  openChat({uid: uid, name: name});
+  clearSearchResult();
 };
 
 
 
 
-
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-console.log("[FB] تم الاتصال بقاعدة البيانات");
-
-/* ===== 2. توليد رقم مستخدم فريد 7 خانات ===== */
-async function generateUniqueNumber() {
-  const counterRef = ref(db, 'counters/userId');
-  const snapshot = await get(counterRef);
+window.renderMessages = (messages) => {
+  const container = $('messagesList');
+  container.innerHTML = '';
   
-  let newNumber = 1000000; // يبدأ من 1000000 عشان يكون 7 خانات
-  if (snapshot.exists()) {
-    newNumber = snapshot.val() + 1;
-  }
-  
-  await set(counterRef, newNumber);
-  return newNumber.toString();
-}
-
-/* ===== 3. إنشاء حساب جديد ===== */
-async function createAccount(name, password) {
-  if (name.length < 3) {
-    showToast("الاسم لازم يكون 3 حروف على الأقل");
-    return;
-  }
-  
-  if (!/^\d{5,}$/.test(password) || /(.)\1{4,}/.test(password) || password === "12345") {
-    showToast("كلمة المرور ضعيفة. استخدم 5 أرقام غير متتالية");
-    return;
-  }
-  
-  const usersSnap = await get(ref(db, 'users'));
-  if (usersSnap.exists()) {
-    const users = usersSnap.val();
-    const nameExists = Object.values(users).some(u => u.name === name);
-    if (nameExists) {
-      showToast("الاسم مستخدم مسبقاً");
-      return;
-    }
-  }
-  
-  const number = await generateUniqueNumber();
-  const userId = 'user_' + Date.now();
-  
-  await set(ref(db, `users/${userId}`), {
-    name: name,
-    number: number,
-    password: password, 
-    // ملاحظة: في الإنتاج استخدم bcrypt أو Firebase Auth
-    createdAt: serverTimestamp()
+  messages.forEach(msg => {
+    const isMe = msg.from === currentUser.uid;
+    const msgDiv = document.createElement('div');
+    
+    msgDiv.className = isMe ? 'msg me' : 'msg';
+   
+    msgDiv.innerHTML = `
+      <div class="msg-text">${msg.text}</div>
+      <div class="msg-time">${formatTime(msg.time)}</div>
+    `;
+    
+    container.appendChild(msgDiv);
   });
   
-  currentUser = { uid: userId, name, number };
-  localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
-  
-  showToast(`تم التسجيل! رقمك هو ${number}`);
-  showScreen('chatsScreen');
-  document.getElementById('currentUserName').textContent = name;
-  document.getElementById('currentUserNumber').textContent = number;
-}
+  container.scrollTop = container.scrollHeight;
+};
 
-/* ===== 4. استعادة حساب ===== */
-async function restoreAccount(number, password) {
-  const usersSnap = await get(ref(db, 'users'));
-  if (!usersSnap.exists()) {
-    showToast("الرقم خطأ");
+
+window.openChat = async (user) => {
+  console.log(" 120. فتح المحادثة مع:", user.name, user.uid);
+  
+  if (user.uid === currentUser.uid) {
+    showToast('ما تقدر تفتح شات مع نفسك', '#f44336');
     return;
   }
-  
-  const users = usersSnap.val();
-  const userEntry = Object.entries(users).find(([uid, u]) => u.number === number);
-  
-  if (!userEntry) {
-    showToast("الرقم خطأ");
-    return;
-  }
-  
-  const [uid, userData] = userEntry;
-  if (userData.password !== password) {
-    showToast("كلمة المرور خطأ");
-    return;
-  }
-  
-  currentUser = { uid, name: userData.name, number };
-  localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
-  
-  showToast("تم استعادة حسابك");
-  showScreen('chatsScreen');
-  document.getElementById('currentUserName').textContent = userData.name;
-  document.getElementById('currentUserNumber').textContent = number;
-  loadChatsList();
-}
 
-/* ===== 5. إرسال رسالة ===== */
-let currentChatId = null;
-let currentChatOtherId = null;
+  currentChat = user;
+  $('chatName').textContent = user.name;
+  $('chatNumber').textContent = user.uid || '';
+  $('chatScreen').classList.remove('hidden');
+  $('chatsScreen').classList.add('hidden');
 
-async function sendMessage(text) {
-  if (!text.trim() || !currentChatId || !currentUser) return;
+  $('messagesList').innerHTML = '';
   
-  const msgRef = push(ref(db, `chats/${currentChatId}/messages`));
-  await set(msgRef, {
-    from: currentUser.uid,
+  const chatId = getChatID(currentUser.uid, user.uid);
+  const msgsRef = ref(db, `chats/${chatId}/messages`);
+  onValue(msgsRef, (snap) => {
+    const msgs = [];
+    snap.forEach(s => msgs.push(s.val()));
+    renderMessages(msgs);
+  });
+
+  // [جديد] نضيف حالة للهستوري عشان زر الرجوع يشتغل
+  history.pushState({screen: 'chat', uid: user.uid}, '', '#chat');
+};
+
+window.sendMessage = async () => {
+  const text = $('msgInput').value.trim();
+  if (!text || !currentChat || !currentUser) return;
+
+  const chatId = getChatID(currentUser.uid, currentChat.uid);
+  const msg = {
     text: text,
-    time: serverTimestamp(),
-    status: 'sent'
-  });
-  
-  await update(ref(db, `userChats/${currentUser.uid}/${currentChatOtherId}`), {
+    from: currentUser.uid,
+    time: Date.now()
+  };
+
+  // ارسل الرسالة للفاير بيس
+  await push(ref(db, `chats/${chatId}/messages`), msg);
+
+  // حدث اخر رسالة في قائمة المحادثات للطرفين
+  await update(ref(db, `userChats/${currentUser.uid}/${currentChat.uid}`), {
     lastMsg: text,
-    lastMsgTime: serverTimestamp()
+    lastMsgTime: msg.time,
+    unreadCount: 0
   });
   
-  await update(ref(db, `userChats/${currentChatOtherId}/${currentUser.uid}`), {
+  await update(ref(db, `userChats/${currentChat.uid}/${currentUser.uid}`), {
     lastMsg: text,
-    lastMsgTime: serverTimestamp()
+    lastMsgTime: msg.time,
+    unreadCount: increment(1)
   });
-  
-  document.getElementById('messageInput').value = '';
-}
 
-/* ===== 6. سماع الرسائل لحظياً ===== */
-function listenMessages(chatId, otherId) {
-  currentChatId = chatId;
-  currentChatOtherId = otherId;
+  $('msgInput').value = ''; // فضي خانة الكتابة
+};
+
+window.closeChat = () => {
+  console.log(" 125. إغلاق المحادثة");
+  $('chatScreen').classList.add('hidden');
+  $('chatsScreen').classList.remove('hidden');
+  currentChat = null;
+
+  // [جديد] نرجع حالة الهستوري لشاشة المحادثات
+  history.replaceState({screen: 'chats'}, '', '#chats');
+};
+
+
+window.showMenu = (menuType) => {
+  console.log("[MENU] 114. فتح قائمة:", menuType);
   
-  const messagesRef = ref(db, `chats/${chatId}/messages`);
-  onValue(messagesRef, (snapshot) => {
-    const messagesList = document.getElementById('messagesList');
-    messagesList.innerHTML = '';
+  // لا تعمل شيء لو إحنا لسه في شاشة الدخول
+  if ($('chatsScreen').classList.contains('hidden')) {
+    return;
+  }
+
+  const menu = $('mainMenu');
+  
+  if (menuType === 'mainMenu') {
+    // افتح/اخفي قائمة الثلاث نقاط
+    menu.classList.toggle('hidden');
     
-    if (snapshot.exists()) {
-      const messages = snapshot.val();
-      Object.values(messages).forEach(msg => {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = msg.from === currentUser.uid ? 'msg-me' : 'msg-other';
-        msgDiv.textContent = msg.text;
-        messagesList.appendChild(msgDiv);
-      });
-      messagesList.scrollTop = messagesList.scrollHeight;
-    }
-  });
-}
+  } else if (menuType === 'chatMenu') {
+    // لو عندك منيو ثاني للشات خليه هنا
+    const chatMenu = $('chatMenu');
+    chatMenu?.classList.toggle('hidden');
+  }
+};
 
-/* ===== 7. تحميل قائمة المحادثات ===== */
-function loadChatsList() {
-  if (!currentUser) return;
+// اخفاء القائمة لو ضغطت برا
+document.addEventListener('click', (e) => {
+  const menu = $('mainMenu');
+  const menuBtn = e.target.closest('[onclick*="showMenu(\'mainMenu\')"]');
   
-  const chatsRef = ref(db, `userChats/${currentUser.uid}`);
-  onValue(chatsRef, (snapshot) => {
-    const chatsList = document.getElementById('chatsList');
-    chatsList.innerHTML = '';
-    
-    if (snapshot.exists()) {
-      const chats = snapshot.val();
-      Object.entries(chats).forEach(([otherId, chatData]) => {
-        get(ref(db, `users/${otherId}`)).then(userSnap => {
-          if (userSnap.exists()) {
-            const user = userSnap.val();
-            const chatDiv = document.createElement('div');
-            chatDiv.className = 'chat-item';
-            chatDiv.innerHTML = `
-              <div class="avatar">${user.name[0]}</div>
-              <div class="chat-info">
-                <div class="chat-top">
-                  <span class="chat-name">${user.name}</span>
-                  <span class="chat-time"></span>
-                </div>
-                <div class="chat-bottom">
-                  <span class="last-msg">${chatData.lastMsg || ''}</span>
-                </div>
-              </div>
-            `;
-            chatDiv.addEventListener('click', () => {
-              const chatId = [currentUser.uid, otherId].sort().join('_');
-              listenMessages(chatId, otherId);
-              showScreen('chatScreen');
-              document.getElementById('chatUserName').textContent = user.name;
-            });
-            chatsList.appendChild(chatDiv);
-          }
-        });
-      });
-    }
-  });
-}
+  if (!e.target.closest('#mainMenu') && !menuBtn) {
+    menu.classList.add('hidden');
+  }
+});
 
-/* ===== 8. البحث عن مستخدم برقمه ===== */
-document.getElementById('btnSearch').addEventListener('click', async () => {
-  const number = document.getElementById('searchNumber').value;
-  if (!number) return;
+
+
+window.setBg = async (color) => {
+  $('chatsList').style.background = color;
+  $('messagesList').style.background = color;
+  $('chatsScreen').style.background = color; // اضافة
+  document.body.style.background = color;   // اضافة
   
-  const usersSnap = await get(ref(db, 'users'));
-  if (!usersSnap.exists()) {
-    showToast("لا يوجد مستخدم بهذا الرقم");
+  await set(ref(db, `users/${currentUser.uid}/settings/bgChats`), color);
+  await set(ref(db, `users/${currentUser.uid}/settings/bgChat`), color);
+  await set(ref(db, `users/${currentUser.uid}/settings/bgBody`), color); // اضافة
+  
+  closeAllModals();
+  showToast('تم تغيير الخلفية', '#00a884');
+};
+
+
+// الدوال اللي لازم يشوفها HTML - حطها قبل
+
+   
+window.openModal = (id) => {
+  $('mainMenu').classList.add('hidden');
+  $('overlay').classList.remove('hidden');
+  $(id).classList.remove('hidden');
+};
+
+window.closeAllModals = () => {
+  $('overlay').classList.add('hidden');
+  $('bgModal').classList.add('hidden');
+  $('passModal').classList.add('hidden');
+  $('logoutModal').classList.add('hidden');
+};
+
+
+
+window.changePass = async () => {
+  const newPass = $('newPass').value.trim();
+  
+  // تحقق من الطول
+  if (!/^\d{6}$/.test(newPass)) {
+    showToast('كلمة المرور 6 أرقام فقط', '#f15c6d');
     return;
   }
   
-  const users = usersSnap.val();
-  const userEntry = Object.entries(users).find(([uid, u]) => u.number === number);
+  // تحقق من القوة
+  if (!isStrongPassword(newPass)) {
+    showToast('كلمة المرور ضعيفة، اختر غيرها', '#f15c6d');
+    return;
+  }
+
+  try {
+    // 1. غير كلمة المرور في Firebase Auth
+    await updatePassword(auth.currentUser, newPass);
+    
+    // 2. غيرها في Realtime DB عشان العرض
+    await set(ref(db, `users/${currentUser.uid}/passHash`), newPass);
+    
+    // 3. حدث العرض والتخزين المؤقت
+    sessionStorage.setItem('myPass', newPass);
+    myPassword = newPass;
+    
+    $('newPass').value = '';
+    closeAllModals();
+    showToast('تم تغيير كلمة المرور بنجاح', '#00a884');
+    
+  } catch (e) {
+    console.error('changePass error:', e);
+    showToast('فشل التغيير: ' + e.message, '#f15c6d');
+  }
+};
+
+window.doLogout = async () => {
+  await signOut(auth);
+  closeAllModals();
+};
+
+window.toggleForm = (type) => {
+  console.log("[UI] toggleForm:", type);
+  const signupForm = $('signupForm');
+  const loginForm = $('loginForm');
+  const signupTab = $('signupTab');
+  const loginTab = $('loginTab');
   
-  if (!userEntry) {
-    showToast("لا يوجد مستخدم بهذا الرقم");
+  if (currentForm === type) {
+    console.log("[UI] toggleForm: إغلاق الفورم الحالي");
+    signupForm.classList.add('hidden');
+    loginForm.classList.add('hidden');
+    signupTab.classList.remove('active');
+    loginTab.classList.remove('active');
+    currentForm = null;
     return;
   }
   
-  const [uid, userData] = userEntry;
-  const chatId = [currentUser.uid, uid].sort().join('_');
+  if (type === 'signup') {
+    console.log("[UI] toggleForm: عرض فورم التسجيل");
+    signupForm.classList.remove('hidden');
+    loginForm.classList.add('hidden');
+    signupTab.classList.add('active');
+    loginTab.classList.remove('active');
+    currentForm = 'signup';
+  } else {
+    console.log("[UI] toggleForm: عرض فورم الدخول");
+    loginForm.classList.remove('hidden');
+    signupForm.classList.add('hidden');
+    loginTab.classList.add('active');
+    signupTab.classList.remove('active');
+    currentForm = 'login';
+  }
+};
+
+async function hashPassword(pass) {
+  const msgBuffer = new TextEncoder().encode(pass);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+
+window.togglePass = (id) => {
+  const input = $(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+};
+
+// [جديد] إدارة زر الرجوع حق الجوال
+window.addEventListener('popstate', (e) => {
+  // لو ضغط رجوع وانت في شاشة الدردشة
+  if ($('chatScreen') && !$('chatScreen').classList.contains('hidden')) {
+    closeChat(); // بنادي الدالة اللي فوق فترجع لشاشة المحادثات
+    return;
+  }
   
-  await set(ref(db, `userChats/${currentUser.uid}/${uid}`), {
-    lastMsg: "",
-    lastMsgTime: serverTimestamp()
-  });
+  // لو ضغط رجوع وانت في شاشة المحادثات
+  if ($('chatsScreen') && !$('chatsScreen').classList.contains('hidden')) {
+    history.go(-1); // يطلع للهوم حق الجوال
+  }
+});
+
+// [جديد] نضيف حالة اولية للهستوري لما تفتح الصفحة
+if (!history.state) {
+  history.replaceState({screen: 'chats'}, '', '#chats');
+}
+
+let isRecording = false;
+let emojiOpen = false;
+
+// تسجيل الصوت
+window.startRecord = async () => {
+  if (isRecording) return;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = async () => {
+      // مؤقتاً يرسل نص، لو تبغى يرسل صوت فعلي قولي اكمل لك كود Storage
+      await sendMessage('[رسالة صوتية]');
+      stream.getTracks().forEach(track => track.stop());
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    $('micBtn').style.color = '#f15c6d';
+  } catch (e) {
+    showToast('تعذر الوصول للمايك');
+  }
+};
+
+window.stopRecord = () => {
+  if (!isRecording || !mediaRecorder) return;
+  mediaRecorder.stop();
+  isRecording = false;
+  $('micBtn').style.color = '#8696a0';
+};
+
+// تبديل الايموجي والكيبورد
+window.toggleEmojiPanel = () => {
+  const panel = $('emojiPanel');
+  const emojiIcon = $('emojiIcon');
+  const keyboardIcon = $('keyboardIcon');
+  const input = $('msgInput');
   
-  loadChatsList();
-  document.getElementById('searchNumber').value = '';
+  emojiOpen = !emojiOpen;
+  
+  // غير هذا السطر
+  panel.style.display = emojiOpen ? 'grid' : 'none';
+  
+  // خلي هذي كما هي
+  emojiIcon.classList.toggle('hidden', emojiOpen);
+  keyboardIcon.classList.toggle('hidden', !emojiOpen);
+  
+  if (emojiOpen) {
+    input.blur();
+  } else {
+    input.focus();
+  }
+};
+
+// ادخال الايموجي
+window.insertEmoji = (emoji) => {
+  const input = $('msgInput');
+  input.value += emoji;
+  input.focus();
+};
+
+// لما تضغط على مربع الكتابة اخفي الايموجي
+$('msgInput').addEventListener('focus', () => {
+  if (emojiOpen) toggleEmojiPanel();
 });
 
-/* ===== 9. ربط أزرار إنشاء واسترجاع الحساب ===== */
-document.getElementById('btnSignup').addEventListener('click', () => {
-  const name = document.getElementById('signupName').value;
-  const pass = document.getElementById('signupPass').value;
-  createAccount(name, pass);
-});
 
-document.getElementById('btnRestore').addEventListener('click', () => {
-  const number = document.getElementById('restoreNumber').value;
-  const pass = document.getElementById('restorePass').value;
-  restoreAccount(number, pass);
-});
-
-/* ===== 10. ربط زر الإرسال ===== */
-document.getElementById('btnSend').addEventListener('click', () => {
-  const text = document.getElementById('messageInput').value;
-  sendMessage(text);
-});
-
-/* ===== 11. تسجيل الخروج ===== */
-document.getElementById('btnLogout').addEventListener('click', () => {
-  localStorage.removeItem('wa_haroon_user');
-  currentUser = null;
-  showScreen('loginScreen');
-  closeModal();
-  showToast("تم تسجيل الخروج");
-});
 </script>
+<!-- قائمة الثلاث نقاط -->
+<div id="mainMenu" class="menu hidden">
+  <div class="menu-item" onclick="openModal('bgModal')">تغيير لون الخلفية</div>
+  <div class="menu-item" onclick="openModal('passModal')">تغيير كلمة المرور</div>
+  <div class="menu-item" onclick="openModal('logoutModal')">تسجيل الخروج</div>
+</div>
+
+<!-- الخلفية المعتمة -->
+<div id="overlay" class="overlay hidden" onclick="closeAllModals()"></div>
+
+<!-- نافذة تغيير الخلفية -->
+<div id="bgModal" class="modal hidden">
+  <h3>اختر لون الخلفية</h3>
+  <div class="colors">
+    <div class="color" style="background:#f0f0f0" onclick="setBg('#f0f0f0')"></div>
+    <div class="color" style="background:#e0f7fa" onclick="setBg('#e0f7fa')"></div>
+    <div class="color" style="background:#fce4ec" onclick="setBg('#fce4ec')"></div>
+    <div class="color" style="background:#fff3e0" onclick="setBg('#fff3e0')"></div>
+    <div class="color" style="background:#e8f5e9" onclick="setBg('#e8f5e9')"></div>
+    <div class="color" style="background:#ede7f6" onclick="setBg('#ede7f6')"></div>
+  </div>
+</div>
+
+<!-- نافذة تغيير كلمة المرور -->
+<div id="passModal" class="modal hidden">
+  <h3>تغيير كلمة المرور</h3>
+  <div class="password-wrapper">
+ <input type="password" id="newPass" placeholder="كلمة المرور الجديدة" 
+style="text-align: center;" inputmode="numeric" pattern="[0-9]*" maxlength="6" 
+onkeypress="return /[0-9]/.test(event.key)">
+    <span class="eye" onclick="togglePass('newPass')">👁️</span>
+  </div>
+  <button onclick="changePass()">حفظ</button>
+  <button onclick="closeAllModals()">إلغاء</button>
+</div>
+
+<!-- نافذة تسجيل الخروج -->
+<div id="logoutModal" class="modal hidden">
+  <h3>هل تريد تسجيل الخروج؟</h3>
+  <button onclick="doLogout()">نعم</button>
+  <button onclick="closeAllModals()">إلغاء</button>
+</div>
+</div>
 </body>
 </html>
