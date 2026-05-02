@@ -1114,52 +1114,87 @@ function listenMessages(chatId, otherId) {
 }
 
 /* ===== 7. تحميل قائمة المحادثات ===== */
+let chatsUnsubscribe = null;
+
 function loadChatsList() {
   if (!currentUser) return;
-  
+
+  if (chatsUnsubscribe) chatsUnsubscribe();
+
   const chatsRef = ref(db, `userChats/${currentUser.uid}`);
-  onValue(chatsRef, (snapshot) => {
+  chatsUnsubscribe = onValue(chatsRef, async (snapshot) => {
     const chatsList = document.getElementById('chatsList');
     chatsList.innerHTML = '';
-    
-    if (snapshot.exists()) {
-      const chats = snapshot.val();
-      Object.entries(chats).forEach(([otherId, chatData]) => {
-        get(ref(db, `users/${otherId}`)).then(userSnap => {
-          if (userSnap.exists()) {
-            const user = userSnap.val();
-            const chatDiv = document.createElement('div');
-            chatDiv.className = 'chat-item';
-            chatDiv.innerHTML = `
-              <div class="avatar">${user.name[0]}</div>
-              <div class="chat-info">
-                <div class="chat-top">
-                  <span class="chat-name">${user.name}</span>
-                  <span class="chat-time"></span>
-                </div>
-                <div class="chat-bottom">
-                  <span class="last-msg">${chatData.lastMsg || ''}</span>
-                </div>
-              </div>
-            `;
-            chatDiv.addEventListener('click', () => {
-              const chatId = [currentUser.uid, otherId].sort().join('_');
-              listenMessages(chatId, otherId);
-              showScreen('chatScreen');
-              document.getElementById('chatUserName').textContent = user.name;
-            });
-            chatsList.appendChild(chatDiv);
-          }
+
+    if (!snapshot.exists()) return;
+
+    let chatsArr = [];
+    const chats = snapshot.val();
+
+    // حولها لمصفوفة عشان نقدر نرتبها
+    for (const [otherId][chatData] of Object.entries(chats)) {
+      const userSnap = await get(ref(db, `users/${otherId}`));
+      if (userSnap.exists()) {
+        chatsArr.push({
+          id: otherId,
+          user: userSnap.val(),
+          lastMsg: chatData.lastMsg || '',
+          lastMsgTime: chatData.lastMsgTime || 0
         });
-      });
+      }
     }
+
+    // رتب من الأحدث للأقدم
+    chatsArr.sort((a, b) => b.lastMsgTime - a.lastMsgTime);
+
+    // ارسمها
+    chatsArr.forEach(chat => {
+      const chatDiv = document.createElement('div');
+      chatDiv.className = 'chat-item';
+      chatDiv.id = 'chat_' + chat.id;
+      chatDiv.innerHTML = `
+        <div class="avatar">${chat.user.name[0]}</div>
+        <div class="chat-info">
+          <div class="chat-top">
+            <span class="chat-name">${chat.user.name}</span>
+            <span class="chat-time">${formatTime(chat.lastMsgTime)}</span>
+          </div>
+          <div class="chat-bottom">
+            <span class="last-msg">${chat.lastMsg}</span>
+          </div>
+        </div>
+      `;
+      chatDiv.addEventListener('click', () => {
+        const chatId = [currentUser.uid, chat.id].sort().join('_');
+        listenMessages(chatId, chat.id);
+        showScreen('chatScreen');
+        document.getElementById('chatUserName').textContent = chat.user.name;
+      });
+      chatsList.appendChild(chatDiv);
+    });
   });
+}
+
+// دالة تنسيق الوقت
+function formatTime(timestamp) {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diff = now - date;
+
+  if (diff < 86400000) { // أقل من يوم
+    return date.toLocaleTimeString('ar', {hour: '2-digit', minute: '2-digit'});
+  }
+  return date.toLocaleDateString('ar');
 }
 
 /* ===== 8. البحث عن مستخدم برقمه ===== */
 document.getElementById('btnSearch').addEventListener('click', async () => {
-  const number = document.getElementById('searchNumber').value;
-  if (!number) return;
+  const number = document.getElementById('searchNumber').value.trim();
+  if (!number) {
+    loadChatsList(); // لو فاضي رجع اعرض الكل
+    return;
+  }
   
   const usersSnap = await get(ref(db, 'users'));
   if (!usersSnap.exists()) {
@@ -1170,20 +1205,48 @@ document.getElementById('btnSearch').addEventListener('click', async () => {
   const users = usersSnap.val();
   const userEntry = Object.entries(users).find(([uid, u]) => u.number === number);
   
+  const chatsList = document.getElementById('chatsList');
+  chatsList.innerHTML = ''; // امسح القائمة القديمة
+  
   if (!userEntry) {
     showToast("لا يوجد مستخدم بهذا الرقم");
     return;
   }
   
   const [uid, userData] = userEntry;
-  const chatId = [currentUser.uid, uid].sort().join('_');
+  if (uid === currentUser.uid) {
+    showToast("هذا انت");
+    return;
+  }
   
-  await set(ref(db, `userChats/${currentUser.uid}/${uid}`), {
-    lastMsg: "",
-    lastMsgTime: serverTimestamp()
+  // اعرض المستخدم اللي لقيته بس
+  const chatDiv = document.createElement('div');
+  chatDiv.className = 'chat-item';
+  chatDiv.innerHTML = `
+    <div class="avatar">${userData.name[0]}</div>
+    <div class="chat-info">
+      <div class="chat-top">
+        <span class="chat-name">${userData.name}</span>
+        <span class="chat-time"></span>
+      </div>
+      <div class="chat-bottom">
+        <span class="last-msg">اضغط لبدء المحادثة</span>
+      </div>
+    </div>
+  `;
+  chatDiv.addEventListener('click', async () => {
+    const chatId = [currentUser.uid, uid].sort().join('_');
+    await set(ref(db, `userChats/${currentUser.uid}/${uid}`), {
+      lastMsg: "",
+      lastMsgTime: serverTimestamp()
+    });
+    listenMessages(chatId, uid);
+    showScreen('chatScreen');
+    document.getElementById('chatUserName').textContent = userData.name;
+    loadChatsList(); // ارجع اعرض كل المحادثات
   });
+  chatsList.appendChild(chatDiv);
   
-  loadChatsList();
   document.getElementById('searchNumber').value = '';
 });
 
