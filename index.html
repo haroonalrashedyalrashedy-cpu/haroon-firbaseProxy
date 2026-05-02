@@ -428,8 +428,13 @@ input, textarea {
   padding-bottom: calc(8px + env(safe-area-inset-bottom));
   
   /* السطرين الجدد */
-  direction: ltr;  /* يثبت الترتيب من اليسار لليمين للشريط هذا فقط */
-  flex-direction: row; /* يمنع الانقلاب */
+ /* direction: ltr; */ /* يثبت الترتيب من اليسار لليمين للشريط هذا فقط */
+  /* flex-direction: row; *. *//* يمنع الانقلاب */
+flex-wrap: nowrap; /* ممنوع يلف سطر ثاني */
+  direction: rtl; /* خليه RTL زي الواتساب */
+flex-direction: row;
+    
+    
 }
 
 #messageInput {
