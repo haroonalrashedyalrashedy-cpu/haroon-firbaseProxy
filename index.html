@@ -30,23 +30,38 @@
   max-width: 65%;
   padding: 8px 12px;
   border-radius: 8px;
-  background: #ffffff; /* رسائل الطرف الثاني بيضاء */
+  background: #ffffff;
   color: #000;
   margin-bottom: 6px;
   word-wrap: break-word;
-  align-self: flex-start; /* يخليها يسار */
+  align-self: flex-start;
 }
 
 .msg.me {
-  background: #dcf8c6; /* رسائلك اخضر فاتح مثل واتساب */
+  background: #dcf8c6;
   color: #000;
-  align-self: flex-end; /* يخليها يمين */
-  margin-left: auto; /* يدفعها لليمين */
+  
+  
+  align-self: flex-end;   /* يرميها يمين */
+  margin-left: auto;      /* يدفعها لليمين */
+}
+
+.msg-text {
+  word-wrap: break-word;
+}
+
+.msg-time {
+  font-size: 11px;
+  color: #8696a0;
+  text-align: right;
+  margin-top: 2px;
 }
 
 .messages {
   display: flex;
   flex-direction: column;
+  align-items: flex-start; /* كل الرسايل تبدأ يسار افتراضي */
+
   padding: 12px;
   gap: 4px;
 }
@@ -433,7 +448,7 @@ oninput="this.value = this.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '')">
   <span class="icon-btn" onclick="showMenu('chatMenu')">⋮</span>
 </div>
 
-<div id="messagesList"></div>
+<div id="messagesList" class="messages"></div>
 
 <div id="chatInputBar">
   <button class="icon-btn" id="emojiToggleBtn" onclick="toggleEmojiPanel()">
@@ -1300,21 +1315,19 @@ window.renderMessages = (messages) => {
   messages.forEach(msg => {
     const isMe = msg.from === currentUser.uid;
     const msgDiv = document.createElement('div');
-    msgDiv.style.display = 'flex';
-    msgDiv.style.justifyContent = isMe ? 'flex-end' : 'flex-start';
-    msgDiv.style.margin = '8px 0';
+    
+    msgDiv.className = isMe ? 'msg me' : 'msg';
+   
     msgDiv.innerHTML = `
-      <div style="background:${isMe ? '#005c4b' : '#202c33'}; padding:8px 12px; border-radius:8px; max-width:70%; color:white">
-        <div>${msg.text}</div>
-        <div style="font-size:11px; color:#8696a0; text-align:right">${formatTime(msg.time)}</div>
-      </div>
+      <div class="msg-text">${msg.text}</div>
+      <div class="msg-time">${formatTime(msg.time)}</div>
     `;
+    
     container.appendChild(msgDiv);
   });
   
   container.scrollTop = container.scrollHeight;
 };
-
 
 
 window.openChat = async (user) => {
