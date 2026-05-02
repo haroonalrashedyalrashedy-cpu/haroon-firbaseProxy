@@ -1210,6 +1210,17 @@ document.getElementById('btnSend').addEventListener('click', () => {
 document.getElementById('btnLogout').addEventListener('click', () => {
   localStorage.removeItem('wa_haroon_user');
   currentUser = null;
+  
+  // امسح كل الحقول
+  document.getElementById('signupName').value = '';
+  document.getElementById('signupPass').value = '';
+  document.getElementById('restoreNumber').value = '';
+  document.getElementById('restorePass').value = '';
+  
+  // اخفي الفورمات
+  document.getElementById('signupForm').style.display = 'none';
+  document.getElementById('restoreForm').style.display = 'none';
+  
   showScreen('loginScreen');
   closeModal();
   showToast("تم تسجيل الخروج");
