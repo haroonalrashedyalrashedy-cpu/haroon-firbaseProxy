@@ -375,10 +375,21 @@
       }
       const number = await generateUniqueNumber();
       const userId = 'user_' + Date.now();
-      await set(ref(db, `users/${userId}`), {
-        name: name, number: number, password: password, createdAt: serverTimestamp()
-      });
-      currentUser = { uid: userId, name, number };
+      
+      // التعديل 1: ضفت isAdmin: false مع البيانات اللي بتتخزن
+      const userData = {
+        name: name, 
+        number: number, 
+        password: password, 
+        createdAt: serverTimestamp(),
+        isAdmin: false
+      };
+      
+      await set(ref(db, `users/${userId}`), userData);
+      
+      // التعديل 2: خليت currentUser ياخذ كل الداتا من userData
+      currentUser = { uid: userId, ...userData };
+      
       localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
       showToast(`تم التسجيل! رقمك هو ${number}`);
       document.getElementById('signupName').value = '';
@@ -400,7 +411,10 @@
       if (!userEntry) { showToast("الرقم خطأ"); return; }
       const [uid, userData] = userEntry;
       if (userData.password!== password) { showToast("كلمة المرور خطأ"); return; }
-      currentUser = { uid, name: userData.name, number };
+      
+      // غيّرت هذا السطر فقط: خليته ينسخ كل الداتا من Firebase
+      currentUser = { uid, ...userData };
+      
       localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
       showToast("تم استعادة حسابك");
       document.getElementById('signupName').value = '';
