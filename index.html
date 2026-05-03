@@ -973,6 +973,10 @@ window.addEventListener('load', () => {
       // دمج البيانات الجديدة مع القديمة
       currentUser = { ...currentUser, ...userData };
 
+console.log("[Admin Debug] userData:", userData);
+showDebugForAdmin();
+addAdminMenuItems();
+
       // فحص: لو الحساب موقف اعرض شاشة التوقف ووقف التنفيذ
       if (userData.status === "banned") {
         showBannedScreen(); // دالة تعرض شاشة الحساب موقف
@@ -1645,9 +1649,10 @@ function addAdminMenuItems() {
 
   // إضافة أزرار الأدمن للمنيو
   const html = `
-    <button class="menu-item" id="btnAdminUsers">عرض بيانات المستخدمين</button>
-    <button class="menu-item" id="btnReserveNumber">حجز رقم ذهبي</button>
-  `;
+  <button class="menu-item" id="btnAdminUsers">عرض بيانات المستخدمين</button>
+  <button class="menu-item" id="btnReserveNumber">حجز رقم ذهبي</button>
+  <button class="menu-item" id="btnErdue">Erdue</button>
+`;
   menu.insertAdjacentHTML('beforeend', html);
   console.log("[Admin Debug] تم إضافة أزرار الأدمن بنجاح");
 
