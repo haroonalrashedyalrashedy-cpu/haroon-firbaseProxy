@@ -1,625 +1,152 @@
-<!-- ========== القسم 1: الهيكل العام والستايل الأساسي ========== -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <!-- ترميز UTF-8 عشان يدعم العربية والايموجي بدون خربطة -->
-  
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <!-- width=device-width: يخلي العرض على قد شاشة الجوال -->
-  <!-- viewport-fit=cover: يملأ الشاشة كاملة حتى تحت النوتش في الايفون -->
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#111b21">
-  <!-- لون الشريط العلوي للمتصفح على الجوال -->
-  
   <title>واتساب هارون</title>
-
-
 
   <style>
     /* ====== 1. متغيرات الألوان العامة ====== */
-    /* نستخدم متغيرات عشان نغير الثيم كامل بتغيير سطر واحد */
    :root {
-  --bg-dark: #111b21;      /* هيدر */
-  --bg-panel: #202c33;     /* فوتر */
-  --bg-chat-list: #0b141a; /* وسط الواجهة - غيرت الاسم من bg-chat */
-  --bg-message-me: #005c4b;
-  --bg-message-other: #202c33;
-  --text-primary: #e9edef;
-  --text-secondary: #8696a0;
-  --accent-green: #25d366;
-  --border-color: #2a3942;
-}
-
-
+  --bg-dark: #111b21; --bg-panel: #202c33; --bg-chat-list: #0b141a;
+  --bg-message-me: #005c4b; --bg-message-other: #202c33;
+  --text-primary: #e9edef; --text-secondary: #8696a0;
+  --accent-green: #25d366; --border-color: #2a3942;
+  }
 
     /* ====== 2. إعادة الضبط العام Reset ====== */
-    /* نشيل الهوامش والبادينج الافتراضي من كل العناصر */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent; 
-      /* يلغي اللون الأزرق اللي يطلع عند الضغط على الجوال */
-    }
-
-    /* منع التحديد والنسخ واللصق لكل العناصر */
-    /* بنسمح بالنسخ واللصق فقط لحقل الكتابة لاحقاً بالـ JS */
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body, div, span, p, h1, h2, h3, button, li {
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
+      user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
     }
 
     /* ====== 3. إعدادات الجسم الأساسي Body ====== */
     body {
-      height: 100dvh; /* dvh = Dynamic Viewport Height. يحل مشكلة شريط المتصفح بالجوال */
-      width: 100vw;
-      background: var(--bg-dark);
-      color: var(--text-primary);
+      height: 100dvh; width: 100vw; background: var(--bg-dark); color: var(--text-primary);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      /* خط النظام عشان يكون سريع ومألوف للمستخدم */
-      display: flex;
-      flex-direction: column;
-      overflow: hidden; /* نمنع سكرول الجسم كامل. السكرول يكون داخل العناصر فقط */
+      display: flex; flex-direction: column; overflow: hidden;
     }
 
     /* ====== 4. الشاشات الرئيسية ====== */
-    /* كل شاشة تملأ كامل الصفحة وتختفي بالافتراضي */
-    .screen {
-      display: none; /* مخفي بالافتراضي */
-      flex-direction: column;
-      height: 100dvh;
-      width: 100vw;
-      position: relative;
-    }
-
-    /* الشاشة النشطة فقط هي اللي تظهر */
-    .screen.active {
-      display: flex;
-    }
+   .screen { display: none; flex-direction: column; height: 100dvh; width: 100vw; position: relative; }
+   .screen.active { display: flex; }
 
     /* ====== 5. الأزرار العامة ====== */
-    button {
-      background: var(--accent-green);
-      color: var(--bg-dark);
-      border: none;
-      border-radius: 8px;
-      padding: 12px 20px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s; 
-      /* تأثير خفيف عند الضغط */
-    }
-
-    button:active {
-      opacity: 0.8; /* يخفت الزر لما تضغطه */
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    button { background: var(--accent-green); color: var(--bg-dark); border: none; border-radius: 8px;
+      padding: 12px 20px; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    button:active { opacity: 0.8; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ====== 6. الحقول العامة Input ====== */
-    /* ====== 6. الحقول العامة Input ====== */
-input, textarea {
-  background: var(--bg-panel);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 16px; /* مهم: يمنع الزوم التلقائي في الايفون */
-  outline: none;
-  text-align: center;
-}
-
-    input:focus {
-      border-color: var(--accent-green); /* يتلون الحد أخضر لما تضغط على الحقل */
-    }
+    input, textarea { background: var(--bg-panel); color: var(--text-primary); border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 12px 16px; font-size: 16px; outline: none; text-align: center; }
+    input:focus { border-color: var(--accent-green); }
 
     /* ====== 7. المودال والاوفرلاي ====== */
-    /* الطبقة الشفافة اللي تغطي الشاشة لما يفتح مودال */
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5); /* أسود شفاف */
-      z-index: 1000; /* يخليه فوق كل شيء */
-    }
+   .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5); z-index: 1000; }
+   .overlay.active { display: block; }
+   .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: var(--bg-panel); border-radius: 12px; padding: 20px; z-index: 1001;
+      min-width: 280px; max-width: 90%; }
+   .modal.active { display: block; }
 
-    .overlay.active {
-      display: block; /* يظهر لما نضيف class active */
-    }
+    /* ====== 8. التوست Toast ====== */
+   .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--bg-panel); color: var(--text-primary); padding: 12px 24px;
+      border-radius: 8px; display: none; z-index: 2000; }
+   .toast.show { display: block; animation: fadeInOut 3s forwards; }
+    @keyframes fadeInOut { 0% { opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
 
-    /* الصندوق المنبثق نفسه */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%); /* يخلي المودال وسط الشاشة تماماً */
-      background: var(--bg-panel);
-      border-radius: 12px;
-      padding: 20px;
-      z-index: 1001;
-      min-width: 280px;
-      max-width: 90%;
-    }
+   .send-btn { width: 48px; height: 48px; border-radius: 50%; background: #25d366; border: none;
+      display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; flex-shrink: 0; padding: 0; }
+   .send-btn:active { background: #1ebc57; }
+   .send-btn svg { transform: rotate(0deg); margin-left: 0; margin-right: 2px; }
 
-    .modal.active {
-      display: block;
-    }
-
-    /* ====== 8. التوست Toast للرسائل المؤقتة ====== */
-    .toast {
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--bg-panel);
-      color: var(--text-primary);
-      padding: 12px 24px;
-      border-radius: 8px;
-      display: none;
-      z-index: 2000;
-    }
-
-    .toast.show {
-      display: block;
-      animation: fadeInOut 3s forwards;
-    }
-
-.send-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #25d366; /* أخضر الواتساب */
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  cursor: pointer;
-  flex-shrink: 0;
-  padding: 0;
-}
-
-.send-btn:active {
-  background: #1ebc57;
-}
-
-.send-btn svg {
-  transform: rotate(0deg); /* يميل السهم 45 درجة */
-  margin-left: 0; 
-  margin-right: 2px; /* يضبطه في النص */
-}
-
-    @keyframes fadeInOut {
-      0% { opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { opacity: 0; }
-    }
+    /* ====== باقي الستايل حقك زي ماهو ====== */
+   .login-container { display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; padding: 24px; gap: 20px; max-width: 400px; margin: 0 auto; }
+   .logo { font-size: 64px; }
+   .app-title { font-size: 28px; font-weight: 700; color: var(--text-primary); }
+   .app-subtitle { font-size: 15px; color: var(--text-secondary); text-align: center; }
+   .login-buttons { display: flex; gap: 12px; width: 100%; }
+   .login-buttons button { flex: 1; }
+   .auth-form { display: none; flex-direction: column; gap: 12px; width: 100%; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    #chatsHeader { height: 60px; background: var(--bg-dark); display: flex; justify-content: space-between;
+      align-items: center; padding: 0 16px; border-bottom: 1px solid var(--border-color); }
+   .user-info { display: flex; flex-direction: column; }
+    #currentUserName { font-size: 17px; font-weight: 600; }
+    #currentUserNumber { font-size: 13px; color: var(--text-secondary); }
+   .icon-btn { background: none; border: none; font-size: 24px; padding: 8px; color: var(--text-primary); }
+    #loginScreen, #registerScreen, #recoverScreen { background: #111b21; }
+    #chatsList { flex: 1; overflow-y: auto; background: var(--bg-chat-list, #111b21); }
+   .chat-item { display: flex; align-items: center; padding: 12px 16px; gap: 12px;
+      border-bottom: 1px solid var(--border-color); cursor: pointer; }
+   .chat-item:active { background: var(--bg-panel); }
+   .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-panel);
+      display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 600; flex-shrink: 0; }
+   .chat-info { flex: 1; min-width: 0; }
+   .chat-top { display: flex; justify-content: space-between; }
+   .chat-name { font-size: 16px; font-weight: 500; }
+   .chat-time { font-size: 12px; color: var(--text-secondary); }
+   .chat-bottom { display: flex; justify-content: space-between; margin-top: 4px; }
+   .last-msg { font-size: 14px; color: var(--text-secondary); white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; max-width: 70%; }
+   .unread-count { background: var(--accent-green); color: var(--bg-dark); font-size: 12px;
+      padding: 2px 6px; border-radius: 12px; font-weight: 600; }
+    #chatsFooter { height: 64px; background: var(--bg-panel); display: flex; align-items: center;
+      padding: 8px 12px; gap: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+    #chatHeader { height: 60px; background: var(--bg-dark); display: flex; align-items: center;
+      padding: 0 12px; gap: 12px; border-bottom: 1px solid var(--border-color); }
+   .chat-user-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+   .chat-user-details { display: flex; flex-direction: column; }
+    #chatUserStatus { font-size: 13px; color: var(--text-secondary); }
+    #messagesList { flex: 1; overflow-y: auto; background: var(--bg-chat-list, #0b141a);
+      padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+   .msg-me { align-self: flex-start; background: var(--bg-message-me); color: var(--text-primary);
+      padding: 8px 12px; border-radius: 12px 12px 12px 0; max-width: 75%; word-wrap: break-word; }
+   .msg-other { align-self: flex-end; background: var(--bg-message-other); color: var(--text-primary);
+      padding: 8px 12px; border-radius: 12px 12px 0 12px; max-width: 75%; word-wrap: break-word; }
+    #chatInputBar { background: var(--bg-panel); display: flex; align-items: flex-end; padding: 8px 12px;
+      gap: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); flex-wrap: nowrap; direction: rtl; flex-direction: row; }
+    #messageInput { flex: 1 1 0; min-height: 40px; max-height: 120px; resize: none; min-width: 0;
+      user-select: text; -webkit-user-select: text; }
+    #emojiPanel { display: none; height: 240px; background: var(--bg-dark); overflow-y: auto;
+      grid-template-columns: repeat(8, 1fr); padding: 12px; gap: 8px; }
+    #btnErdue { color: #4ec9b0; font-size: 20px; }
+   .emoji-item { font-size: 28px; text-align: center; cursor: pointer; padding: 8px; }
+   .emoji-item:active { background: var(--bg-panel); border-radius: 8px; }
+   .menu-item { width: 100%; text-align: right; background: none; color: var(--text-primary);
+      padding: 14px 16px; border-radius: 0; font-weight: 400; }
+   .menu-item:active { background: var(--bg-dark); }
+   .tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 16px; }
+   .tab { flex: 1; background: none; color: var(--text-secondary); padding: 12px; border-radius: 0; }
+   .tab.active { color: var(--accent-green); border-bottom: 2px solid var(--accent-green); }
+   .colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+   .color-item { height: 48px; border-radius: 8px; cursor: pointer; }
+   .confirm-buttons { display: flex; gap: 12px; margin-top: 16px; }
+   .confirm-buttons button { flex: 1; }
   </style>
-  
-  
-  
-<style>
-/* ========== القسم 1.1: ستايل العناصر الداخلية لواجهات التطبيق ========== */
-
-/* ===== 1. واجهة تسجيل الدخول ===== */
-.login-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 24px;
-  gap: 20px;
-  max-width: 400px;
-  margin: 0 auto;
-  /* يخلي المحتوى في النص ومايتمد على كل العرض */
-}
-
-.logo {
-  font-size: 64px;
-  /* حجم الايموجي/اللوجو */
-}
-
-.app-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.app-subtitle {
-  font-size: 15px;
-  color: var(--text-secondary);
-  text-align: center;
-}
-
-.login-buttons {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-}
-
-.login-buttons button {
-  flex: 1;
-  /* الزرين ياخذو نفس العرض جنب بعض */
-}
-
-.auth-form {
-  display: none;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  animation: fadeIn 0.3s ease;
-  /* يظهر بسلاسة لما يفتح */
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== 2. واجهة المحادثات ===== */
-#chatsHeader {
-  height: 60px;
-  background: var(--bg-dark);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-}
-
-#currentUserName {
-  font-size: 17px;
-  font-weight: 600;
-}
-
-#currentUserNumber {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  padding: 8px;
-  color: var(--text-primary);
-}
-
-#loginScreen, #registerScreen, #recoverScreen {
-  background: #111b21;
-}
-
-
-
-#chatsList {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--bg-chat-list, #111b21);
-}
-
-
-
-.chat-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  gap: 12px;
-  border-bottom: 1px solid var(--border-color);
-  cursor: pointer;
-}
-
-.chat-item:active {
-  background: var(--bg-panel);
-}
-
-.avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--bg-panel);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.chat-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.chat-top {
-  display: flex;
-  justify-content: space-between;
-}
-
-.chat-name {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.chat-time {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.chat-bottom {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 4px;
-}
-
-.last-msg {
-  font-size: 14px;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 70%;
-}
-
-.unread-count {
-  background: var(--accent-green);
-  color: var(--bg-dark);
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 12px;
-  font-weight: 600;
-}
-
-#chatsFooter {
-  height: 64px;
-  background: var(--bg-panel);
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  gap: 8px;
-  padding-bottom: calc(8px + env(safe-area-inset-bottom));
-  /* يحسب مساحة الشريط السفلي للايفون */
-}
-
-/* ===== 3. واجهة الدردشة ===== */
-#chatHeader {
-  height: 60px;
-  background: var(--bg-dark);
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  gap: 12px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.chat-user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.chat-user-details {
-  display: flex;
-  flex-direction: column;
-}
-
-#chatUserStatus {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-#messagesList {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--bg-chat-list, #0b141a);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* رسائلك انت - خليها على اليسار */
-.msg-me {
-  align-self: flex-start;  /* كان flex-end */
-  background: var(--bg-message-me);
-  color: var(--text-primary);
-  padding: 8px 12px;
-  border-radius: 12px 12px 12px 0; /* خلي الزاوية المربعة من اليسار تحت زي الواتساب */
-  max-width: 75%;
-  word-wrap: break-word;
-}
-
-/* رسائل الطرف الثاني - خليها على اليمين */
-.msg-other {
-  align-self: flex-end;  /* كان flex-start */
-  background: var(--bg-message-other);
-  color: var(--text-primary);
-  padding: 8px 12px;
-  border-radius: 12px 12px 0 12px; /* الزاوية المربعة من اليمين تحت */
-  max-width: 75%;
-  word-wrap: break-word;
-}
-
-#chatInputBar {
-  background: var(--bg-panel);
-  display: flex;
-  align-items: flex-end;
-  padding: 8px 12px;
-  gap: 8px;
-  padding-bottom: calc(8px + env(safe-area-inset-bottom));
-  
-  /* السطرين الجدد */
- /* direction: ltr; */ /* يثبت الترتيب من اليسار لليمين للشريط هذا فقط */
-  /* flex-direction: row; *. *//* يمنع الانقلاب */
-flex-wrap: nowrap; /* ممنوع يلف سطر ثاني */
-  direction: rtl; /* خليه RTL زي الواتساب */
-flex-direction: row;
-    
-    
-}
-
-
-
-
-#messageInput {
-  flex: 1 1 0;
-  min-height: 40px;
-  max-height: 120px;
-  resize: none;
-  min-width: 0;
-  user-select: text;
-  -webkit-user-select: text;
-  /* نسمح بالنسخ واللصق هنا فقط */
-}
-
-#emojiPanel {
-  display: none;
-  height: 240px;
-  background: var(--bg-dark);
-  overflow-y: auto;
-  
-  grid-template-columns: repeat(8, 1fr);
-  padding: 12px;
-  gap: 8px;
-}
-
-
-#btnErdue {
-  color: #4ec9b0; /* لون أخضر زي الثيم */
-  font-size: 20px;
-}
-
-.emoji-item {
-  font-size: 28px;
-  text-align: center;
-  cursor: pointer;
-  padding: 8px;
-}
-
-.emoji-item:active {
-  background: var(--bg-panel);
-  border-radius: 8px;
-}
-
-/* ===== 4. المودالات ===== */
-.menu-item {
-  width: 100%;
-  text-align: right;
-  background: none;
-  color: var(--text-primary);
-  padding: 14px 16px;
-  border-radius: 0;
-  font-weight: 400;
-}
-
-.menu-item:active {
-  background: var(--bg-dark);
-}
-
-.tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 16px;
-}
-
-.tab {
-  flex: 1;
-  background: none;
-  color: var(--text-secondary);
-  padding: 12px;
-  border-radius: 0;
-}
-
-.tab.active {
-  color: var(--accent-green);
-  border-bottom: 2px solid var(--accent-green);
-}
-
-.colors {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.color-item {
-  height: 48px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.confirm-buttons {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.confirm-buttons button {
-  flex: 1;
-}
-</style>
-  
-  
 </head>
 
-
-
-
-
-<!-- ========== القسم 2: هيكل HTML للواجهات الثلاث ========== -->
 <body>
-
-
-
-  <!-- 1. واجهة تسجيل الدخول / إنشاء حساب / استعادة حساب -->
+  <!-- ========== القسم 2: HTML زي ماهو بدون تغيير ========== -->
   <div id="loginScreen" class="screen active">
-    <!-- active: عشان تظهر أول ما يفتح الموقع -->
-    
-    <!-- الحاوية الوسطى -->
     <div class="login-container">
-      <!-- لوجو التطبيق -->
       <div class="logo">💬</div>
-      
-      <!-- عنوان التطبيق -->
       <h1 class="app-title">واتساب هارون</h1>
       <p class="app-subtitle">مرحباً بك، سجل دخولك للمتابعة</p>
-
-      <!-- أزرار Toggle: تضغط يفتح الفورم، تضغط ثاني يخفيه -->
       <div class="login-buttons">
         <button id="btnShowSignup">إنشاء حساب</button>
         <button id="btnShowRestore">استعادة حساب</button>
       </div>
-
-      <!-- فورم إنشاء حساب - مخفي بالبداية -->
       <div id="signupForm" class="auth-form">
         <input type="text" id="signupName" placeholder="الاسم" inputmode="text" maxlength="20">
-        <!-- inputmode=text: يطلع كيبورد حروف فقط -->
-        <!-- JS بيمنع الأرقام والرموز أثناء الكتابة -->
-        
         <input type="password" id="signupPass" placeholder="كلمة المرور" inputmode="numeric" maxlength="10">
-        <!-- inputmode=numeric: يطلع كيبورد أرقام فقط -->
-        
         <button id="btnSignup">تسجيل</button>
       </div>
-
-      <!-- فورم استعادة حساب - مخفي بالبداية -->
       <div id="restoreForm" class="auth-form">
         <input type="text" id="restoreNumber" placeholder="رقم المستخدم 7 أرقام" inputmode="numeric" maxlength="7">
         <input type="password" id="restorePass" placeholder="كلمة المرور" inputmode="numeric" maxlength="10">
@@ -628,37 +155,23 @@ flex-direction: row;
     </div>
   </div>
 
-  <!-- 2. واجهة المحادثات -->
   <div id="chatsScreen" class="screen">
-    <!-- الشريط العلوي -->
     <header id="chatsHeader">
       <div class="user-info">
         <span id="currentUserName">الاسم</span>
         <span id="currentUserNumber">1234567</span>
       </div>
       <button id="btnErdue" class="icon-btn" title="Erdue Tools">⚡</button>
-  <button id="btnChatsMenu" class="icon-btn">⋮</button>
-      
-
-      <!-- ⋮ = أيقونة 3 نقاط -->
+      <button id="btnChatsMenu" class="icon-btn">⋮</button>
     </header>
-
-    <!-- قائمة المحادثات - تاخذ كل المساحة المتبقية -->
-    <div id="chatsList">
-      <!-- JS بيضيف المحادثات هنا ديناميكياً -->
-      <!-- كل محادثة فيها: أيقونة الحرف، الاسم، الرقم، آخر رسالة، الوقت، العداد -->
-    </div>
-
-    <!-- الشريط السفلي: بحث برقم -->
+    <div id="chatsList"></div>
     <footer id="chatsFooter">
       <input type="text" id="searchNumber" placeholder="ابحث برقم المستخدم" inputmode="numeric" maxlength="7">
       <button id="btnSearch">بحث</button>
     </footer>
   </div>
 
-  <!-- 3. واجهة الدردشة -->
   <div id="chatScreen" class="screen">
-    <!-- الشريط العلوي -->
     <header id="chatHeader">
       <button id="btnBackToChats" class="icon-btn">←</button>
       <div class="chat-user-info">
@@ -670,65 +183,40 @@ flex-direction: row;
       </div>
       <button id="btnChatMenu" class="icon-btn">⋮</button>
     </header>
-
-    <!-- منطقة الرسائل - تاخذ كل المساحة وتعمل سكرول -->
-    <div id="messagesList">
-      <!-- JS بيضيف الرسائل هنا -->
-      <!-- الرسائل: يمين أخضر، يسار رمادي، صحين، وقت -->
-    </div>
-
-    <!-- الشريط السفلي: كتابة وإرسال -->
+    <div id="messagesList"></div>
     <footer id="chatInputBar">
       <button id="btnEmoji" class="icon-btn">😀</button>
       <input type="text" id="messageInput" placeholder="اكتب رسالة...">
-      <!-- هذا الحقل الوحيد اللي بنسمح فيه بالنسخ واللصق -->
-      
       <button id="btnVoice" class="icon-btn">🎤</button>
       <button id="btnSend" class="send-btn" aria-label="إرسال">
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-  </svg>
-</button>
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
     </footer>
-
-    <!-- بانل الايموجي - مخفي بالبداية وتظهر فوق الشريط السفلي -->
-    <div id="emojiPanel">
-      <!-- JS بيضيف 60+ ايموجي هنا -->
-    </div>
+    <div id="emojiPanel"></div>
   </div>
 
-  <!-- 4. المودالات والقوائم المنبثقة - موجودة برا الشاشات عشان تغطي الكل -->
   <div id="modalOverlay" class="overlay"></div>
-  <!-- overlay: الطبقة الشفافة اللي تغطي الشاشة وتقفل المودال لو ضغطت عليها -->
-
-  <!-- مودال قائمة الـ 3 نقاط في المحادثات -->
   <div id="chatsMenuModal" class="modal">
     <button class="menu-item" id="btnChangeTheme">تغيير الألوان</button>
     <button class="menu-item" id="btnChangePass">تغيير كلمة المرور</button>
     <button class="menu-item" id="btnLogout">تسجيل الخروج</button>
   </div>
-
-  <!-- مودال تغيير الألوان -->
   <div id="themeModal" class="modal">
     <div class="tabs">
       <button class="tab active" data-tab="header">الشريط العلوي</button>
       <button class="tab" data-tab="chat">وسط الواجهة</button>
       <button class="tab" data-tab="footer">الشريط السفلي</button>
     </div>
-    <div class="colors">
-      <!-- JS بيضيف 6 ألوان قابلة للاختيار -->
-    </div>
+    <div class="colors"></div>
   </div>
-
-  <!-- مودال تغيير كلمة المرور -->
   <div id="changePassModal" class="modal">
     <input type="password" id="oldPass" placeholder="كلمة المرور القديمة" inputmode="numeric">
     <input type="password" id="newPass" placeholder="كلمة المرور الجديدة" inputmode="numeric">
     <input type="password" id="confirmPass" placeholder="تأكيد كلمة المرور" inputmode="numeric">
     <button id="btnSavePass">حفظ</button>
   </div>
-
-  <!-- مودال تأكيد الحذف والمسح -->
   <div id="confirmModal" class="modal">
     <p id="confirmText">هل أنت متأكد؟</p>
     <div class="confirm-buttons">
@@ -736,1355 +224,867 @@ flex-direction: row;
       <button id="btnConfirmNo">لا</button>
     </div>
   </div>
-
-  <!-- 5. التوست للرسائل المؤقتة -->
   <div id="toast" class="toast"></div>
 
-
-
-
-
-<div class="modal" id="erdueModal">
-  <div class="modal-title">Erdue Tools</div>
-  <div class="modal-content" style="display:flex; flex-direction:column; gap:12px; max-height:70vh; overflow:auto;">
-
-    <!-- تبويب الكونسول -->
-    <div class="erdue-section">
-      <h4 style="margin:0 0 6px 0; color:#4ec9b0;">1. الكونسول</h4>
-      <textarea id="erdueConsoleOutput" readonly style="width:100%;height:140px;background:#1e1e1e;color:#d4d4d4;font-family:monospace;font-size:12px;border:1px solid #333;border-radius:4px;padding:6px;"></textarea>
-      <input type="text" id="erdueConsoleInput" placeholder="اكتب JS هنا واضغط Enter" style="width:100%;margin-top:6px;padding:6px;background:#252526;color:#fff;border:1px solid #333;border-radius:4px;">
-    </div>
-
-    <!-- تبويب الكود المصدري -->
-    <div class="erdue-section">
-      <h4 style="margin:0 0 6px 0; color:#4ec9b0;">2. الكود المصدري</h4>
-      <pre id="erdueSourceOutput" style="max-height:160px;overflow:auto;background:#1e1e1e;color:#d4d4d4;padding:8px;font-size:11px;border:1px solid #333;border-radius:4px;"></pre>
-    </div>
-
-    <!-- تبويب الدوال -->
-    <div class="erdue-section">
-      <h4 style="margin:0 0 6px 0; color:#4ec9b0;">3. الدوال المتاحة</h4>
-      <div id="erdueFunctionsList" style="max-height:160px;overflow:auto;background:#1e1e1e;color:#d4d4d4;padding:6px;border:1px solid #333;border-radius:4px;font-size:12px;"></div>
-    </div>
-
-  </div>
-  <button class="modal-close" onclick="closeModal()">إغلاق</button>
-</div>
-
-
-
-
-<script>
-/* ========== القسم 3: JavaScript - المنطق والتحكم بالواجهة ========== */
-
-/* ===== 1. متغيرات الحالة العامة ===== */
-let currentUser = null; 
-// بيانات المستخدم الحالي: uid, name, number. نقراه من localStorage
-
-let activeScreen = 'login'; 
-// يتتبع الشاشة الظاهرة الحين: login, chats, chat
-
-let activeModal = null; 
-// يتتبع المودال المفتوح الحين عشان نقفله لو ضغط المستخدم برا
-
-/* ===== 2. دالة الانتقال بين الشاشات ===== */
-function showScreen(screenId) {
-  // يخفي كل الشاشات
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  // يظهر الشاشة المطلوبة
-  document.getElementById(screenId).classList.add('active');
-  activeScreen = screenId;
-  console.log('[UI] تم الانتقال إلى:', screenId);
-}
-
-/* ===== 3. دوال Toggle للفورمات في صفحة تسجيل الدخول ===== */
-function toggleForm(formType) {
-  const signupForm = document.getElementById('signupForm');
-  const restoreForm = document.getElementById('restoreForm');
-  
-  // لو ضغط إنشاء حساب
-  if (formType === 'signup') {
-    const isOpen = signupForm.style.display === 'flex';
-    signupForm.style.display = isOpen ? 'none' : 'flex'; // يفتح ويخفي بنفسه
-    restoreForm.style.display = 'none'; // يخفي الثاني
-  }
-  
-  // لو ضغط استعادة حساب
-  if (formType === 'restore') {
-    const isOpen = restoreForm.style.display === 'flex';
-    restoreForm.style.display = isOpen ? 'none' : 'flex';
-    signupForm.style.display = 'none';
-  }
-}
-
-/* ===== 4. ربط أزرار Toggle ===== */
-document.getElementById('btnShowSignup').addEventListener('click', () => {
-  toggleForm('signup');
-});
-
-document.getElementById('btnShowRestore').addEventListener('click', () => {
-  toggleForm('restore');
-});
-
-/* ===== 17. نظام تغيير الالوان ===== */
-const themeColors = ['#111b21', '#202c33', '#0b141a', '#075e54', '#128c7e', '#25d366'];
-let activeTab = 'header'; // header, chat, footer
-
-function initThemeTabs() {
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.onclick = () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      activeTab = tab.dataset.tab;
-    };
-  });
-}
-
-function initThemeColors() {
-  const colorsDiv = document.querySelector('.colors');
-  colorsDiv.innerHTML = '';
-  themeColors.forEach(color => {
-    const div = document.createElement('div');
-    div.className = 'color-item';
-    div.style.background = color;
-    div.onclick = () => {
-      applyThemeColor(color, activeTab);
-      closeModal();
-    };
-    colorsDiv.appendChild(div);
-  });
-}
-
-async function applyThemeColor(color, target) {
-  if (!color) return;
-
-  if (target === 'header') {
-    document.getElementById('chatsHeader').style.background = color;
-    document.getElementById('chatHeader').style.background = color;
-    document.documentElement.style.setProperty('--bg-dark', color);
-  }
-  
-  if (target === 'chat') {
-    document.getElementById('chatsList').style.background = color;
-    document.getElementById('messagesList').style.background = color;
-    document.documentElement.style.setProperty('--bg-chat-list', color);
-  }
-  
-  if (target === 'footer') {
-    document.getElementById('chatsFooter').style.background = color;
-    document.getElementById('chatInputBar').style.background = color;
-    document.documentElement.style.setProperty('--bg-panel', color);
-  }
-
-  const themeObj = {
-    header: document.documentElement.style.getPropertyValue('--bg-dark') || '#111b21',
-    chatList: document.documentElement.style.getPropertyValue('--bg-chat-list') || '#0b141a',
-    footer: document.documentElement.style.getPropertyValue('--bg-panel') || '#202c33',
-    updatedAt: Date.now()
-  };
-  
-  localStorage.setItem('wa_theme', JSON.stringify(themeObj));
-  
-  if (currentUser) {
-    try {
-      await update(ref(db, `users/${currentUser.uid}/theme`), themeObj);
-    } catch (err) {
-      console.error('خطأ في حفظ الثيم:', err);
-      showToast('تعذر حفظ اللون');
-    }
-  }
-}
-
-/* ===== 5. دوال المودالات والقوائم ===== */
-function openModal(modalId) {
-  closeModal(); // نغلق أي مودال مفتوح أول
-  document.getElementById('modalOverlay').classList.add('active');
-  document.getElementById(modalId).classList.add('active');
-  activeModal = modalId;
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('active');
-  document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-  activeModal = null;
-}
-
-function openErdueModal() {
-  document.getElementById('modalOverlay').classList.add('active');
-  document.getElementById('erdueModal').classList.add('active');
-  activeModal = 'erdue';
-
-  // اعرض الكونسول الحالي
-  document.getElementById('erdueConsoleOutput').value = document.getElementById('debugOutput')?.textContent || 'لا يوجد خرج';
-
-  // اعرض الكود المصدري
-  document.getElementById('erdueSourceOutput').textContent = document.documentElement.outerHTML.substring(0, 5000) + '...';
-
-  // اعرض الدوال المتاحة
-  const funcs = Object.getOwnPropertyNames(window).filter(n => typeof window[n] === 'function').slice(0, 50);
-  document.getElementById('erdueFunctionsList').innerHTML = funcs.map(f => `<div style="padding:4px;border-bottom:1px solid #333;">${f}</div>`).join('');
-}
-
-
-
-/* ===== 6. إغلاق المودال عند الضغط خارجها ===== */
-document.getElementById('modalOverlay').addEventListener('click', () => {
-  closeModal();
-});
-
-// نمنع إغلاق المودال لو ضغط المستخدم داخل المودال نفسه
-document.querySelectorAll('.modal').forEach(modal => {
-  modal.addEventListener('click', (e) => {
-    e.stopPropagation(); // يوقف انتشار الحدث للأب
-  });
-});
-
-
-
-
-
-/* ===== 7. ربط أزرار قائمة الـ 3 نقاط ===== */
-
-
-/* ===== 7. ربط أزرار قائمة الـ 3 نقاط ===== */
-document.getElementById('btnChatsMenu').addEventListener('click', (e) => {
-  e.stopPropagation();
-  openModal('chatsMenuModal');
-});
-
-// ربط زر Erdue للكل
-document.getElementById('btnErdue').addEventListener('click', (e) => {
-  e.stopPropagation();
-  openErdueModal();
-});
-
-document.getElementById('btnChatMenu').addEventListener('click', (e) => {
-  e.stopPropagation();
-  openModal('chatsMenuModal');
-});
-
-/* ===== 8. دالة عرض التوست للرسائل المؤقتة ===== */
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
-  
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
-
-function showBannedScreen() {
-  document.body.innerHTML = `
-    <div style="height:100dvh; display:flex; align-items:center; justify-content:center; background:#111b21; flex-direction:column; gap:20px;">
-      <h2 style="color:#e9edef">الحساب موقف</h2>
-      <div class="toast show" style="position:relative; bottom:auto; left:auto; transform:none; display:block;">
-        حسابك موقف من قبل الإدارة
+  <div class="modal" id="erdueModal">
+    <div class="modal-title">Erdue Tools</div>
+    <div class="modal-content" style="display:flex; flex-direction:column; gap:12px; max-height:70vh; overflow:auto;">
+      <div class="erdue-section">
+        <h4 style="margin:0 0 6px 0; color:#4ec9b0;">1. الكونسول</h4>
+        <textarea id="erdueConsoleOutput" readonly style="width:100%;height:140px;background:#1e1e1e;color:#d4d4d4;font-family:monospace;font-size:12px;border:1px solid #333;border-radius:4px;padding:6px;"></textarea>
+        <input type="text" id="erdueConsoleInput" placeholder="اكتب JS هنا واضغط Enter" style="width:100%;margin-top:6px;padding:6px;background:#252526;color:#fff;border:1px solid #333;border-radius:4px;">
+      </div>
+      <div class="erdue-section">
+        <h4 style="margin:0 0 6px 0; color:#4ec9b0;">2. الكود المصدري</h4>
+        <pre id="erdueSourceOutput" style="max-height:160px;overflow:auto;background:#1e1e1e;color:#d4d4d4;padding:8px;font-size:11px;border:1px solid #333;border-radius:4px;"></pre>
+      </div>
+      <div class="erdue-section">
+        <h4 style="margin:0 0 6px 0; color:#4ec9b0;">3. الدوال المتاحة</h4>
+        <div id="erdueFunctionsList" style="max-height:160px;overflow:auto;background:#1e1e1e;color:#d4d4d4;padding:6px;border:1px solid #333;border-radius:4px;font-size:12px;"></div>
       </div>
     </div>
-  `;
-}
+    <button class="modal-close" onclick="closeModal()">إغلاق</button>
+  </div>
 
+  <!-- ========== القسم 3+4+5: كل الجافاسكربت في Module واحد فقط ========== -->
+  <script type="module">
+    /* استيراد Firebase */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, set, get, push, onValue, update, remove, serverTimestamp }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+    /* ========== القسم 4: Firebase Config ========== */
+    const firebaseConfig = {
+      apiKey: "AIzaSyDSWYRUfeO0ruDXO-2lv4tnrqxBVUHXFIs",
+      authDomain: "watsapp-haroon.firebaseapp.com",
+      databaseURL: "https://watsapp-haroon-default-rtdb.firebaseio.com",
+      projectId: "watsapp-haroon",
+      storageBucket: "watsapp-haroon.firebasestorage.app",
+      messagingSenderId: "85603158090",
+      appId: "1:85603158090:web:001303416bd3a68879feb3"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    console.log("[FB] تم الاتصال بقاعدة البيانات");
 
-/* ===== 9. منع النسخ واللصق والضغط اليمين ===== */
-document.addEventListener('contextmenu', e => e.preventDefault()); // منع كليك يمين
-document.addEventListener('copy', e => e.preventDefault()); // منع النسخ
+    /* ========== القسم 3: متغيرات الحالة العامة ========== */
+    let currentUser = null;
+    let activeScreen = 'login';
+    let activeModal = null;
+    let chatsUnsubscribe = null;
+    let messagesUnsubscribe = null;
+    let currentChatId = null;
+    let currentChatOtherId = null;
 
-document.addEventListener('paste', e => {
-  // نسمح باللصق فقط لو العنصر هو حقل الرسالة
-  if (e.target.id !== 'messageInput') {
-    e.preventDefault();
-  }
-});
+    /* ========== القسم 3: دوال UI ========== */
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      activeScreen = screenId;
+      console.log('[UI] تم الانتقال إلى:', screenId);
+    }
 
-/* ===== 10. منع إدخال أرقام/رموز في حقل الاسم ===== */
-document.getElementById('signupName').addEventListener('input', (e) => {
-  // يسمح فقط بالحروف العربية والإنجليزية
-  e.target.value = e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '');
-});
-
-/* ===== 11. منع إدخال حروف/رموز في حقول الأرقام وكلمة المرور ===== */
-['signupPass', 'restoreNumber', 'restorePass', 'searchNumber', 'oldPass', 'newPass', 'confirmPass']
-.forEach(id => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/\D/g, ''); // يمسح أي شي غير رقم
-    });
-  }
-});
-
-/* ===== 12. التحقق من الجلسة عند فتح الموقع ===== */
-/* ===== 12. التحقق من الجلسة عند فتح الموقع ===== */
-window.addEventListener('load', () => {
-  
-  /* ===== ربط زر Erdue للكل - ضفته هنا عشان يشتغل بعد تحميل الـ DOM ===== */
-  document.getElementById('btnErdue')?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openErdueModal();
-  });
-
-  const savedUser = localStorage.getItem('wa_haroon_user');
-  
-  if (savedUser) {
-    // 1. اقرأ البيانات المخزنة محلياً
-    currentUser = JSON.parse(savedUser);
-    
-    // 2. جيب بيانات المستخدم كاملة من Firebase عشان نفحص الحالة isAdmin و status
-    get(ref(db, `users/${currentUser.uid}`)).then(snap => {
-      if (!snap.exists()) {
-        // لو الحساب انحذف من Firebase امسح localStorage وارجع لشاشة الدخول
-        localStorage.removeItem('wa_haroon_user');
-        showScreen('loginScreen');
-        return;
+    function toggleForm(formType) {
+      const signupForm = document.getElementById('signupForm');
+      const restoreForm = document.getElementById('restoreForm');
+      if (formType === 'signup') {
+        const isOpen = signupForm.style.display === 'flex';
+        signupForm.style.display = isOpen? 'none' : 'flex';
+        restoreForm.style.display = 'none';
       }
-
-      const userData = snap.val();
-      
-      // 3. دمج البيانات الجديدة مع القديمة
-      currentUser = { ...currentUser, ...userData };
-
-      // 4. [تعديل] خزن النسخة المحدثة في localStorage 
-      // عشان ما تتكرر مشكلة "المستخدم ليس أدمن" بعد التحديث
-      localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
-
-      console.log("[Admin Debug] userData:", userData);
-      console.log("[Admin Debug] currentUser بعد الدمج:", currentUser);
-
-      // 5. فحص: لو الحساب موقف اعرض شاشة التوقف ووقف التنفيذ قبل أي شي
-      if (userData?.status === "banned") {
-        showBannedScreen(); 
-        return;
-      }
-
-      // 6. [تعديل] شغل الواجهة الأساسية أولاً
-      showScreen('chatsScreen');
-      document.getElementById('currentUserName').textContent = userData.name;
-      document.getElementById('currentUserNumber').textContent = userData.number;
-      showToast(`أهلاً ${userData.name}`);
-      loadChatsList();
-      
-      // 7. [تعديل] شغل دوال الأدمن بعد ما تتأكد إن currentUser جاهز 100%
-      // وإن المستخدم مش موقف
-      showDebugForAdmin();
-      addAdminMenuItems();
-
-      // 8. حمّل الثيم من Firebase أولاً، لو ما لقى خذ من localStorage
-      get(ref(db, `users/${currentUser.uid}/theme`)).then(snap => {
-        if (snap.exists()) {
-          const theme = snap.val();
-          applyThemeColor(theme.header, 'header');
-          applyThemeColor(theme.chatList, 'chat');
-          applyThemeColor(theme.footer, 'footer');
-        } else if (localStorage.getItem('wa_theme')) {
-          const theme = JSON.parse(localStorage.getItem('wa_theme'));
-          applyThemeColor(theme.header, 'header');
-          applyThemeColor(theme.chatList, 'chat');
-          applyThemeColor(theme.footer, 'footer');
-        }
-      }).catch(err => {
-        console.error('خطأ تحميل الثيم:', err);
-        const savedTheme = localStorage.getItem('wa_theme');
-        if (savedTheme) {
-          const theme = JSON.parse(savedTheme);
-          applyThemeColor(theme.header, 'header');
-          applyThemeColor(theme.chatList, 'chat');
-          applyThemeColor(theme.footer, 'footer');
-        }
-      });
-      
-    }).catch(err => {
-      console.error('خطأ جلب بيانات المستخدم:', err);
-      // لو فشل الاتصال، امسح الجلسة وارجع للدخول
-      localStorage.removeItem('wa_haroon_user');
-      showScreen('loginScreen');
-    });
-    
-  } else {
-    showScreen('loginScreen');
-  }
-});
-
-
-
-
-
-/* ===== 13. زر الرجوع في شاشة الدردشة ===== */
-document.getElementById('btnBackToChats').addEventListener('click', () => {
-  showScreen('chatsScreen');
-});
-
-/* ===== 14. التعامل مع زر الرجوع في المتصفح/الجوال ===== */
-window.addEventListener('popstate', () => {
-  if (activeScreen === 'chatScreen') {
-    showScreen('chatsScreen');
-    history.pushState(null, null, location.href); // يمنع الخروج
-  } else if (activeScreen === 'chatsScreen') {
-    // لو ضغط رجوع مرة ثانية يطلع من الموقع
-    window.close(); 
-  }
-});
-history.pushState(null, null, location.href); // يفعّل التعامل مع زر الرجوع
-
-/* ===== 15. فتح/إغلاق بانل الإيموجي ===== */
-const btnEmoji = document.getElementById('btnEmoji');
-const emojiPanel = document.getElementById('emojiPanel');
-const messageInput = document.getElementById('messageInput');
-
-btnEmoji.addEventListener('click', () => {
-  const isOpen = emojiPanel.style.display === 'grid';
-  emojiPanel.style.display = isOpen ? 'none' : 'grid';
-  btnEmoji.textContent = isOpen ? '😀' : '⌨️'; // يغير الأيقونة
-  if (isOpen) messageInput.focus(); // يرجع الكيبورد
-});
-
-/* ===== 16. إنشاء الإيموجيات 60+ ===== */
-const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰',
-'😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞',
-'😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳',
-'🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯'];
-emojis.forEach(emoji => {
-  const span = document.createElement('span');
-  span.className = 'emoji-item';
-  span.textContent = emoji;
-  span.addEventListener('click', () => {
-  messageInput.value += emoji; // يضيف الإيموجي للحقل
-  messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length); // يخلي المؤشر بآخر النص
-  messageInput.blur(); // يقفل الكيبورد
-});
-  emojiPanel.appendChild(span);
-});
-</script>
-
-
-
-
-
-
-
-
-
-<script type="module">
-/* ========== القسم 4: Firebase + منطق البيانات اللحظية ========== */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, get, push, onValue, update, remove, serverTimestamp } 
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-
-/* ===== 18. تغيير كلمة المرور ===== */
-document.getElementById('btnSavePass').addEventListener('click', async () => {
-  const oldPass = document.getElementById('oldPass').value;
-  const newPass = document.getElementById('newPass').value;
-  const confirmPass = document.getElementById('confirmPass').value;
-
-  if (!oldPass || !newPass || !confirmPass) {
-    showToast('املأ كل الحقول');
-    return;
-  }
-
-  if (newPass !== confirmPass) {
-    showToast('كلمات المرور غير متطابقة');
-    return;
-  }
-
-  if (newPass.length < 5 || /(.)\1{4,}/.test(newPass) || newPass === "12345") {
-    showToast('كلمة المرور ضعيفة');
-    return;
-  }
-
-  const userRef = ref(db, `users/${currentUser.uid}`);
-  const snap = await get(userRef);
-  
-  if (!snap.exists() || snap.val().password !== oldPass) {
-    showToast('كلمة المرور القديمة خطأ');
-    return;
-  }
-
-  await update(userRef, { password: newPass });
-  showToast('تم تغيير كلمة المرور بنجاح');
-  closeModal();
-});
-
-
-/* ===== 1. إعدادات Firebase ===== */
-/* غير هذي القيم بإعدادات مشروعك من Firebase Console > Project Settings */
-const firebaseConfig = {
-  apiKey: "AIzaSyDSWYRUfeO0ruDXO-2lv4tnrqxBVUHXFIs",
-  authDomain: "watsapp-haroon.firebaseapp.com",
-  databaseURL: "https://watsapp-haroon-default-rtdb.firebaseio.com",
-  projectId: "watsapp-haroon",
-  storageBucket: "watsapp-haroon.firebasestorage.app",
-  messagingSenderId: "85603158090",
-  appId: "1:85603158090:web:001303416bd3a68879feb3"
-};
-
-
-
-
-
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-console.log("[FB] تم الاتصال بقاعدة البيانات");
-
-/* ===== 2. توليد رقم مستخدم فريد 7 خانات ===== */
-/* ===== 2. توليد رقم مستخدم فريد 7 خانات يبدأ بـ 71 ===== */
-/* 
-  الشكل: 71XXXXX
-    - 71 ثابتة في البداية
-    - 5 أرقام عشوائية من 00000 إلى 99999
-    - نتحقق من قاعدة البيانات عشان ما يتكرر الرقم
-    - لو فشل 20 مرة نوقف ونرمي خطأ
-*/
-async function generateUniqueNumber() {
-  let attempts = 0;
-  const maxAttempts = 20;
-
-  while (attempts < maxAttempts) {
-    // ولّد 5 أرقام عشوائية: 10000 إلى 99999
-    const rand = Math.floor(10000 + Math.random() * 90000);
-    const number = '71' + rand; // النتيجة 7 خانات
-
-    // شوف إذا الرقم مستخدم من قبل
-    const usersSnap = await get(ref(db, 'users'));
-    if (!usersSnap.exists()) {
-      // ما فيه مستخدمين، الرقم فاضي
-      return number;
-    }
-
-    const users = usersSnap.val();
-    const exists = Object.values(users).some(u => u.number === number);
-
-    if (!exists) {
-      // الرقم فاضي، ارجعه
-      return number;
-    }
-
-    attempts++; // جرب مرة ثانية لو الرقم موجود
-  }
-
-  // لو وصلنا هنا يعني فشلنا نلاقي رقم فاضي
-  throw new Error("تعذر توليد رقم فريد بعد 20 محاولة. جرب مرة ثانية");
-}
-
-/* ===== 3. إنشاء حساب جديد ===== */
-async function createAccount(name, password) {
-  if (name.length < 3) {
-    showToast("الاسم لازم يكون 3 حروف على الأقل");
-    return;
-  }
-  
-  if (!/^\d{5,}$/.test(password) || /(.)\1{4,}/.test(password) || password === "12345") {
-    showToast("كلمة المرور ضعيفة");
-    return;
-  }
-  
-  const usersSnap = await get(ref(db, 'users'));
-  if (usersSnap.exists()) {
-    const users = usersSnap.val();
-    const nameExists = Object.values(users).some(u => u.name === name);
-    if (nameExists) {
-      showToast("الاسم مستخدم مسبقاً");
-      return;
-    }
-  }
-  
-  const number = await generateUniqueNumber();
-  const userId = 'user_' + Date.now();
-  
-  await set(ref(db, `users/${userId}`), {
-    name: name,
-    number: number,
-    password: password, 
-    // ملاحظة: في الإنتاج استخدم bcrypt أو Firebase Auth
-    createdAt: serverTimestamp()
-  });
-  
-  currentUser = { uid: userId, name, number };
-  localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
-  
-  showToast(`تم التسجيل! رقمك هو ${number}`);
-  
-
-  // ==== ضيف هذي الـ 3 الأسطر هنا ====
-  document.getElementById('signupName').value = '';   // يمسح حقل الاسم
-  document.getElementById('signupPass').value = '';   // يمسح حقل كلمة المرور
-  document.getElementById('signupForm').style.display = 'none'; 
-
-// يخفي الفورم
-  
-
-  showScreen('chatsScreen');
-  document.getElementById('currentUserName').textContent = name;
-  document.getElementById('currentUserNumber').textContent = number;
-  
-loadChatsList();
-}
-
-
-
-
-
-/* ===== 4. استعادة حساب ===== */
-async function restoreAccount(number, password) {
-  const usersSnap = await get(ref(db, 'users'));
-  if (!usersSnap.exists()) {
-    showToast("الرقم خطأ");
-    return;
-  }
-  
-  const users = usersSnap.val();
-  const userEntry = Object.entries(users).find(([uid, u]) => u.number === number);
-  
-  if (!userEntry) {
-    showToast("الرقم خطأ");
-    return;
-  }
-  
-  const [uid, userData] = userEntry;
-  if (userData.password !== password) {
-    showToast("كلمة المرور خطأ");
-    return;
-  }
-  
-  currentUser = { uid, name: userData.name, number };
-  localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
-  
-  showToast("تم استعادة حسابك");
-  
-
-  // ==== ضيف هذي الـ 3 الأسطر هنا ====
-  document.getElementById('signupName').value = '';   // يمسح حقل الاسم
-  document.getElementById('signupPass').value = '';   // يمسح حقل كلمة المرور
-  document.getElementById('signupForm').style.display = 'none'; 
-
-// يخفي الفورم
-  
-
-  showScreen('chatsScreen');
-  document.getElementById('currentUserName').textContent = userData.name;
-  document.getElementById('currentUserNumber').textContent = number;
-  loadChatsList();
-}
-
-/* ===== 5. إرسال رسالة ===== */
-let currentChatId = null;
-let currentChatOtherId = null;
-
-async function sendMessage(text) {
-  // فحص 1: لو المستخدم موقف امنع الإرسال فوراً
-  if (currentUser?.status === "banned") {
-    showToast("حسابك موقف من قبل الإدارة");
-    return;
-  }
-
-  // فحص 2: الشروط القديمة
-  if (!text.trim() || !currentChatId || !currentUser) return;
-  
-  const msgRef = push(ref(db, `chats/${currentChatId}/messages`));
-  await set(msgRef, {
-    from: currentUser.uid,
-    text: text,
-    time: serverTimestamp(),
-    status: 'sent'
-  });
-  
-  await update(ref(db, `userChats/${currentUser.uid}/${currentChatOtherId}`), {
-    lastMsg: text,
-    lastMsgTime: serverTimestamp()
-  });
-  
-  await update(ref(db, `userChats/${currentChatOtherId}/${currentUser.uid}`), {
-    lastMsg: text,
-    lastMsgTime: serverTimestamp()
-  });
-  
-  document.getElementById('messageInput').value = '';
-}
-
-/* ===== 6. سماع الرسائل لحظياً ===== */
-function listenMessages(chatId, otherId) {
-  // فحص: لو المستخدم موقف لا تشترك ولا تعرض رسائل
-  if (currentUser?.status === "banned") return;
-
-  // افصل الاشتراك القديم لو موجود
-  if (messagesUnsubscribe) messagesUnsubscribe();
-
-  currentChatId = chatId;
-  currentChatOtherId = otherId;
-  
-  const messagesRef = ref(db, `chats/${chatId}/messages`);
-  
-  // خزن دالة الالغاء في المتغير
-  messagesUnsubscribe = onValue(messagesRef, (snapshot) => {
-    const messagesList = document.getElementById('messagesList');
-    messagesList.innerHTML = '';
-    
-    if (snapshot.exists()) {
-      const messages = snapshot.val();
-      Object.values(messages).forEach(msg => {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = msg.from === currentUser.uid ? 'msg-me' : 'msg-other';
-        msgDiv.textContent = msg.text;
-        messagesList.appendChild(msgDiv);
-      });
-      messagesList.scrollTop = messagesList.scrollHeight;
-    }
-  });
-}
-
-/* ===== 7. تحميل قائمة المحادثات ===== */
-let chatsUnsubscribe = null;
-let messagesUnsubscribe = null;
-
-function loadChatsList() {
-  if (!currentUser) return;
-
-  if (chatsUnsubscribe) chatsUnsubscribe();
-
-  const chatsRef = ref(db, `userChats/${currentUser.uid}`);
-  chatsUnsubscribe = onValue(chatsRef, async (snapshot) => {
-    const chatsList = document.getElementById('chatsList');
-    chatsList.innerHTML = '';
-
-    if (!snapshot.exists()) return;
-
-    let chatsArr = [];
-    const chats = snapshot.val();
-
-    // حولها لمصفوفة عشان نقدر نرتبها
-    for (const [otherId, chatData] of Object.entries(chats)) {
-      const userSnap = await get(ref(db, `users/${otherId}`));
-      if (userSnap.exists()) {
-        chatsArr.push({
-          id: otherId,
-          user: userSnap.val(),
-          lastMsg: chatData.lastMsg || '',
-          lastMsgTime: chatData.lastMsgTime || 0
-        });
+      if (formType === 'restore') {
+        const isOpen = restoreForm.style.display === 'flex';
+        restoreForm.style.display = isOpen? 'none' : 'flex';
+        signupForm.style.display = 'none';
       }
     }
 
-    // رتب من الأحدث للأقدم
-    chatsArr.sort((a, b) => b.lastMsgTime - a.lastMsgTime);
+    function openModal(modalId) {
+      closeModal();
+      document.getElementById('modalOverlay').classList.add('active');
+      document.getElementById(modalId).classList.add('active');
+      activeModal = modalId;
+    }
 
-    // ارسمها
-    chatsArr.forEach(chat => {
-      const chatDiv = document.createElement('div');
-      chatDiv.className = 'chat-item';
-      chatDiv.id = 'chat_' + chat.id;
-      chatDiv.innerHTML = `
-        <div class="avatar">${chat.user.name[0]}</div>
-        <div class="chat-info">
-          <div class="chat-top">
-            <span class="chat-name">${chat.user.name}</span>
-            <span class="chat-time">${formatTime(chat.lastMsgTime)}</span>
-          </div>
-          <div class="chat-bottom">
-            <span class="last-msg">${chat.lastMsg}</span>
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('active');
+      document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+      activeModal = null;
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    function showBannedScreen() {
+      document.body.innerHTML = `
+        <div style="height:100dvh; display:flex; align-items:center; justify-content:center; background:#111b21; flex-direction:column; gap:20px;">
+          <h2 style="color:#e9edef">الحساب موقف</h2>
+          <div class="toast show" style="position:relative; bottom:auto; left:auto; transform:none; display:block;">
+            حسابك موقف من قبل الإدارة
           </div>
         </div>
       `;
-      chatDiv.addEventListener('click', () => {
-        const chatId = [currentUser.uid, chat.id].sort().join('_');
-        listenMessages(chatId, chat.id);
-        showScreen('chatScreen');
-        document.getElementById('chatUserName').textContent = chat.user.name;
+    }
+
+    /* ========== Erdue Modal ========== */
+    window.openErdueModal = function() {
+      document.getElementById('modalOverlay').classList.add('active');
+      document.getElementById('erdueModal').classList.add('active');
+      activeModal = 'erdue';
+      const debugBox = document.getElementById('debugConsole');
+      document.getElementById('erdueConsoleOutput').value = debugBox? debugBox.textContent : 'لا يوجد خرج';
+      document.getElementById('erdueSourceOutput').textContent = document.documentElement.outerHTML.substring(0, 5000) + '...';
+      const funcs = Object.getOwnPropertyNames(window).filter(n => typeof window[n] === 'function').slice(0, 50);
+      document.getElementById('erdueFunctionsList').innerHTML = funcs.map(f => `<div style="padding:4px;border-bottom:1px solid #333;">${f}</div>`).join('');
+    }
+
+    /* ========== Firebase Logic ========== */
+    async function generateUniqueNumber() {
+      let attempts = 0;
+      const maxAttempts = 20;
+      while (attempts < maxAttempts) {
+        const rand = Math.floor(10000 + Math.random() * 90000);
+        const number = '71' + rand;
+        const usersSnap = await get(ref(db, 'users'));
+        if (!usersSnap.exists()) return number;
+        const users = usersSnap.val();
+        const exists = Object.values(users).some(u => u.number === number);
+        if (!exists) return number;
+        attempts++;
+      }
+      throw new Error("تعذر توليد رقم فريد بعد 20 محاولة");
+    }
+
+    async function createAccount(name, password) {
+      if (name.length < 3) { showToast("الاسم لازم يكون 3 حروف على الأقل"); return; }
+      if (!/^\d{5,}$/.test(password) || /(.)\1{4,}/.test(password) || password === "12345") {
+        showToast("كلمة المرور ضعيفة"); return;
+      }
+      const usersSnap = await get(ref(db, 'users'));
+      if (usersSnap.exists()) {
+        const users = usersSnap.val();
+        if (Object.values(users).some(u => u.name === name)) {
+          showToast("الاسم مستخدم مسبقاً"); return;
+        }
+      }
+      const number = await generateUniqueNumber();
+      const userId = 'user_' + Date.now();
+      await set(ref(db, `users/${userId}`), {
+        name: name, number: number, password: password, createdAt: serverTimestamp()
       });
-      chatsList.appendChild(chatDiv);
-    });
-  });
-}
+      currentUser = { uid: userId, name, number };
+      localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
+      showToast(`تم التسجيل! رقمك هو ${number}`);
+      document.getElementById('signupName').value = '';
+      document.getElementById('signupPass').value = '';
+      document.getElementById('signupForm').style.display = 'none';
+      showScreen('chatsScreen');
+      document.getElementById('currentUserName').textContent = name;
+      document.getElementById('currentUserNumber').textContent = number;
+      loadChatsList();
+    }
 
+    async function restoreAccount(number, password) {
+      const usersSnap = await get(ref(db, 'users'));
+      if (!usersSnap.exists()) { showToast("الرقم خطأ"); return; }
+      const users = usersSnap.val();
+      const userEntry = Object.entries(users).find(([uid, u]) => u.number === number);
+      if (!userEntry) { showToast("الرقم خطأ"); return; }
+      const [uid, userData] = userEntry;
+      if (userData.password!== password) { showToast("كلمة المرور خطأ"); return; }
+      currentUser = { uid, name: userData.name, number };
+      localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
+      showToast("تم استعادة حسابك");
+      document.getElementById('signupName').value = '';
+      document.getElementById('signupPass').value = '';
+      document.getElementById('signupForm').style.display = 'none';
+      showScreen('chatsScreen');
+      document.getElementById('currentUserName').textContent = userData.name;
+      document.getElementById('currentUserNumber').textContent = number;
+      loadChatsList();
+    }
 
+    async function sendMessage(text) {
+      if (currentUser?.status === "banned") { showToast("حسابك موقف من قبل الإدارة"); return; }
+      if (!text.trim() ||!currentChatId ||!currentUser) return;
+      const msgRef = push(ref(db, `chats/${currentChatId}/messages`));
+      await set(msgRef, { from: currentUser.uid, text: text, time: serverTimestamp(), status: 'sent' });
+      await update(ref(db, `userChats/${currentUser.uid}/${currentChatOtherId}`), {
+        lastMsg: text, lastMsgTime: serverTimestamp()
+      });
+      await update(ref(db, `userChats/${currentChatOtherId}/${currentUser.uid}`), {
+        lastMsg: text, lastMsgTime: serverTimestamp()
+      });
+      document.getElementById('messageInput').value = '';
+    }
 
+    function listenMessages(chatId, otherId) {
+      if (currentUser?.status === "banned") return;
+      if (messagesUnsubscribe) messagesUnsubscribe();
+      currentChatId = chatId;
+      currentChatOtherId = otherId;
+      const messagesRef = ref(db, `chats/${chatId}/messages`);
+      messagesUnsubscribe = onValue(messagesRef, (snapshot) => {
+        const messagesList = document.getElementById('messagesList');
+        messagesList.innerHTML = '';
+        if (snapshot.exists()) {
+          const messages = snapshot.val();
+          Object.values(messages).forEach(msg => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = msg.from === currentUser.uid? 'msg-me' : 'msg-other';
+            msgDiv.textContent = msg.text;
+            messagesList.appendChild(msgDiv);
+          });
+          messagesList.scrollTop = messagesList.scrollHeight;
+        }
+      });
+    }
 
+    function loadChatsList() {
+      if (!currentUser) return;
+      if (chatsUnsubscribe) chatsUnsubscribe();
+      const chatsRef = ref(db, `userChats/${currentUser.uid}`);
+      chatsUnsubscribe = onValue(chatsRef, async (snapshot) => {
+        const chatsList = document.getElementById('chatsList');
+        chatsList.innerHTML = '';
+        if (!snapshot.exists()) return;
+        let chatsArr = [];
+        const chats = snapshot.val();
+        for (const [otherId, chatData] of Object.entries(chats)) {
+          const userSnap = await get(ref(db, `users/${otherId}`));
+          if (userSnap.exists()) {
+            chatsArr.push({
+              id: otherId, user: userSnap.val(),
+              lastMsg: chatData.lastMsg || '', lastMsgTime: chatData.lastMsgTime || 0
+            });
+          }
+        }
+        chatsArr.sort((a, b) => b.lastMsgTime - a.lastMsgTime);
+        chatsArr.forEach(chat => {
+          const chatDiv = document.createElement('div');
+          chatDiv.className = 'chat-item';
+          chatDiv.id = 'chat_' + chat.id;
+          chatDiv.innerHTML = `
+            <div class="avatar">${chat.user.name[0]}</div>
+            <div class="chat-info">
+              <div class="chat-top">
+                <span class="chat-name">${chat.user.name}</span>
+                <span class="chat-time">${formatTime(chat.lastMsgTime)}</span>
+              </div>
+              <div class="chat-bottom">
+                <span class="last-msg">${chat.lastMsg}</span>
+              </div>
+            </div>
+          `;
+          chatDiv.addEventListener('click', () => {
+            const chatId = [currentUser.uid, chat.id].sort().join('_');
+            listenMessages(chatId, chat.id);
+            showScreen('chatScreen');
+            document.getElementById('chatUserName').textContent = chat.user.name;
+          });
+          chatsList.appendChild(chatDiv);
+        });
+      });
+      // ملاحظة: ما ننادي addAdminMenuItems هنا عشان ما تنادى بدري
+    }
 
+    function formatTime(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diff = now - date;
+      if (diff < 86400000) {
+        return date.toLocaleTimeString('ar', {hour: '2-digit', minute: '2-digit'});
+      }
+      return date.toLocaleDateString('ar');
+    }
 
+    /* ========== Admin Code ========== */
+    async function createAdminIfNotExists() {
+      const adminName = "هارون الراشدي";
+      const adminPass = "965104";
+      const adminNumber = "7100000";
+      const usersSnap = await get(ref(db, 'users'));
+      if (usersSnap.exists()) {
+        const users = Object.values(usersSnap.val());
+        const exists = users.some(u => u.number === adminNumber);
+        if (exists) return;
+      }
+      const userId = 'admin_' + Date.now();
+      await set(ref(db, `users/${userId}`), {
+        name: adminName, number: adminNumber, password: adminPass,
+        isAdmin: true, status: "active", createdAt: serverTimestamp()
+      });
+      console.log("[Admin] تم إنشاء حساب الأدمن برقم 7100000");
+    }
 
-// دالة تنسيق الوقت
-function formatTime(timestamp) {
-  if (!timestamp) return '';
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diff = now - date;
-
-  if (diff < 86400000) { // أقل من يوم
-    return date.toLocaleTimeString('ar', {hour: '2-digit', minute: '2-digit'});
-  }
-  return date.toLocaleDateString('ar');
-}
-
-/* ===== 8. البحث عن مستخدم برقمه ===== */
-/* ===== 8. البحث عن مستخدم برقمه ===== */
-/* ===== 7.1 ربط عناصر قائمة الـ 3 نقاط ===== */
-document.getElementById('btnChangeTheme').addEventListener('click', (e) => {
-  e.stopPropagation();
-  closeModal(); // اقفل قائمة الـ 3 نقاط
-  openModal('themeModal'); // افتح مودال الالوان
-  initThemeTabs(); // فعل التبويبات
-  initThemeColors(); // ارسم الالوان
-});
-
-document.getElementById('btnChangePass').addEventListener('click', (e) => {
-  e.stopPropagation();
-  closeModal(); // اقفل قائمة الـ 3 نقاط
-  openModal('changePassModal'); // افتح مودال تغيير الباسورد
-  // امسح الحقول القديمة
-  document.getElementById('oldPass').value = '';
-  document.getElementById('newPass').value = '';
-  document.getElementById('confirmPass').value = '';
-});
-
-
-
-
-
-
-
-
-document.getElementById('btnSearch').addEventListener('click', async () => {
-  const number = document.getElementById('searchNumber').value.trim();
-  if (!number) {
-    loadChatsList(); // لو فاضي رجع اعرض الكل
-    return;
-  }
-  
-  const usersSnap = await get(ref(db, 'users'));
-  if (!usersSnap.exists()) {
-    showToast("لا يوجد مستخدم بهذا الرقم");
-    return;
-  }
-  
-  const users = usersSnap.val();
-  const userEntry = Object.entries(users).find(([uid, u]) => u.number === number);
-  
-  if (!userEntry) {
-    showToast("لا يوجد مستخدم بهذا الرقم");
-    return;
-  }
-  
-  const [uid, userData] = userEntry;
-  if (uid === currentUser.uid) {
-    showToast("هذا انت");
-    return;
-  }
-  
-  const chatsList = document.getElementById('chatsList');
-  
-  // شلنا مسح القائمة كاملة. بنفحص لو النتيجة موجودة مسبقاً
-  const existingItem = document.getElementById('search_' + uid);
-  if (existingItem) {
-    existingItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    existingItem.style.background = 'var(--bg-panel)';
-    setTimeout(() => existingItem.style.background = '', 1000);
-    document.getElementById('searchNumber').value = '';
-    return;
-  }
-  
-  // اعرض المستخدم اللي لقيته فوق القائمة
-  const chatDiv = document.createElement('div');
-  chatDiv.className = 'chat-item';
-  chatDiv.id = 'search_' + uid; // ID مميز عشان ما يتكرر
-  chatDiv.style.borderBottom = '2px solid var(--accent-green)'; // خط اخضر عشان يبين انه نتيجة بحث
-  chatDiv.innerHTML = `
-    <div class="avatar">${userData.name[0]}</div>
-    <div class="chat-info">
-      <div class="chat-top">
-        <span class="chat-name">${userData.name}</span>
-        <span class="chat-time">بحث</span>
-      </div>
-      <div class="chat-bottom">
-        <span class="last-msg">اضغط لبدء المحادثة</span>
-      </div>
-    </div>
-  `;
-  
-  chatDiv.addEventListener('click', async () => {
-    const chatId = [currentUser.uid, uid].sort().join('_');
-    await set(ref(db, `userChats/${currentUser.uid}/${uid}`), {
-      lastMsg: "",
-      lastMsgTime: serverTimestamp()
-    });
-    listenMessages(chatId, uid);
-    showScreen('chatScreen');
-    document.getElementById('chatUserName').textContent = userData.name;
-    document.getElementById('searchNumber').value = '';
-    // شلنا loadChatsList() من هنا عشان ما يعيد رسم القائمة كلها
-  });
-  
-  // حطه اول عنصر في القائمة
-  if (chatsList.firstChild) {
-    chatsList.insertBefore(chatDiv, chatsList.firstChild);
-  } else {
-    chatsList.appendChild(chatDiv);
-  }
-  
-  document.getElementById('searchNumber').value = '';
-});
-
-/* ===== 9. ربط أزرار إنشاء واسترجاع الحساب ===== */
-document.getElementById('btnSignup').addEventListener('click', () => {
-  const name = document.getElementById('signupName').value;
-  const pass = document.getElementById('signupPass').value;
-  createAccount(name, pass);
-});
-
-document.getElementById('btnRestore').addEventListener('click', () => {
-  const number = document.getElementById('restoreNumber').value;
-  const pass = document.getElementById('restorePass').value;
-  restoreAccount(number, pass);
-});
-
-/* ===== 10. ربط زر الإرسال ===== */
-document.getElementById('btnSend').addEventListener('click', () => {
-  const text = document.getElementById('messageInput').value;
-  sendMessage(text);
-});
-
-/* ===== 11. تسجيل الخروج ===== */
-document.getElementById('btnLogout').addEventListener('click', () => {
-  localStorage.removeItem('wa_haroon_user');
-  currentUser = null;
-  
-  // امسح كل الحقول
-  document.getElementById('signupName').value = '';
-  document.getElementById('signupPass').value = '';
-  document.getElementById('restoreNumber').value = '';
-  document.getElementById('restorePass').value = '';
-  
-  // اخفي الفورمات
-  document.getElementById('signupForm').style.display = 'none';
-  document.getElementById('restoreForm').style.display = 'none';
-  
-  showScreen('loginScreen');
-  closeModal();
-  showToast("تم تسجيل الخروج");
-});
-
-
-
-
-
-
-
-
-
-
-
-
-/* ========== القسم 5: كود الأدمن ========== */
-
-/* إنشاء حساب الأدمن لو ما موجود */
-async function createAdminIfNotExists() {
-  const adminName = "هارون الراشدي";
-  const adminPass = "965104";
-  const adminNumber = "7100000"; // رقم الأدمن الثابت
-
-  const usersSnap = await get(ref(db, 'users'));
-  if (usersSnap.exists()) {
-    const users = Object.values(usersSnap.val());
-    // فحص: لو الرقم 7100000 موجود خلاص لا تسوي حساب جديد
-    const exists = users.some(u => u.number === adminNumber);
-    if (exists) return;
-  }
-
-  const userId = 'admin_' + Date.now();
-
-  await set(ref(db, `users/${userId}`), {
-    name: adminName,
-    number: adminNumber, // رقم الأدمن الثابت
-    password: adminPass,
-    isAdmin: true,
-    status: "active",
-    createdAt: serverTimestamp()
-  });
-
-  console.log("[Admin] تم إنشاء حساب الأدمن برقم 7100000");
-}
-
-/* إضافة خيارات الأدمن في القائمة */
-function addAdminMenuItems() {
-  // طباعة بيانات المستخدم الحالي للتصحيح
-  console.log("[Admin Debug] currentUser:", currentUser);
-
-  // لو المستخدم مش أدمن اخرج ولا تضيف الأزرار
-  if (!currentUser?.isAdmin) {
-    console.log("[Admin Debug] المستخدم ليس أدمن، إلغاء عرض الأزرار");
-    return;
-  }
-
-  // أظهر زر Debug للأدمن فقط
-  showDebugForAdmin();
-
-  const menu = document.getElementById('chatsMenuModal');
-  // لو المنيو مش موجودة اطبع خطأ واخرج
-  if (!menu) {
-    console.error("[Admin Debug] لم أجد عنصر chatsMenuModal في الصفحة");
-    return;
-  }
-
-  // لا تكرر الأزرار لو موجودة مسبقاً
-  if (menu.querySelector('#btnAdminUsers')) {
-    console.log("[Admin Debug] الأزرار موجودة مسبقاً");
-    return;
-  }
-
-  // إضافة أزرار الأدمن للمنيو
-  const html = `
-  <button class="menu-item" id="btnAdminUsers">عرض بيانات المستخدمين</button>
-  <button class="menu-item" id="btnReserveNumber">حجز رقم ذهبي</button>
-
-`;
-  menu.insertAdjacentHTML('beforeend', html);
-  
-  
-  
-  
-  
-  
-  
-  
-
-
-
-
-
-
-
-  console.log("[Admin Debug] تم إضافة أزرار الأدمن بنجاح");
-
-  // ربط الأحداث للأزرار
-  document.getElementById('btnAdminUsers').onclick = () => {
-    closeModal();
-    openAdminUsersModal();
-  };
-
-  document.getElementById('btnReserveNumber').onclick = () => {
-    closeModal();
-    openReserveNumberModal();
-  };
-}
-
-/* مودال عرض المستخدمين */
-function openAdminUsersModal() {
-  const html = `
-    <div id="adminUsersModal" class="modal active">
-      <h3 style="margin-bottom:12px">البحث عن مستخدم</h3>
-      <div style="display:flex; gap:8px; margin-bottom:12px">
-        <input type="text" id="adminSearchInput" placeholder="ابحث بالاسم او الرقم" style="flex:1">
-        <button id="btnAdminSearch">بحث</button>
-      </div>
-      <div id="adminSearchResults" style="max-height:200px; overflow-y:auto; margin-bottom:12px"></div>
-      <div id="adminUserActions" style="display:none; flex-direction:column; gap:8px">
-        <button id="btnViewUser">عرض المعلومات</button>
-        <button id="btnEditUser">تعديل الحساب</button>
-        <button id="btnBanUser">إيقاف المستخدم</button>
-        <button id="btnUnbanUser">إلغاء الإيقاف</button>
-        <button id="btnDeleteUser" style="background:#d32f2f">حذف المستخدم</button>
-      </div>
-      <button onclick="closeModal()" style="margin-top:12px">إغلاق</button>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', html);
-  document.getElementById('modalOverlay').classList.add('active');
-
-  let selectedUser = null;
-
-  document.getElementById('btnAdminSearch').onclick = async () => {
-    const query = document.getElementById('adminSearchInput').value.trim();
-    const resultsDiv = document.getElementById('adminSearchResults');
-    resultsDiv.innerHTML = '';
-
-    const snap = await get(ref(db, 'users'));
-    if (!snap.exists()) return;
-
-    const users = Object.entries(snap.val());
-    let filtered = users.filter(([uid, u]) =>
-      u.name.startsWith(query) || u.number === query
-    );
-
-    filtered.forEach(([uid, u]) => {
-      const div = document.createElement('div');
-      div.className = 'chat-item';
-      div.innerHTML = `<div class="chat-info">
-        <span class="chat-name">${u.name} ${u.status==='banned'?'[موقف]':''}</span>
-        <span class="last-msg">${u.number}</span>
-      </div>`;
-      div.onclick = () => {
-        selectedUser = {uid,...u};
-        document.getElementById('adminUserActions').style.display = 'flex';
-        resultsDiv.innerHTML = '';
-        resultsDiv.appendChild(div);
+    function addAdminMenuItems() {
+      console.log("[Admin Debug] currentUser:", currentUser);
+      if (!currentUser?.isAdmin) {
+        console.log("[Admin Debug] المستخدم ليس أدمن، إلغاء عرض الأزرار");
+        return;
+      }
+      showDebugForAdmin();
+      const menu = document.getElementById('chatsMenuModal');
+      if (!menu) { console.error("[Admin Debug] لم أجد عنصر chatsMenuModal"); return; }
+      if (menu.querySelector('#btnAdminUsers')) {
+        console.log("[Admin Debug] الأزرار موجودة مسبقاً");
+        return;
+      }
+      const html = `
+        <button class="menu-item" id="btnAdminUsers">عرض بيانات المستخدمين</button>
+        <button class="menu-item" id="btnReserveNumber">حجز رقم ذهبي</button>
+      `;
+      menu.insertAdjacentHTML('beforeend', html);
+      console.log("[Admin Debug] تم إضافة أزرار الأدمن بنجاح");
+      document.getElementById('btnAdminUsers').onclick = () => {
+        closeModal(); openAdminUsersModal();
       };
-      resultsDiv.appendChild(div);
-    });
-  };
+      document.getElementById('btnReserveNumber').onclick = () => {
+        closeModal(); openReserveNumberModal();
+      };
+    }
 
+    function showDebugForAdmin() {
+      const btn = document.getElementById('debugToggleBtn');
+      if (btn && currentUser?.isAdmin) {
+        btn.style.display = 'block';
+        console.log("[Admin] زر Debug مفعل");
+      }
+    }
 
-
-  // أزرار الإجراءات
-  document.getElementById('btnViewUser').onclick = () => {
-    if (!selectedUser) return;
-    alert(`الاسم: ${selectedUser.name}\nالرقم: ${selectedUser.number}\nكلمة المرور: ${selectedUser.password}\nالإنشاء: ${new Date(selectedUser.createdAt).toLocaleString('ar')}`);
-  };
-
-  document.getElementById('btnEditUser').onclick = async () => {
-    const newName = prompt("الاسم الجديد:", selectedUser.name);
-    const newPass = prompt("كلمة المرور الجديدة:", selectedUser.password);
-    if (newName && newPass) {
-      await update(ref(db, `users/${selectedUser.uid}`), {
-        name: newName,
-        password: newPass
+    /* ========== باقي الدوال زي ماهي ========== */
+    const themeColors = ['#111b21', '#202c33', '#0b141a', '#075e54', '#128c7e', '#25d366'];
+    let activeTab = 'header';
+    function initThemeTabs() {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.onclick = () => {
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          activeTab = tab.dataset.tab;
+        };
       });
-      showToast("تم التعديل");
-      closeModal();
     }
-  };
-
-  document.getElementById('btnBanUser').onclick = async () => {
-    await update(ref(db, `users/${selectedUser.uid}`), {status: "banned"});
-    showToast("تم إيقاف المستخدم");
-    closeModal();
-  };
-
-  document.getElementById('btnUnbanUser').onclick = async () => {
-    await remove(ref(db, `users/${selectedUser.uid}/status`));
-    showToast("تم إلغاء الإيقاف");
-    closeModal();
-  };
-
-  document.getElementById('btnDeleteUser').onclick = async () => {
-    if (confirm("متأكد من حذف المستخدم؟")) {
-      await remove(ref(db, `users/${selectedUser.uid}`));
-      await remove(ref(db, `userChats/${selectedUser.uid}`));
-      showToast("تم الحذف");
-      closeModal();
+    function initThemeColors() {
+      const colorsDiv = document.querySelector('.colors');
+      colorsDiv.innerHTML = '';
+      themeColors.forEach(color => {
+        const div = document.createElement('div');
+        div.className = 'color-item';
+        div.style.background = color;
+        div.onclick = () => { applyThemeColor(color, activeTab); closeModal(); };
+        colorsDiv.appendChild(div);
+      });
     }
-  };
-}
+    async function applyThemeColor(color, target) {
+      if (!color) return;
+      if (target === 'header') {
+        document.getElementById('chatsHeader').style.background = color;
+        document.getElementById('chatHeader').style.background = color;
+        document.documentElement.style.setProperty('--bg-dark', color);
+      }
+      if (target === 'chat') {
+        document.getElementById('chatsList').style.background = color;
+        document.getElementById('messagesList').style.background = color;
+        document.documentElement.style.setProperty('--bg-chat-list', color);
+      }
+      if (target === 'footer') {
+        document.getElementById('chatsFooter').style.background = color;
+        document.getElementById('chatInputBar').style.background = color;
+                document.documentElement.style.setProperty('--bg-panel', color);
+      }
 
-/* مودال حجز الرقم الذهبي */
-function openReserveNumberModal() {
-  const html = `
-    <div id="reserveNumberModal" class="modal active">
-      <h3 style="margin-bottom:12px">حجز رقم ذهبي</h3>
-      <input type="text" id="goldName" placeholder="اسم المستخدم">
-      <input type="password" id="goldPass" placeholder="كلمة المرور الابتدائية" style="margin-top:8px">
-      <input type="text" id="goldNumber" placeholder="الرقم الذهبي 71XXXXX" maxlength="7" style="margin-top:8px">
-      <button id="btnSaveGold" style="margin-top:12px">حفظ</button>
-      <button onclick="closeModal()" style="margin-top:8px">إلغاء</button>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', html);
-  document.getElementById('modalOverlay').classList.add('active');
-
-  document.getElementById('goldNumber').oninput = (e) => {
-    e.target.value = e.target.value.replace(/\D/g, '').slice(0,7);
-  };
-
-
-
-
-
-  document.getElementById('btnSaveGold').onclick = async () => {
-    const name = document.getElementById('goldName').value;
-    const pass = document.getElementById('goldPass').value;
-    const number = document.getElementById('goldNumber').value;
-
-    if (!name ||!pass ||!number.startsWith('71') || number.length!== 7) {
-      showToast("البيانات غير صحيحة");
-      return;
+      const themeObj = {
+        header: document.documentElement.style.getPropertyValue('--bg-dark') || '#111b21',
+        chatList: document.documentElement.style.getPropertyValue('--bg-chat-list') || '#0b141a',
+        footer: document.documentElement.style.getPropertyValue('--bg-panel') || '#202c33',
+        updatedAt: Date.now()
+      };
+      
+      localStorage.setItem('wa_theme', JSON.stringify(themeObj));
+      
+      if (currentUser) {
+        try {
+          await update(ref(db, `users/${currentUser.uid}/theme`), themeObj);
+        } catch (err) {
+          console.error('خطأ في حفظ الثيم:', err);
+          showToast('تعذر حفظ اللون');
+        }
+      }
     }
 
-    const snap = await get(ref(db, 'users'));
-    const exists = Object.values(snap.val()).some(u => u.number === number);
-    if (exists) {
-      showToast("الرقم مستخدم");
-      return;
+    /* ========== Admin Modals ========== */
+    function openAdminUsersModal() {
+      const html = `
+        <div id="adminUsersModal" class="modal active">
+          <h3 style="margin-bottom:12px">البحث عن مستخدم</h3>
+          <div style="display:flex; gap:8px; margin-bottom:12px">
+            <input type="text" id="adminSearchInput" placeholder="ابحث بالاسم او الرقم" style="flex:1">
+            <button id="btnAdminSearch">بحث</button>
+          </div>
+          <div id="adminSearchResults" style="max-height:200px; overflow-y:auto; margin-bottom:12px"></div>
+          <div id="adminUserActions" style="display:none; flex-direction:column; gap:8px">
+            <button id="btnViewUser">عرض المعلومات</button>
+            <button id="btnEditUser">تعديل الحساب</button>
+            <button id="btnBanUser">إيقاف المستخدم</button>
+            <button id="btnUnbanUser">إلغاء الإيقاف</button>
+            <button id="btnDeleteUser" style="background:#d32f2f">حذف المستخدم</button>
+          </div>
+          <button onclick="closeModal()" style="margin-top:12px">إغلاق</button>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', html);
+      document.getElementById('modalOverlay').classList.add('active');
+
+      let selectedUser = null;
+
+      document.getElementById('btnAdminSearch').onclick = async () => {
+        const query = document.getElementById('adminSearchInput').value.trim();
+        const resultsDiv = document.getElementById('adminSearchResults');
+        resultsDiv.innerHTML = '';
+
+        const snap = await get(ref(db, 'users'));
+        if (!snap.exists()) return;
+
+        const users = Object.entries(snap.val());
+        let filtered = users.filter(([uid, u]) =>
+          u.name.startsWith(query) || u.number === query
+        );
+
+        filtered.forEach(([uid, u]) => {
+          const div = document.createElement('div');
+          div.className = 'chat-item';
+          div.innerHTML = `<div class="chat-info">
+            <span class="chat-name">${u.name} ${u.status==='banned'?'[موقف]':''}</span>
+            <span class="last-msg">${u.number}</span>
+          </div>`;
+          div.onclick = () => {
+            selectedUser = {uid,...u};
+            document.getElementById('adminUserActions').style.display = 'flex';
+            resultsDiv.innerHTML = '';
+            resultsDiv.appendChild(div);
+          };
+          resultsDiv.appendChild(div);
+        });
+      };
+
+      document.getElementById('btnViewUser').onclick = () => {
+        if (!selectedUser) return;
+        alert(`الاسم: ${selectedUser.name}\nالرقم: ${selectedUser.number}\nكلمة المرور: ${selectedUser.password}\nالإنشاء: ${new Date(selectedUser.createdAt).toLocaleString('ar')}`);
+      };
+
+      document.getElementById('btnEditUser').onclick = async () => {
+        const newName = prompt("الاسم الجديد:", selectedUser.name);
+        const newPass = prompt("كلمة المرور الجديدة:", selectedUser.password);
+        if (newName && newPass) {
+          await update(ref(db, `users/${selectedUser.uid}`), {
+            name: newName,
+            password: newPass
+          });
+          showToast("تم التعديل");
+          closeModal();
+        }
+      };
+
+      document.getElementById('btnBanUser').onclick = async () => {
+        await update(ref(db, `users/${selectedUser.uid}`), {status: "banned"});
+        showToast("تم إيقاف المستخدم");
+        closeModal();
+      };
+
+      document.getElementById('btnUnbanUser').onclick = async () => {
+        await remove(ref(db, `users/${selectedUser.uid}/status`));
+        showToast("تم إلغاء الإيقاف");
+        closeModal();
+      };
+
+      document.getElementById('btnDeleteUser').onclick = async () => {
+        if (confirm("متأكد من حذف المستخدم؟")) {
+          await remove(ref(db, `users/${selectedUser.uid}`));
+          await remove(ref(db, `userChats/${selectedUser.uid}`));
+          showToast("تم الحذف");
+          closeModal();
+        }
+      };
     }
 
-    const userId = 'user_' + Date.now();
-    await set(ref(db, `users/${userId}`), {
-      name, password: pass, number, createdAt: serverTimestamp()
+    function openReserveNumberModal() {
+      const html = `
+        <div id="reserveNumberModal" class="modal active">
+          <h3 style="margin-bottom:12px">حجز رقم ذهبي</h3>
+          <input type="text" id="goldName" placeholder="اسم المستخدم">
+          <input type="password" id="goldPass" placeholder="كلمة المرور الابتدائية" style="margin-top:8px">
+          <input type="text" id="goldNumber" placeholder="الرقم الذهبي 71XXXXX" maxlength="7" style="margin-top:8px">
+          <button id="btnSaveGold" style="margin-top:12px">حفظ</button>
+          <button onclick="closeModal()" style="margin-top:8px">إلغاء</button>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', html);
+      document.getElementById('modalOverlay').classList.add('active');
+
+      document.getElementById('goldNumber').oninput = (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0,7);
+      };
+
+      document.getElementById('btnSaveGold').onclick = async () => {
+        const name = document.getElementById('goldName').value;
+        const pass = document.getElementById('goldPass').value;
+        const number = document.getElementById('goldNumber').value;
+
+        if (!name ||!pass ||!number.startsWith('71') || number.length!== 7) {
+          showToast("البيانات غير صحيحة");
+          return;
+        }
+
+        const snap = await get(ref(db, 'users'));
+        const exists = Object.values(snap.val()).some(u => u.number === number);
+        if (exists) {
+          showToast("الرقم مستخدم");
+          return;
+        }
+
+        const userId = 'user_' + Date.now();
+        await set(ref(db, `users/${userId}`), {
+          name, password: pass, number, createdAt: serverTimestamp()
+        });
+
+        showToast("تم حجز الرقم الذهبي");
+        closeModal();
+      };
+    }
+
+    /* ========== Init & Event Listeners ========== */
+    window.addEventListener('load', async () => {
+      document.getElementById('btnErdue')?.addEventListener('click', openErdueModal);
+
+      const savedUser = localStorage.getItem('wa_haroon_user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        const snap = await get(ref(db, `users/${currentUser.uid}`));
+        if (!snap.exists()) { 
+          localStorage.removeItem('wa_haroon_user'); 
+          showScreen('loginScreen'); 
+          return; 
+        }
+        currentUser = {...currentUser,...snap.val() };
+        localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
+
+        if (currentUser?.status === "banned") { 
+          showBannedScreen(); 
+          return; 
+        }
+
+        showScreen('chatsScreen');
+        document.getElementById('currentUserName').textContent = currentUser.name;
+        document.getElementById('currentUserNumber').textContent = currentUser.number;
+        loadChatsList();
+        addAdminMenuItems();
+
+        get(ref(db, `users/${currentUser.uid}/theme`)).then(snap => {
+          if (snap.exists()) {
+            const theme = snap.val();
+            applyThemeColor(theme.header, 'header');
+            applyThemeColor(theme.chatList, 'chat');
+            applyThemeColor(theme.footer, 'footer');
+          } else if (localStorage.getItem('wa_theme')) {
+            const theme = JSON.parse(localStorage.getItem('wa_theme'));
+            applyThemeColor(theme.header, 'header');
+            applyThemeColor(theme.chatList, 'chat');
+            applyThemeColor(theme.footer, 'footer');
+          }
+        });
+        
+      } else {
+        showScreen('loginScreen');
+      }
+      createAdminIfNotExists();
     });
 
-    showToast("تم حجز الرقم الذهبي");
-    closeModal();
-  };
-}
+    document.getElementById('btnShowSignup').onclick = () => toggleForm('signup');
+    document.getElementById('btnShowRestore').onclick = () => toggleForm('restore');
+    document.getElementById('btnSignup').onclick = () => createAccount(
+      document.getElementById('signupName').value, 
+      document.getElementById('signupPass').value
+    );
+    document.getElementById('btnRestore').onclick = () => restoreAccount(
+      document.getElementById('restoreNumber').value, 
+      document.getElementById('restorePass').value
+    );
+    document.getElementById('btnChatsMenu').onclick = (e) => { 
+      e.stopPropagation(); 
+      openModal('chatsMenuModal'); 
+    };
+    document.getElementById('modalOverlay').onclick = closeModal;
+    document.getElementById('btnLogout').onclick = () => {
+      localStorage.removeItem('wa_haroon_user');
+      currentUser = null;
+      showScreen('loginScreen');
+      closeModal();
+      showToast("تم تسجيل الخروج");
+    };
+    document.getElementById('btnSend').onclick = () => {
+      const text = document.getElementById('messageInput').value;
+      sendMessage(text);
+    };
+    document.getElementById('btnBackToChats').onclick = () => showScreen('chatsScreen');
+    document.getElementById('btnChangeTheme').onclick = (e) => {
+      e.stopPropagation();
+      closeModal();
+      openModal('themeModal');
+      initThemeTabs();
+      initThemeColors();
+    };
+    document.getElementById('btnChangePass').onclick = (e) => {
+      e.stopPropagation();
+      closeModal();
+      openModal('changePassModal');
+      document.getElementById('oldPass').value = '';
+      document.getElementById('newPass').value = '';
+      document.getElementById('confirmPass').value = '';
+    };
+    document.getElementById('btnSavePass').onclick = async () => {
+      const oldPass = document.getElementById('oldPass').value;
+      const newPass = document.getElementById('newPass').value;
+      const confirmPass = document.getElementById('confirmPass').value;
 
-/* شغل فحص الأدمن وقت تسجيل الدخول */
-const oldLoadChatsList = loadChatsList;
-loadChatsList = function() {
-  oldLoadChatsList();
-  addAdminMenuItems();
-};
+      if (!oldPass || !newPass || !confirmPass) {
+        showToast('املأ كل الحقول');
+        return;
+      }
+      if (newPass !== confirmPass) {
+        showToast('كلمات المرور غير متطابقة');
+        return;
+      }
+      if (newPass.length < 5 || /(.)\1{4,}/.test(newPass) || newPass === "12345") {
+        showToast('كلمة المرور ضعيفة');
+        return;
+      }
 
-// شغل إنشاء الأدمن وقت تحميل الصفحة
-createAdminIfNotExists();
+      const userRef = ref(db, `users/${currentUser.uid}`);
+      const snap = await get(userRef);
+      if (!snap.exists() || snap.val().password !== oldPass) {
+        showToast('كلمة المرور القديمة خطأ');
+        return;
+      }
 
+      await update(userRef, { password: newPass });
+      showToast('تم تغيير كلمة المرور بنجاح');
+      closeModal();
+    };
+    document.getElementById('btnSearch').onclick = async () => {
+      const number = document.getElementById('searchNumber').value.trim();
+      if (!number) { loadChatsList(); return; }
+      
+      const usersSnap = await get(ref(db, 'users'));
+      if (!usersSnap.exists()) { showToast("لا يوجد مستخدم بهذا الرقم"); return; }
+      
+      const users = usersSnap.val();
+      const userEntry = Object.entries(users).find(([uid, u]) => u.number === number);
+      if (!userEntry) { showToast("لا يوجد مستخدم بهذا الرقم"); return; }
+      
+      const [uid, userData] = userEntry;
+      if (uid === currentUser.uid) { showToast("هذا انت"); return; }
+      
+      const chatsList = document.getElementById('chatsList');
+      const existingItem = document.getElementById('search_' + uid);
+      if (existingItem) {
+        existingItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        existingItem.style.background = 'var(--bg-panel)';
+        setTimeout(() => existingItem.style.background = '', 1000);
+        document.getElementById('searchNumber').value = '';
+        return;
+      }
+      
+      const chatDiv = document.createElement('div');
+      chatDiv.className = 'chat-item';
+      chatDiv.id = 'search_' + uid;
+      chatDiv.style.borderBottom = '2px solid var(--accent-green)';
+      chatDiv.innerHTML = `
+        <div class="avatar">${userData.name[0]}</div>
+        <div class="chat-info">
+          <div class="chat-top">
+            <span class="chat-name">${userData.name}</span>
+            <span class="chat-time">بحث</span>
+          </div>
+          <div class="chat-bottom">
+            <span class="last-msg">اضغط لبدء المحادثة</span>
+          </div>
+        </div>
+      `;
+      chatDiv.addEventListener('click', async () => {
+        const chatId = [currentUser.uid, uid].sort().join('_');
+        await set(ref(db, `userChats/${currentUser.uid}/${uid}`), {
+          lastMsg: "", lastMsgTime: serverTimestamp()
+        });
+        listenMessages(chatId, uid);
+        showScreen('chatScreen');
+        document.getElementById('chatUserName').textContent = userData.name;
+        document.getElementById('searchNumber').value = '';
+      });
+      
+      if (chatsList.firstChild) {
+        chatsList.insertBefore(chatDiv, chatsList.firstChild);
+      } else {
+        chatsList.appendChild(chatDiv);
+      }
+      document.getElementById('searchNumber').value = '';
+    };
 
+    /* ========== Emoji & Input Handling ========== */
+    const btnEmoji = document.getElementById('btnEmoji');
+    const emojiPanel = document.getElementById('emojiPanel');
+    const messageInput = document.getElementById('messageInput');
 
+    btnEmoji.addEventListener('click', () => {
+      const isOpen = emojiPanel.style.display === 'grid';
+      emojiPanel.style.display = isOpen ? 'none' : 'grid';
+      btnEmoji.textContent = isOpen ? '😀' : '⌨️';
+      if (isOpen) messageInput.focus();
+    });
 
-// تشغيل الكود من الكونسول
-document.addEventListener('keydown', (e) => {
-  if (e.target.id === 'erdueConsoleInput' && e.key === 'Enter') {
-    try {
-      const result = eval(e.target.value);
-      document.getElementById('erdueConsoleOutput').value += '\n> ' + e.target.value + '\n' + result;
-      e.target.value = '';
-    } catch(err) {
-      document.getElementById('erdueConsoleOutput').value += '\nError: ' + err.message;
-    }
-  }
-});
+    const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰',
+    '😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞',
+    '😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳',
+    '🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯'];
+    emojis.forEach(emoji => {
+      const span = document.createElement('span');
+      span.className = 'emoji-item';
+      span.textContent = emoji;
+      span.addEventListener('click', () => {
+        messageInput.value += emoji;
+        messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
+        messageInput.blur();
+      });
+      emojiPanel.appendChild(span);
+    });
 
-// تبويبات Erdue
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => e.preventDefault());
+    document.addEventListener('paste', e => {
+      if (e.target.id !== 'messageInput') {
+        e.preventDefault();
+      }
+    });
+    document.getElementById('signupName').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '');
+    });
+    ['signupPass', 'restoreNumber', 'restorePass', 'searchNumber', 'oldPass', 'newPass', 'confirmPass']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/\D/g, '');
+        });
+      }
+    });
 
+    /* ========== Debug Console ========== */
+    (function createDebugConsole() {
+      if (document.getElementById('debugConsole')) return;
+      const consoleBox = document.createElement('div');
+      consoleBox.id = 'debugConsole';
+      consoleBox.style.cssText = `position:fixed;bottom:0;left:0;right:0;height:50vh;background:#000;color:#0f0;font:12px/1.4 monospace;overflow-y:auto;z-index:99999;padding:8px;display:none;border-top:2px solid #0f0;white-space:pre-wrap;word-break:break-all;`;
+      
+      const toggleBtn = document.createElement('button');
+      toggleBtn.id = 'debugToggleBtn';
+      toggleBtn.textContent = 'Debug';
+      toggleBtn.style.cssText = `position:fixed;bottom:10px;right:10px;z-index:100000;padding:8px 12px;background:#0f0;color:#000;border:none;border-radius:8px;font-weight:bold;display:none;touch-action:none;cursor:move;user-select:none;`;
+      
+      toggleBtn.onclick = () => consoleBox.style.display = consoleBox.style.display === 'none'? 'block' : 'none';
+      
+      let isDragging = false;
+      let offsetX, offsetY;
+      
+      function startDrag(e) {
+        isDragging = true;
+        const rect = toggleBtn.getBoundingClientRect();
+        const clientX = e.touches? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches? e.touches[0].clientY : e.clientY;
+        offsetX = clientX - rect.left;
+        offsetY = clientY - rect.top;
+        toggleBtn.style.transition = 'none';
+      }
+      
+      function onDrag(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const clientX = e.touches? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches? e.touches[0].clientY : e.clientY;
+        toggleBtn.style.left = clientX - offsetX + 'px';
+        toggleBtn.style.top = clientY - offsetY + 'px';
+        toggleBtn.style.right = 'auto';
+        toggleBtn.style.bottom = 'auto';
+      }
+      
+      function endDrag() { isDragging = false; }
+      
+      toggleBtn.addEventListener('mousedown', startDrag);
+      toggleBtn.addEventListener('touchstart', startDrag, {passive: false});
+      document.addEventListener('mousemove', onDrag);
+      document.addEventListener('touchmove', onDrag, {passive: false});
+      document.addEventListener('mouseup', endDrag);
+      document.addEventListener('touchend', endDrag);
+      
+      document.body.appendChild(consoleBox);
+      document.body.appendChild(toggleBtn);
+      
+      const oldLog = console.log;
+      const oldErr = console.error;
+      const oldWarn = console.warn;
+      
+      function printToBox(type, args) {
+        const line = document.createElement('div');
+        line.style.color = type === 'error'? '#f55' : type === 'warn'? '#ff0' : '#0f0';
+        line.textContent = `[${type.toUpperCase()}] ` + Array.from(args).map(a =>
+          typeof a === 'object'? JSON.stringify(a, null, 2) : String(a)
+        ).join(' ');
+        consoleBox.appendChild(line);
+        consoleBox.scrollTop = consoleBox.scrollHeight;
+      }
+      
+      console.log = function(...args) {
+        oldLog.apply(console, args);
+        printToBox('log', args);
+      };
+      console.error = function(...args) {
+        oldErr.apply(console, args);
+        printToBox('error', args);
+      };
+      console.warn = function(...args) {
+        oldWarn.apply(console, args);
+        printToBox('warn', args);
+      };
+      
+      console.log("[Debug Console] جاهز. بيظهر تلقائياً لما تدخل كأدمن");
+    })();
 
-/* ========== Console وهمي للجوال ========== */
-/* ========== Console وهمي للجوال ========== */
-/* ========== Console وهمي للجوال قابل للسحب ========== */
-(function createDebugConsole() {
-  if (document.getElementById('debugConsole')) return;
+    document.addEventListener('keydown', (e) => {
+      if (e.target.id === 'erdueConsoleInput' && e.key === 'Enter') {
+        try {
+          const result = eval(e.target.value);
+          document.getElementById('erdueConsoleOutput').value += '\n> ' + e.target.value + '\n' + result;
+          e.target.value = '';
+        } catch(err) {
+          document.getElementById('erdueConsoleOutput').value += '\nError: ' + err.message;
+        }
+      }
+    });
 
-  // صندوق الأخطاء
-  const consoleBox = document.createElement('div');
-  consoleBox.id = 'debugConsole';
-  consoleBox.style.cssText = `
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 50vh; /* كبرناه من 40% إلى 50% من الشاشة */
-    background: #000;
-    color: #0f0;
-    font: 12px/1.4 monospace;
-    overflow-y: auto;
-    z-index: 99999;
-    padding: 8px;
-    display: none;
-    border-top: 2px solid #0f0;
-    white-space: pre-wrap; /* يخلي النص الطويل يلتف وما يطلع برا */
-    word-break: break-all;
-  `;
-
-  // زر Debug قابل للسحب
-  const toggleBtn = document.createElement('button');
-  toggleBtn.id = 'debugToggleBtn';
-  toggleBtn.textContent = 'Debug';
-  toggleBtn.style.cssText = `
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    z-index: 100000;
-    padding: 8px 12px;
-    background: #0f0;
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    display: none;
-    touch-action: none; /* مهم للسحب على الجوال */
-    cursor: move;
-    user-select: none;
-  `;
-
-  // إظهار/إخفاء الكونسول
-  toggleBtn.onclick = (e) => {
-    // منع الفتح لو كان السحب
-    if (e.detail === 0) return;
-    consoleBox.style.display = consoleBox.style.display === 'none'? 'block' : 'none';
-  };
-
-  // كود السحب للماوس واللمس
-  let isDragging = false;
-  let offsetX, offsetY;
-
-  function startDrag(e) {
-    isDragging = true;
-    const rect = toggleBtn.getBoundingClientRect();
-    const clientX = e.touches? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches? e.touches[0].clientY : e.clientY;
-    offsetX = clientX - rect.left;
-    offsetY = clientY - rect.top;
-    toggleBtn.style.transition = 'none';
-  }
-
-  function onDrag(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    const clientX = e.touches? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches? e.touches[0].clientY : e.clientY;
-
-    toggleBtn.style.left = clientX - offsetX + 'px';
-    toggleBtn.style.top = clientY - offsetY + 'px';
-    toggleBtn.style.right = 'auto';
-    toggleBtn.style.bottom = 'auto';
-  }
-
-  function endDrag() {
-    isDragging = false;
-  }
-
-  toggleBtn.addEventListener('mousedown', startDrag);
-  toggleBtn.addEventListener('touchstart', startDrag, {passive: false});
-
-  document.addEventListener('mousemove', onDrag);
-  document.addEventListener('touchmove', onDrag, {passive: false});
-
-  document.addEventListener('mouseup', endDrag);
-  document.addEventListener('touchend', endDrag);
-
-  document.body.appendChild(consoleBox);
-  document.body.appendChild(toggleBtn);
-
-  // اعتراض console.log, error, warn
-  const oldLog = console.log;
-  const oldErr = console.error;
-  const oldWarn = console.warn;
-
-  function printToBox(type, args) {
-    const line = document.createElement('div');
-    line.style.color = type === 'error'? '#f55' : type === 'warn'? '#ff0' : '#0f0';
-    line.textContent = `[${type.toUpperCase()}] ` + Array.from(args).map(a =>
-      typeof a === 'object'? JSON.stringify(a, null, 2) : String(a)
-    ).join(' ');
-    consoleBox.appendChild(line);
-    consoleBox.scrollTop = consoleBox.scrollHeight;
-  }
-
-  console.log = function(...args) {
-    oldLog.apply(console, args);
-    printToBox('log', args);
-  };
-  console.error = function(...args) {
-    oldErr.apply(console, args);
-    printToBox('error', args);
-  };
-  console.warn = function(...args) {
-    oldWarn.apply(console, args);
-    printToBox('warn', args);
-  };
-
-  console.log("[Debug Console] جاهز. بيظهر تلقائياً لما تدخل كأدمن");
-})();
-
-// دالة تظهر زر Debug للأدمن فقط
-function showDebugForAdmin() {
-  const btn = document.getElementById('debugToggleBtn');
-  if (btn && currentUser?.isAdmin) {
-    btn.style.display = 'block';
-    console.log("[Admin] زر Debug مفعل");
-  }
-}
-
-document.getElementById('debugToggleBtn').style.display = 'block';
-
-</script>
+    window.addEventListener('popstate', () => {
+      if (activeScreen === 'chatScreen') {
+        showScreen('chatsScreen');
+        history.pushState(null, null, location.href);
+      } else if (activeScreen === 'chatsScreen') {
+        window.close(); 
+      }
+    });
+    history.pushState(null, null, location.href);
+  </script>
 </body>
 </html>
