@@ -1665,6 +1665,24 @@ function addAdminMenuItems() {
   <button class="menu-item" id="btnErdue">Erdue</button>
 `;
   menu.insertAdjacentHTML('beforeend', html);
+  
+  
+  
+  
+  
+  
+  
+  document.getElementById('btnErdue').onclick = () => {
+  closeModal();
+  openErdueModal(); // لازم تسوي الدالة هذي كمان
+};
+
+
+
+
+
+
+
   console.log("[Admin Debug] تم إضافة أزرار الأدمن بنجاح");
 
   // ربط الأحداث للأزرار
