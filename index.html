@@ -388,6 +388,7 @@
       document.getElementById('currentUserName').textContent = name;
       document.getElementById('currentUserNumber').textContent = number;
       loadChatsList();
+      setupErdueButton();
     }
 
     async function restoreAccount(number, password) {
@@ -408,6 +409,7 @@
       document.getElementById('currentUserName').textContent = userData.name;
       document.getElementById('currentUserNumber').textContent = number;
       loadChatsList();
+      setupErdueButton();
     }
 
     async function sendMessage(text) {
@@ -781,7 +783,7 @@ console.log("[Admin] زر Debug مفعل");
         document.getElementById('currentUserNumber').textContent = currentUser.number;
         loadChatsList();
         addAdminMenuItems();
-
+        setupErdueButton();
         get(ref(db, `users/${currentUser.uid}/theme`)).then(snap => {
           if (snap.exists()) {
             const theme = snap.val();
@@ -996,6 +998,26 @@ console.log("[Admin] زر Debug مفعل");
         }
       }
     });
+    
+   // 1. اظهار/اخفاء زر Erdue حسب الأدمن
+function setupErdueButton() {
+  const erdueBtn = document.getElementById('btnErdue');
+  if (!erdueBtn) return;
+
+  if (currentUser?.isAdmin) {
+    erdueBtn.style.display = 'block';
+    erdueBtn.onclick = openErdueModal; // استخدم الدالة الموجودة
+  } else {
+    erdueBtn.style.display = 'none';
+  }
+}
+
+// 2. ربط زر الإغلاق للمودال - استخدم selector صح
+document.querySelector('#erdueModal .modal-close')?.addEventListener('click', () => {
+  document.getElementById('erdueModal').classList.remove('active');
+  document.getElementById('modalOverlay').classList.remove('active');
+  activeModal = null;
+}); 
 
     window.addEventListener('popstate', () => {
       if (activeScreen === 'chatScreen') {
@@ -1006,6 +1028,9 @@ console.log("[Admin] زر Debug مفعل");
       }
     });
     history.pushState(null, null, location.href);
+    
+    
+    
   </script>
 </body>
 </html>
