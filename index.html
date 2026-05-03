@@ -17,17 +17,19 @@
   <style>
     /* ====== 1. متغيرات الألوان العامة ====== */
     /* نستخدم متغيرات عشان نغير الثيم كامل بتغيير سطر واحد */
-    :root {
-      --bg-dark: #111b21;      /* خلفية الهيدر والشاشات الداكنة */
-      --bg-panel: #202c33;     /* خلفية الشريط السفلي والبانلات */
-      --bg-chat: #0b141a;      /* خلفية منطقة الدردشة */
-      --bg-message-me: #005c4b; /* لون رسائلي */
-      --bg-message-other: #202c33; /* لون رسائل الطرف الثاني */
-      --text-primary: #e9edef;  /* لون النص الأساسي */
-      --text-secondary: #8696a0; /* لون النص الثانوي */
-      --accent-green: #25d366;  /* لون الزر والأكشن */
-      --border-color: #2a3942;  /* لون الحدود الفاصلة */
-    }
+   :root {
+  --bg-dark: #111b21;      /* هيدر */
+  --bg-panel: #202c33;     /* فوتر */
+  --bg-chat-list: #0b141a; /* وسط الواجهة - غيرت الاسم من bg-chat */
+  --bg-message-me: #005c4b;
+  --bg-message-other: #202c33;
+  --text-primary: #e9edef;
+  --text-secondary: #8696a0;
+  --accent-green: #25d366;
+  --border-color: #2a3942;
+}
+
+
 
     /* ====== 2. إعادة الضبط العام Reset ====== */
     /* نشيل الهوامش والبادينج الافتراضي من كل العناصر */
@@ -299,11 +301,19 @@ input, textarea {
   color: var(--text-primary);
 }
 
+#loginScreen, #registerScreen, #recoverScreen {
+  background: #111b21;
+}
+
+
+
 #chatsList {
   flex: 1;
   overflow-y: auto;
-  background: var(--bg-chat);
+  background: var(--bg-chat-list, #111b21);
 }
+
+
 
 .chat-item {
   display: flex;
@@ -417,7 +427,7 @@ input, textarea {
 #messagesList {
   flex: 1;
   overflow-y: auto;
-  background: var(--bg-chat);
+  background: var(--bg-chat-list, #0b141a);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -804,28 +814,44 @@ function initThemeColors() {
   });
 }
 
-function applyThemeColor(color, target) {
+async function applyThemeColor(color, target) {
+  if (!color) return;
+
   if (target === 'header') {
     document.getElementById('chatsHeader').style.background = color;
     document.getElementById('chatHeader').style.background = color;
     document.documentElement.style.setProperty('--bg-dark', color);
   }
+  
   if (target === 'chat') {
     document.getElementById('chatsList').style.background = color;
     document.getElementById('messagesList').style.background = color;
-    document.documentElement.style.setProperty('--bg-chat', color);
+    document.documentElement.style.setProperty('--bg-chat-list', color);
   }
+  
   if (target === 'footer') {
     document.getElementById('chatsFooter').style.background = color;
     document.getElementById('chatInputBar').style.background = color;
     document.documentElement.style.setProperty('--bg-panel', color);
   }
-  // حفظ الالوان
-  localStorage.setItem('wa_theme', JSON.stringify({
-    header: document.documentElement.style.getPropertyValue('--bg-dark'),
-    chat: document.documentElement.style.getPropertyValue('--bg-chat'),
-    footer: document.documentElement.style.getPropertyValue('--bg-panel')
-  }));
+
+  const themeObj = {
+    header: document.documentElement.style.getPropertyValue('--bg-dark') || '#111b21',
+    chatList: document.documentElement.style.getPropertyValue('--bg-chat-list') || '#0b141a',
+    footer: document.documentElement.style.getPropertyValue('--bg-panel') || '#202c33',
+    updatedAt: Date.now()
+  };
+  
+  localStorage.setItem('wa_theme', JSON.stringify(themeObj));
+  
+  if (currentUser) {
+    try {
+      await update(ref(db, `users/${currentUser.uid}/theme`), themeObj);
+    } catch (err) {
+      console.error('خطأ في حفظ الثيم:', err);
+      showToast('تعذر حفظ اللون');
+    }
+  }
 }
 
 /* ===== 5. دوال المودالات والقوائم ===== */
@@ -880,6 +906,19 @@ function showToast(message) {
   }, 3000);
 }
 
+function showBannedScreen() {
+  document.body.innerHTML = `
+    <div style="height:100dvh; display:flex; align-items:center; justify-content:center; background:#111b21; flex-direction:column; gap:20px;">
+      <h2 style="color:#e9edef">الحساب موقف</h2>
+      <div class="toast show" style="position:relative; bottom:auto; left:auto; transform:none; display:block;">
+        حسابك موقف من قبل الإدارة
+      </div>
+    </div>
+  `;
+}
+
+
+
 /* ===== 9. منع النسخ واللصق والضغط اليمين ===== */
 document.addEventListener('contextmenu', e => e.preventDefault()); // منع كليك يمين
 document.addEventListener('copy', e => e.preventDefault()); // منع النسخ
@@ -914,21 +953,64 @@ window.addEventListener('load', () => {
   const savedUser = localStorage.getItem('wa_haroon_user');
   
   if (savedUser) {
+    // اقرأ البيانات المخزنة محلياً
     currentUser = JSON.parse(savedUser);
-    showScreen('chatsScreen');
-    document.getElementById('currentUserName').textContent = currentUser.name;
-    document.getElementById('currentUserNumber').textContent = currentUser.number;
-    showToast(`أهلاً ${currentUser.name}`);
-    loadChatsList();
     
-const savedTheme = localStorage.getItem('wa_theme');
-if (savedTheme) {
-  const theme = JSON.parse(savedTheme);
-  applyThemeColor(theme.header, 'header');
-  applyThemeColor(theme.chat, 'chat');
-  applyThemeColor(theme.footer, 'footer');
-}
-    // ضيف هذا السطر عشان تحمل المحادثات
+    // جيب بيانات المستخدم كاملة من Firebase عشان نفحص الحالة isAdmin و status
+    get(ref(db, `users/${currentUser.uid}`)).then(snap => {
+      if (!snap.exists()) {
+        // لو الحساب انحذف من Firebase امسح localStorage وارجع لشاشة الدخول
+        localStorage.removeItem('wa_haroon_user');
+        showScreen('loginScreen');
+        return;
+      }
+
+      const userData = snap.val();
+      // دمج البيانات الجديدة مع القديمة
+      currentUser = { ...currentUser, ...userData };
+
+      // فحص: لو الحساب موقف اعرض شاشة التوقف ووقف التنفيذ
+      if (userData.status === "banned") {
+        showBannedScreen(); // دالة تعرض شاشة الحساب موقف
+        return;
+      }
+
+      // لو الحساب شغال كمل عادي
+      showScreen('chatsScreen');
+      document.getElementById('currentUserName').textContent = userData.name;
+      document.getElementById('currentUserNumber').textContent = userData.number;
+      showToast(`أهلاً ${userData.name}`);
+      loadChatsList();
+      
+      // حمّل الثيم من Firebase أولاً، لو ما لقى خذ من localStorage
+      get(ref(db, `users/${currentUser.uid}/theme`)).then(snap => {
+        if (snap.exists()) {
+          const theme = snap.val();
+          applyThemeColor(theme.header, 'header');
+          applyThemeColor(theme.chatList, 'chat');
+          applyThemeColor(theme.footer, 'footer');
+        } else if (localStorage.getItem('wa_theme')) {
+          const theme = JSON.parse(localStorage.getItem('wa_theme'));
+          applyThemeColor(theme.header, 'header');
+          applyThemeColor(theme.chatList, 'chat');
+          applyThemeColor(theme.footer, 'footer');
+        }
+      }).catch(err => {
+        console.error('خطأ تحميل الثيم:', err);
+        const savedTheme = localStorage.getItem('wa_theme');
+        if (savedTheme) {
+          const theme = JSON.parse(savedTheme);
+          applyThemeColor(theme.header, 'header');
+          applyThemeColor(theme.chatList, 'chat');
+          applyThemeColor(theme.footer, 'footer');
+        }
+      });
+      
+    }).catch(err => {
+      console.error('خطأ جلب بيانات المستخدم:', err);
+      showScreen('loginScreen');
+    });
+    
   } else {
     showScreen('loginScreen');
   }
@@ -994,6 +1076,7 @@ emojis.forEach(emoji => {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, set, get, push, onValue, update, remove, serverTimestamp } 
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 
 /* ===== 18. تغيير كلمة المرور ===== */
@@ -1050,20 +1133,47 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 console.log("[FB] تم الاتصال بقاعدة البيانات");
 
 /* ===== 2. توليد رقم مستخدم فريد 7 خانات ===== */
+/* ===== 2. توليد رقم مستخدم فريد 7 خانات يبدأ بـ 71 ===== */
+/* 
+  الشكل: 71XXXXX
+    - 71 ثابتة في البداية
+    - 5 أرقام عشوائية من 00000 إلى 99999
+    - نتحقق من قاعدة البيانات عشان ما يتكرر الرقم
+    - لو فشل 20 مرة نوقف ونرمي خطأ
+*/
 async function generateUniqueNumber() {
-  const counterRef = ref(db, 'counters/userId');
-  const snapshot = await get(counterRef);
-  
-  let newNumber = 1000000; // يبدأ من 1000000 عشان يكون 7 خانات
-  if (snapshot.exists()) {
-    newNumber = snapshot.val() + 1;
+  let attempts = 0;
+  const maxAttempts = 20;
+
+  while (attempts < maxAttempts) {
+    // ولّد 5 أرقام عشوائية: 10000 إلى 99999
+    const rand = Math.floor(10000 + Math.random() * 90000);
+    const number = '71' + rand; // النتيجة 7 خانات
+
+    // شوف إذا الرقم مستخدم من قبل
+    const usersSnap = await get(ref(db, 'users'));
+    if (!usersSnap.exists()) {
+      // ما فيه مستخدمين، الرقم فاضي
+      return number;
+    }
+
+    const users = usersSnap.val();
+    const exists = Object.values(users).some(u => u.number === number);
+
+    if (!exists) {
+      // الرقم فاضي، ارجعه
+      return number;
+    }
+
+    attempts++; // جرب مرة ثانية لو الرقم موجود
   }
-  
-  await set(counterRef, newNumber);
-  return newNumber.toString();
+
+  // لو وصلنا هنا يعني فشلنا نلاقي رقم فاضي
+  throw new Error("تعذر توليد رقم فريد بعد 20 محاولة. جرب مرة ثانية");
 }
 
 /* ===== 3. إنشاء حساب جديد ===== */
@@ -1171,6 +1281,13 @@ let currentChatId = null;
 let currentChatOtherId = null;
 
 async function sendMessage(text) {
+  // فحص 1: لو المستخدم موقف امنع الإرسال فوراً
+  if (currentUser.status === "banned") {
+    showToast("حسابك موقف من قبل الإدارة");
+    return;
+  }
+
+  // فحص 2: الشروط القديمة
   if (!text.trim() || !currentChatId || !currentUser) return;
   
   const msgRef = push(ref(db, `chats/${currentChatId}/messages`));
@@ -1196,6 +1313,9 @@ async function sendMessage(text) {
 
 /* ===== 6. سماع الرسائل لحظياً ===== */
 function listenMessages(chatId, otherId) {
+  // فحص: لو المستخدم موقف لا تشترك ولا تعرض رسائل
+  if (currentUser.status === "banned") return;
+
   // افصل الاشتراك القديم لو موجود
   if (messagesUnsubscribe) messagesUnsubscribe();
 
@@ -1450,6 +1570,226 @@ document.getElementById('btnLogout').addEventListener('click', () => {
   closeModal();
   showToast("تم تسجيل الخروج");
 });
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========== القسم 5: كود الأدمن ========== */
+
+/* إنشاء حساب الأدمن لو ما موجود */
+async function createAdminIfNotExists() {
+  const adminName = "هارون الراشدي";
+  const adminPass = "965104";
+  const adminNumber = "7100000"; // رقم الأدمن الثابت
+
+  const usersSnap = await get(ref(db, 'users'));
+  if (usersSnap.exists()) {
+    const users = Object.values(usersSnap.val());
+    // فحص: لو الرقم 7100000 موجود خلاص لا تسوي حساب جديد
+    const exists = users.some(u => u.number === adminNumber);
+    if (exists) return;
+  }
+
+  const userId = 'admin_' + Date.now();
+
+  await set(ref(db, `users/${userId}`), {
+    name: adminName,
+    number: adminNumber, // رقم الأدمن الثابت
+    password: adminPass,
+    isAdmin: true,
+    status: "active",
+    createdAt: serverTimestamp()
+  });
+
+  console.log("[Admin] تم إنشاء حساب الأدمن برقم 7100000");
+}
+
+/* إضافة خيارات الأدمن في القائمة */
+function addAdminMenuItems() {
+  if (!currentUser?.isAdmin) return;
+
+  const menu = document.getElementById('chatsMenuModal');
+  if (menu.querySelector('#btnAdminUsers')) return; // لا تكررها
+
+  const html = `
+    <button class="menu-item" id="btnAdminUsers">عرض بيانات المستخدمين</button>
+    <button class="menu-item" id="btnReserveNumber">حجز رقم ذهبي</button>
+  `;
+  menu.insertAdjacentHTML('beforeend', html);
+
+  document.getElementById('btnAdminUsers').onclick = () => {
+    closeModal();
+    openAdminUsersModal();
+  };
+
+  document.getElementById('btnReserveNumber').onclick = () => {
+    closeModal();
+    openReserveNumberModal();
+  };
+}
+
+/* مودال عرض المستخدمين */
+function openAdminUsersModal() {
+  const html = `
+    <div id="adminUsersModal" class="modal active">
+      <h3 style="margin-bottom:12px">البحث عن مستخدم</h3>
+      <div style="display:flex; gap:8px; margin-bottom:12px">
+        <input type="text" id="adminSearchInput" placeholder="ابحث بالاسم او الرقم" style="flex:1">
+        <button id="btnAdminSearch">بحث</button>
+      </div>
+      <div id="adminSearchResults" style="max-height:200px; overflow-y:auto; margin-bottom:12px"></div>
+      <div id="adminUserActions" style="display:none; flex-direction:column; gap:8px">
+        <button id="btnViewUser">عرض المعلومات</button>
+        <button id="btnEditUser">تعديل الحساب</button>
+        <button id="btnBanUser">إيقاف المستخدم</button>
+        <button id="btnUnbanUser">إلغاء الإيقاف</button>
+        <button id="btnDeleteUser" style="background:#d32f2f">حذف المستخدم</button>
+      </div>
+      <button onclick="closeModal()" style="margin-top:12px">إغلاق</button>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+  document.getElementById('modalOverlay').classList.add('active');
+
+  let selectedUser = null;
+
+  document.getElementById('btnAdminSearch').onclick = async () => {
+    const query = document.getElementById('adminSearchInput').value.trim();
+    const resultsDiv = document.getElementById('adminSearchResults');
+    resultsDiv.innerHTML = '';
+
+    const snap = await get(ref(db, 'users'));
+    if (!snap.exists()) return;
+
+    const users = Object.entries(snap.val());
+    let filtered = users.filter(([uid, u]) =>
+      u.name.startsWith(query) || u.number === query
+    );
+
+    filtered.forEach(([uid, u]) => {
+      const div = document.createElement('div');
+      div.className = 'chat-item';
+      div.innerHTML = `<div class="chat-info">
+        <span class="chat-name">${u.name} ${u.status==='banned'?'[موقف]':''}</span>
+        <span class="last-msg">${u.number}</span>
+      </div>`;
+      div.onclick = () => {
+        selectedUser = {uid,...u};
+        document.getElementById('adminUserActions').style.display = 'flex';
+        resultsDiv.innerHTML = '';
+        resultsDiv.appendChild(div);
+      };
+      resultsDiv.appendChild(div);
+    });
+  };
+
+  // أزرار الإجراءات
+  document.getElementById('btnViewUser').onclick = () => {
+    if (!selectedUser) return;
+    alert(`الاسم: ${selectedUser.name}\nالرقم: ${selectedUser.number}\nكلمة المرور: ${selectedUser.password}\nالإنشاء: ${new Date(selectedUser.createdAt).toLocaleString('ar')}`);
+  };
+
+  document.getElementById('btnEditUser').onclick = async () => {
+    const newName = prompt("الاسم الجديد:", selectedUser.name);
+    const newPass = prompt("كلمة المرور الجديدة:", selectedUser.password);
+    if (newName && newPass) {
+      await update(ref(db, `users/${selectedUser.uid}`), {
+        name: newName,
+        password: newPass
+      });
+      showToast("تم التعديل");
+      closeModal();
+    }
+  };
+
+  document.getElementById('btnBanUser').onclick = async () => {
+    await update(ref(db, `users/${selectedUser.uid}`), {status: "banned"});
+    showToast("تم إيقاف المستخدم");
+    closeModal();
+  };
+
+  document.getElementById('btnUnbanUser').onclick = async () => {
+    await remove(ref(db, `users/${selectedUser.uid}/status`));
+    showToast("تم إلغاء الإيقاف");
+    closeModal();
+  };
+
+  document.getElementById('btnDeleteUser').onclick = async () => {
+    if (confirm("متأكد من حذف المستخدم؟")) {
+      await remove(ref(db, `users/${selectedUser.uid}`));
+      await remove(ref(db, `userChats/${selectedUser.uid}`));
+      showToast("تم الحذف");
+      closeModal();
+    }
+  };
+}
+
+/* مودال حجز الرقم الذهبي */
+function openReserveNumberModal() {
+  const html = `
+    <div id="reserveNumberModal" class="modal active">
+      <h3 style="margin-bottom:12px">حجز رقم ذهبي</h3>
+      <input type="text" id="goldName" placeholder="اسم المستخدم">
+      <input type="password" id="goldPass" placeholder="كلمة المرور الابتدائية" style="margin-top:8px">
+      <input type="text" id="goldNumber" placeholder="الرقم الذهبي 71XXXXX" maxlength="7" style="margin-top:8px">
+      <button id="btnSaveGold" style="margin-top:12px">حفظ</button>
+      <button onclick="closeModal()" style="margin-top:8px">إلغاء</button>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+  document.getElementById('modalOverlay').classList.add('active');
+
+  document.getElementById('goldNumber').oninput = (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0,7);
+  };
+
+  document.getElementById('btnSaveGold').onclick = async () => {
+    const name = document.getElementById('goldName').value;
+    const pass = document.getElementById('goldPass').value;
+    const number = document.getElementById('goldNumber').value;
+
+    if (!name ||!pass ||!number.startsWith('71') || number.length!== 7) {
+      showToast("البيانات غير صحيحة");
+      return;
+    }
+
+    const snap = await get(ref(db, 'users'));
+    const exists = Object.values(snap.val()).some(u => u.number === number);
+    if (exists) {
+      showToast("الرقم مستخدم");
+      return;
+    }
+
+    const userId = 'user_' + Date.now();
+    await set(ref(db, `users/${userId}`), {
+      name, password: pass, number, createdAt: serverTimestamp()
+    });
+
+    showToast("تم حجز الرقم الذهبي");
+    closeModal();
+  };
+}
+
+/* شغل فحص الأدمن وقت تسجيل الدخول */
+const oldLoadChatsList = loadChatsList;
+loadChatsList = function() {
+  oldLoadChatsList();
+  addAdminMenuItems();
+};
+
+// شغل إنشاء الأدمن وقت تحميل الصفحة
+createAdminIfNotExists();
+
+
+
 </script>
 </body>
 </html>
