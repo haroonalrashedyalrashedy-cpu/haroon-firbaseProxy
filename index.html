@@ -1614,17 +1614,40 @@ async function createAdminIfNotExists() {
 
 /* إضافة خيارات الأدمن في القائمة */
 function addAdminMenuItems() {
-  if (!currentUser?.isAdmin) return;
+  // طباعة بيانات المستخدم الحالي للتصحيح
+  console.log("[Admin Debug] currentUser:", currentUser);
+
+  // لو المستخدم مش أدمن اخرج ولا تضيف الأزرار
+  if (!currentUser?.isAdmin) {
+    console.log("[Admin Debug] المستخدم ليس أدمن، إلغاء عرض الأزرار");
+    return;
+  }
+
+  // أظهر زر Debug للأدمن فقط
+  showDebugForAdmin();
 
   const menu = document.getElementById('chatsMenuModal');
-  if (menu.querySelector('#btnAdminUsers')) return; // لا تكررها
+  // لو المنيو مش موجودة اطبع خطأ واخرج
+  if (!menu) {
+    console.error("[Admin Debug] لم أجد عنصر chatsMenuModal في الصفحة");
+    return;
+  }
 
+  // لا تكرر الأزرار لو موجودة مسبقاً
+  if (menu.querySelector('#btnAdminUsers')) {
+    console.log("[Admin Debug] الأزرار موجودة مسبقاً");
+    return;
+  }
+
+  // إضافة أزرار الأدمن للمنيو
   const html = `
     <button class="menu-item" id="btnAdminUsers">عرض بيانات المستخدمين</button>
     <button class="menu-item" id="btnReserveNumber">حجز رقم ذهبي</button>
   `;
   menu.insertAdjacentHTML('beforeend', html);
+  console.log("[Admin Debug] تم إضافة أزرار الأدمن بنجاح");
 
+  // ربط الأحداث للأزرار
   document.getElementById('btnAdminUsers').onclick = () => {
     closeModal();
     openAdminUsersModal();
@@ -1789,6 +1812,93 @@ loadChatsList = function() {
 createAdminIfNotExists();
 
 
+
+
+/* ========== Console وهمي للجوال ========== */
+/* ========== Console وهمي للجوال ========== */
+(function createDebugConsole() {
+  if (document.getElementById('debugConsole')) return;
+
+  const consoleBox = document.createElement('div');
+  consoleBox.id = 'debugConsole';
+  consoleBox.style.cssText = `
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 40%;
+    background: #000;
+    color: #0f0;
+    font: 12px/1.4 monospace;
+    overflow-y: auto;
+    z-index: 99999;
+    padding: 8px;
+    display: none;
+    border-top: 2px solid #0f0;
+  `;
+
+  const toggleBtn = document.createElement('button');
+  toggleBtn.id = 'debugToggleBtn';
+  toggleBtn.textContent = 'Debug';
+  toggleBtn.style.cssText = `
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 100000;
+    padding: 6px 10px;
+    background: #0f0;
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    display: none; /* مخفي افتراضيًا */
+  `;
+
+  toggleBtn.onclick = () => {
+    consoleBox.style.display = consoleBox.style.display === 'none'? 'block' : 'none';
+  };
+
+  document.body.appendChild(consoleBox);
+  document.body.appendChild(toggleBtn);
+
+  const oldLog = console.log;
+  const oldErr = console.error;
+  const oldWarn = console.warn;
+
+  function printToBox(type, args) {
+    const line = document.createElement('div');
+    line.style.color = type === 'error'? '#f55' : type === 'warn'? '#ff0' : '#0f0';
+    line.textContent = `[${type.toUpperCase()}] ` + Array.from(args).map(a =>
+      typeof a === 'object'? JSON.stringify(a) : String(a)
+    ).join(' ');
+    consoleBox.appendChild(line);
+    consoleBox.scrollTop = consoleBox.scrollHeight;
+  }
+
+  console.log = function(...args) {
+    oldLog.apply(console, args);
+    printToBox('log', args);
+  };
+  console.error = function(...args) {
+    oldErr.apply(console, args);
+    printToBox('error', args);
+  };
+  console.warn = function(...args) {
+    oldWarn.apply(console, args);
+    printToBox('warn', args);
+  };
+
+  console.log("[Debug Console] جاهز. بيظهر تلقائيًا لما تدخل كأدمن");
+})();
+
+// دالة تظهر زر Debug للأدمن فقط
+function showDebugForAdmin() {
+  const btn = document.getElementById('debugToggleBtn');
+  if (btn && currentUser?.isAdmin) {
+    btn.style.display = 'block';
+    console.log("[Admin] زر Debug مفعل");
+  }
+}
 
 </script>
 </body>
