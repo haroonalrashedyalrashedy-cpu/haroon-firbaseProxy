@@ -957,10 +957,10 @@ window.addEventListener('load', () => {
   const savedUser = localStorage.getItem('wa_haroon_user');
   
   if (savedUser) {
-    // اقرأ البيانات المخزنة محلياً
+    // 1. اقرأ البيانات المخزنة محلياً
     currentUser = JSON.parse(savedUser);
     
-    // جيب بيانات المستخدم كاملة من Firebase عشان نفحص الحالة isAdmin و status
+    // 2. جيب بيانات المستخدم كاملة من Firebase عشان نفحص الحالة isAdmin و status
     get(ref(db, `users/${currentUser.uid}`)).then(snap => {
       if (!snap.exists()) {
         // لو الحساب انحذف من Firebase امسح localStorage وارجع لشاشة الدخول
@@ -970,27 +970,36 @@ window.addEventListener('load', () => {
       }
 
       const userData = snap.val();
-      // دمج البيانات الجديدة مع القديمة
+      
+      // 3. دمج البيانات الجديدة مع القديمة
       currentUser = { ...currentUser, ...userData };
 
-console.log("[Admin Debug] userData:", userData);
-showDebugForAdmin();
-addAdminMenuItems();
+      // 4. [تعديل] خزن النسخة المحدثة في localStorage 
+      // عشان ما تتكرر مشكلة "المستخدم ليس أدمن" بعد التحديث
+      localStorage.setItem('wa_haroon_user', JSON.stringify(currentUser));
 
-      // فحص: لو الحساب موقف اعرض شاشة التوقف ووقف التنفيذ
+      console.log("[Admin Debug] userData:", userData);
+      console.log("[Admin Debug] currentUser بعد الدمج:", currentUser);
+
+      // 5. فحص: لو الحساب موقف اعرض شاشة التوقف ووقف التنفيذ قبل أي شي
       if (userData.status === "banned") {
-        showBannedScreen(); // دالة تعرض شاشة الحساب موقف
+        showBannedScreen(); 
         return;
       }
 
-      // لو الحساب شغال كمل عادي
+      // 6. [تعديل] شغل الواجهة الأساسية أولاً
       showScreen('chatsScreen');
       document.getElementById('currentUserName').textContent = userData.name;
       document.getElementById('currentUserNumber').textContent = userData.number;
       showToast(`أهلاً ${userData.name}`);
       loadChatsList();
       
-      // حمّل الثيم من Firebase أولاً، لو ما لقى خذ من localStorage
+      // 7. [تعديل] شغل دوال الأدمن بعد ما تتأكد إن currentUser جاهز 100%
+      // وإن المستخدم مش موقف
+      showDebugForAdmin();
+      addAdminMenuItems();
+
+      // 8. حمّل الثيم من Firebase أولاً، لو ما لقى خذ من localStorage
       get(ref(db, `users/${currentUser.uid}/theme`)).then(snap => {
         if (snap.exists()) {
           const theme = snap.val();
@@ -1016,6 +1025,8 @@ addAdminMenuItems();
       
     }).catch(err => {
       console.error('خطأ جلب بيانات المستخدم:', err);
+      // لو فشل الاتصال، امسح الجلسة وارجع للدخول
+      localStorage.removeItem('wa_haroon_user');
       showScreen('loginScreen');
     });
     
@@ -1960,7 +1971,7 @@ function showDebugForAdmin() {
   }
 }
 
-document.getElementById('debugToggleBtn').style.display = 'block';
+//document.getElementById('debugToggleBtn').style.display = 'block';
 
 </script>
 </body>
