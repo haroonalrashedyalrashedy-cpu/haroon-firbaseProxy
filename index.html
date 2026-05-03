@@ -530,7 +530,7 @@
         console.log("[Admin Debug] المستخدم ليس أدمن، إلغاء عرض الأزرار");
         return;
       }
-      showDebugForAdmin();
+      
       const menu = document.getElementById('chatsMenuModal');
       if (!menu) { console.error("[Admin Debug] لم أجد عنصر chatsMenuModal"); return; }
       if (menu.querySelector('#btnAdminUsers')) {
@@ -551,13 +551,9 @@
       };
     }
 
-    function showDebugForAdmin() {
-      const btn = document.getElementById('debugToggleBtn');
-      if (btn && currentUser?.isAdmin) {
-        btn.style.display = 'block';
-        console.log("[Admin] زر Debug مفعل");
-      }
-    }
+    
+console.log("[Admin] زر Debug مفعل");
+
 
     /* ========== باقي الدوال زي ماهي ========== */
     const themeColors = ['#111b21', '#202c33', '#0b141a', '#075e54', '#128c7e', '#25d366'];
@@ -985,85 +981,10 @@
     });
 
     /* ========== Debug Console ========== */
-    (function createDebugConsole() {
-      if (document.getElementById('debugConsole')) return;
-      const consoleBox = document.createElement('div');
-      consoleBox.id = 'debugConsole';
-      consoleBox.style.cssText = `position:fixed;bottom:0;left:0;right:0;height:50vh;background:#000;color:#0f0;font:12px/1.4 monospace;overflow-y:auto;z-index:99999;padding:8px;display:none;border-top:2px solid #0f0;white-space:pre-wrap;word-break:break-all;`;
-      
-      const toggleBtn = document.createElement('button');
-      toggleBtn.id = 'debugToggleBtn';
-      toggleBtn.textContent = 'Debug';
-      toggleBtn.style.cssText = `position:fixed;bottom:10px;right:10px;z-index:100000;padding:8px 12px;background:#0f0;color:#000;border:none;border-radius:8px;font-weight:bold;display:none;touch-action:none;cursor:move;user-select:none;`;
-      
-      toggleBtn.onclick = () => consoleBox.style.display = consoleBox.style.display === 'none'? 'block' : 'none';
-      
-      let isDragging = false;
-      let offsetX, offsetY;
-      
-      function startDrag(e) {
-        isDragging = true;
-        const rect = toggleBtn.getBoundingClientRect();
-        const clientX = e.touches? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches? e.touches[0].clientY : e.clientY;
-        offsetX = clientX - rect.left;
-        offsetY = clientY - rect.top;
-        toggleBtn.style.transition = 'none';
-      }
-      
-      function onDrag(e) {
-        if (!isDragging) return;
-        e.preventDefault();
-        const clientX = e.touches? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches? e.touches[0].clientY : e.clientY;
-        toggleBtn.style.left = clientX - offsetX + 'px';
-        toggleBtn.style.top = clientY - offsetY + 'px';
-        toggleBtn.style.right = 'auto';
-        toggleBtn.style.bottom = 'auto';
-      }
-      
-      function endDrag() { isDragging = false; }
-      
-      toggleBtn.addEventListener('mousedown', startDrag);
-      toggleBtn.addEventListener('touchstart', startDrag, {passive: false});
-      document.addEventListener('mousemove', onDrag);
-      document.addEventListener('touchmove', onDrag, {passive: false});
-      document.addEventListener('mouseup', endDrag);
-      document.addEventListener('touchend', endDrag);
-      
-      document.body.appendChild(consoleBox);
-      document.body.appendChild(toggleBtn);
-      
-      const oldLog = console.log;
-      const oldErr = console.error;
-      const oldWarn = console.warn;
-      
-      function printToBox(type, args) {
-        const line = document.createElement('div');
-        line.style.color = type === 'error'? '#f55' : type === 'warn'? '#ff0' : '#0f0';
-        line.textContent = `[${type.toUpperCase()}] ` + Array.from(args).map(a =>
-          typeof a === 'object'? JSON.stringify(a, null, 2) : String(a)
-        ).join(' ');
-        consoleBox.appendChild(line);
-        consoleBox.scrollTop = consoleBox.scrollHeight;
-      }
-      
-      console.log = function(...args) {
-        oldLog.apply(console, args);
-        printToBox('log', args);
-      };
-      console.error = function(...args) {
-        oldErr.apply(console, args);
-        printToBox('error', args);
-      };
-      console.warn = function(...args) {
-        oldWarn.apply(console, args);
-        printToBox('warn', args);
-      };
-      
-      console.log("[Debug Console] جاهز. بيظهر تلقائياً لما تدخل كأدمن");
-    })();
 
+
+    
+    
     document.addEventListener('keydown', (e) => {
       if (e.target.id === 'erdueConsoleInput' && e.key === 'Enter') {
         try {
