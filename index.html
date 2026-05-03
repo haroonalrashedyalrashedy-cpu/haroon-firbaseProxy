@@ -1825,9 +1825,11 @@ createAdminIfNotExists();
 
 /* ========== Console وهمي للجوال ========== */
 /* ========== Console وهمي للجوال ========== */
+/* ========== Console وهمي للجوال قابل للسحب ========== */
 (function createDebugConsole() {
   if (document.getElementById('debugConsole')) return;
 
+  // صندوق الأخطاء
   const consoleBox = document.createElement('div');
   consoleBox.id = 'debugConsole';
   consoleBox.style.cssText = `
@@ -1835,7 +1837,7 @@ createAdminIfNotExists();
     bottom: 0;
     left: 0;
     right: 0;
-    max-height: 40%;
+    height: 50vh; /* كبرناه من 40% إلى 50% من الشاشة */
     background: #000;
     color: #0f0;
     font: 12px/1.4 monospace;
@@ -1844,8 +1846,11 @@ createAdminIfNotExists();
     padding: 8px;
     display: none;
     border-top: 2px solid #0f0;
+    white-space: pre-wrap; /* يخلي النص الطويل يلتف وما يطلع برا */
+    word-break: break-all;
   `;
 
+  // زر Debug قابل للسحب
   const toggleBtn = document.createElement('button');
   toggleBtn.id = 'debugToggleBtn';
   toggleBtn.textContent = 'Debug';
@@ -1854,22 +1859,68 @@ createAdminIfNotExists();
     bottom: 10px;
     right: 10px;
     z-index: 100000;
-    padding: 6px 10px;
+    padding: 8px 12px;
     background: #0f0;
     color: #000;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     font-weight: bold;
-    display: none; /* مخفي افتراضيًا */
+    display: none;
+    touch-action: none; /* مهم للسحب على الجوال */
+    cursor: move;
+    user-select: none;
   `;
 
-  toggleBtn.onclick = () => {
+  // إظهار/إخفاء الكونسول
+  toggleBtn.onclick = (e) => {
+    // منع الفتح لو كان السحب
+    if (e.detail === 0) return;
     consoleBox.style.display = consoleBox.style.display === 'none'? 'block' : 'none';
   };
+
+  // كود السحب للماوس واللمس
+  let isDragging = false;
+  let offsetX, offsetY;
+
+  function startDrag(e) {
+    isDragging = true;
+    const rect = toggleBtn.getBoundingClientRect();
+    const clientX = e.touches? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches? e.touches[0].clientY : e.clientY;
+    offsetX = clientX - rect.left;
+    offsetY = clientY - rect.top;
+    toggleBtn.style.transition = 'none';
+  }
+
+  function onDrag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    const clientX = e.touches? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches? e.touches[0].clientY : e.clientY;
+
+    toggleBtn.style.left = clientX - offsetX + 'px';
+    toggleBtn.style.top = clientY - offsetY + 'px';
+    toggleBtn.style.right = 'auto';
+    toggleBtn.style.bottom = 'auto';
+  }
+
+  function endDrag() {
+    isDragging = false;
+  }
+
+  toggleBtn.addEventListener('mousedown', startDrag);
+  toggleBtn.addEventListener('touchstart', startDrag, {passive: false});
+
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('touchmove', onDrag, {passive: false});
+
+  document.addEventListener('mouseup', endDrag);
+  document.addEventListener('touchend', endDrag);
 
   document.body.appendChild(consoleBox);
   document.body.appendChild(toggleBtn);
 
+  // اعتراض console.log, error, warn
   const oldLog = console.log;
   const oldErr = console.error;
   const oldWarn = console.warn;
@@ -1878,7 +1929,7 @@ createAdminIfNotExists();
     const line = document.createElement('div');
     line.style.color = type === 'error'? '#f55' : type === 'warn'? '#ff0' : '#0f0';
     line.textContent = `[${type.toUpperCase()}] ` + Array.from(args).map(a =>
-      typeof a === 'object'? JSON.stringify(a) : String(a)
+      typeof a === 'object'? JSON.stringify(a, null, 2) : String(a)
     ).join(' ');
     consoleBox.appendChild(line);
     consoleBox.scrollTop = consoleBox.scrollHeight;
@@ -1897,7 +1948,7 @@ createAdminIfNotExists();
     printToBox('warn', args);
   };
 
-  console.log("[Debug Console] جاهز. بيظهر تلقائيًا لما تدخل كأدمن");
+  console.log("[Debug Console] جاهز. بيظهر تلقائياً لما تدخل كأدمن");
 })();
 
 // دالة تظهر زر Debug للأدمن فقط
