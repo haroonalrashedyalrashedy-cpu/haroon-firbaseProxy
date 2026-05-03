@@ -389,6 +389,7 @@
       document.getElementById('currentUserNumber').textContent = number;
       loadChatsList();
       setupErdueButton();
+      addAdminMenuItems();
     }
 
     async function restoreAccount(number, password) {
@@ -410,6 +411,7 @@
       document.getElementById('currentUserNumber').textContent = number;
       loadChatsList();
       setupErdueButton();
+      addAdminMenuItems();
     }
 
     async function sendMessage(text) {
@@ -528,23 +530,29 @@
 
     function addAdminMenuItems() {
       console.log("[Admin Debug] currentUser:", currentUser);
+      
+      const menu = document.getElementById('chatsMenuModal');
+      if (!menu) { 
+        console.error("[Admin Debug] لم أجد عنصر chatsMenuModal"); 
+        return; 
+      }
+      
+      // امسح أزرار الأدمن القديمة عشان ما تتكرر
+      menu.querySelectorAll('#btnAdminUsers, #btnReserveNumber').forEach(el => el.remove());
+      
       if (!currentUser?.isAdmin) {
         console.log("[Admin Debug] المستخدم ليس أدمن، إلغاء عرض الأزرار");
         return;
       }
       
-      const menu = document.getElementById('chatsMenuModal');
-      if (!menu) { console.error("[Admin Debug] لم أجد عنصر chatsMenuModal"); return; }
-      if (menu.querySelector('#btnAdminUsers')) {
-        console.log("[Admin Debug] الأزرار موجودة مسبقاً");
-        return;
-      }
+      console.log("[Admin Debug] المستخدم أدمن، إضافة الأزرار");
       const html = `
         <button class="menu-item" id="btnAdminUsers">عرض بيانات المستخدمين</button>
         <button class="menu-item" id="btnReserveNumber">حجز رقم ذهبي</button>
       `;
       menu.insertAdjacentHTML('beforeend', html);
       console.log("[Admin Debug] تم إضافة أزرار الأدمن بنجاح");
+      
       document.getElementById('btnAdminUsers').onclick = () => {
         closeModal(); openAdminUsersModal();
       };
