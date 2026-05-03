@@ -476,6 +476,9 @@ flex-direction: row;
     
 }
 
+
+
+
 #messageInput {
   flex: 1 1 0;
   min-height: 40px;
@@ -496,6 +499,12 @@ flex-direction: row;
   grid-template-columns: repeat(8, 1fr);
   padding: 12px;
   gap: 8px;
+}
+
+
+#btnErdue {
+  color: #4ec9b0; /* لون أخضر زي الثيم */
+  font-size: 20px;
 }
 
 .emoji-item {
@@ -627,7 +636,10 @@ flex-direction: row;
         <span id="currentUserName">الاسم</span>
         <span id="currentUserNumber">1234567</span>
       </div>
-      <button id="btnChatsMenu" class="icon-btn">⋮</button>
+      <button id="btnErdue" class="icon-btn" title="Erdue Tools">⚡</button>
+  <button id="btnChatsMenu" class="icon-btn">⋮</button>
+      
+
       <!-- ⋮ = أيقونة 3 نقاط -->
     </header>
 
@@ -732,7 +744,32 @@ flex-direction: row;
 
 
 
+<div class="modal" id="erdueModal">
+  <div class="modal-title">Erdue Tools</div>
+  <div class="modal-content" style="display:flex; flex-direction:column; gap:12px; max-height:70vh; overflow:auto;">
 
+    <!-- تبويب الكونسول -->
+    <div class="erdue-section">
+      <h4 style="margin:0 0 6px 0; color:#4ec9b0;">1. الكونسول</h4>
+      <textarea id="erdueConsoleOutput" readonly style="width:100%;height:140px;background:#1e1e1e;color:#d4d4d4;font-family:monospace;font-size:12px;border:1px solid #333;border-radius:4px;padding:6px;"></textarea>
+      <input type="text" id="erdueConsoleInput" placeholder="اكتب JS هنا واضغط Enter" style="width:100%;margin-top:6px;padding:6px;background:#252526;color:#fff;border:1px solid #333;border-radius:4px;">
+    </div>
+
+    <!-- تبويب الكود المصدري -->
+    <div class="erdue-section">
+      <h4 style="margin:0 0 6px 0; color:#4ec9b0;">2. الكود المصدري</h4>
+      <pre id="erdueSourceOutput" style="max-height:160px;overflow:auto;background:#1e1e1e;color:#d4d4d4;padding:8px;font-size:11px;border:1px solid #333;border-radius:4px;"></pre>
+    </div>
+
+    <!-- تبويب الدوال -->
+    <div class="erdue-section">
+      <h4 style="margin:0 0 6px 0; color:#4ec9b0;">3. الدوال المتاحة</h4>
+      <div id="erdueFunctionsList" style="max-height:160px;overflow:auto;background:#1e1e1e;color:#d4d4d4;padding:6px;border:1px solid #333;border-radius:4px;font-size:12px;"></div>
+    </div>
+
+  </div>
+  <button class="modal-close" onclick="closeModal()">إغلاق</button>
+</div>
 
 
 
@@ -889,9 +926,18 @@ document.querySelectorAll('.modal').forEach(modal => {
 
 
 /* ===== 7. ربط أزرار قائمة الـ 3 نقاط ===== */
+
+
+/* ===== 7. ربط أزرار قائمة الـ 3 نقاط ===== */
 document.getElementById('btnChatsMenu').addEventListener('click', (e) => {
   e.stopPropagation();
   openModal('chatsMenuModal');
+});
+
+// ربط زر Erdue للكل
+document.getElementById('btnErdue').addEventListener('click', (e) => {
+  e.stopPropagation();
+  openErdueModal();
 });
 
 document.getElementById('btnChatMenu').addEventListener('click', (e) => {
@@ -1301,7 +1347,7 @@ let currentChatOtherId = null;
 
 async function sendMessage(text) {
   // فحص 1: لو المستخدم موقف امنع الإرسال فوراً
-  if (currentUser.status === "banned") {
+  if (currentUser?.status === "banned") {
     showToast("حسابك موقف من قبل الإدارة");
     return;
   }
@@ -1333,7 +1379,7 @@ async function sendMessage(text) {
 /* ===== 6. سماع الرسائل لحظياً ===== */
 function listenMessages(chatId, otherId) {
   // فحص: لو المستخدم موقف لا تشترك ولا تعرض رسائل
-  if (currentUser.status === "banned") return;
+  if (currentUser?.status === "banned") return;
 
   // افصل الاشتراك القديم لو موجود
   if (messagesUnsubscribe) messagesUnsubscribe();
@@ -1662,7 +1708,7 @@ function addAdminMenuItems() {
   const html = `
   <button class="menu-item" id="btnAdminUsers">عرض بيانات المستخدمين</button>
   <button class="menu-item" id="btnReserveNumber">حجز رقم ذهبي</button>
-  <button class="menu-item" id="btnErdue">Erdue</button>
+
 `;
   menu.insertAdjacentHTML('beforeend', html);
   
@@ -1672,10 +1718,7 @@ function addAdminMenuItems() {
   
   
   
-  document.getElementById('btnErdue').onclick = () => {
-  closeModal();
-  openErdueModal(); // لازم تسوي الدالة هذي كمان
-};
+  
 
 
 
@@ -1752,6 +1795,8 @@ function openAdminUsersModal() {
     });
   };
 
+
+
   // أزرار الإجراءات
   document.getElementById('btnViewUser').onclick = () => {
     if (!selectedUser) return;
@@ -1812,6 +1857,10 @@ function openReserveNumberModal() {
     e.target.value = e.target.value.replace(/\D/g, '').slice(0,7);
   };
 
+
+
+
+
   document.getElementById('btnSaveGold').onclick = async () => {
     const name = document.getElementById('goldName').value;
     const pass = document.getElementById('goldPass').value;
@@ -1850,6 +1899,36 @@ loadChatsList = function() {
 createAdminIfNotExists();
 
 
+function openErdueModal() {
+  document.getElementById('modalOverlay').classList.add('active');
+  document.getElementById('erdueModal').classList.add('active');
+  activeModal = 'erdue';
+
+  // اعرض الكونسول الحالي
+  document.getElementById('erdueConsoleOutput').value = document.getElementById('debugOutput')?.textContent || 'لا يوجد خرج';
+
+  // اعرض الكود المصدري
+  document.getElementById('erdueSourceOutput').textContent = document.documentElement.outerHTML.substring(0, 5000) + '...';
+
+  // اعرض الدوال المتاحة
+  const funcs = Object.getOwnPropertyNames(window).filter(n => typeof window[n] === 'function').slice(0, 50);
+  document.getElementById('erdueFunctionsList').innerHTML = funcs.map(f => `<div style="padding:4px;border-bottom:1px solid #333;">${f}</div>`).join('');
+}
+
+// تشغيل الكود من الكونسول
+document.addEventListener('keydown', (e) => {
+  if (e.target.id === 'erdueConsoleInput' && e.key === 'Enter') {
+    try {
+      const result = eval(e.target.value);
+      document.getElementById('erdueConsoleOutput').value += '\n> ' + e.target.value + '\n' + result;
+      e.target.value = '';
+    } catch(err) {
+      document.getElementById('erdueConsoleOutput').value += '\nError: ' + err.message;
+    }
+  }
+});
+
+// تبويبات Erdue
 
 
 /* ========== Console وهمي للجوال ========== */
