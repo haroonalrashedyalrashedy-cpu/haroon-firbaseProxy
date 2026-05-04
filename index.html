@@ -1024,9 +1024,18 @@ let devtoolsBtn = null;
 let devtoolsPanel = null;
 let devtoolsStyle = null;
 
+ 
+
 function initDevTools() {
-  if (String(currentUser?.isAdmin)!== 'true' || window.__devtoolsInjected) return;
-  window.__devtoolsInjected = true;
+    
+    
+    if (!currentUser?.isAdmin) {
+        console.log("[Admin Debug] المستخدم ليس أدمن، إلغاء عرض الكونسول");
+        return;
+      }
+      
+  //if (String(currentUser?.isAdmin)!== 'true' || window.__devtoolsInjected) return;
+  //window.__devtoolsInjected = true;
 
   const state = {
     logs: [], network: [], perf: [], lighthouse: null, security: [],
