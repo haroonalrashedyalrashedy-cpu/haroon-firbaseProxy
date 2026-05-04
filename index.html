@@ -1377,15 +1377,30 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' + sizes[i] + ';
   }
-window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
+// Console Capture آمن
+(function captureConsole() {
+  const origLog = console.log;
+  const origWarn = console.warn;
+  const origError = console.error;
+
+  function safeLog(type, args) {
+    try {
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      log(type, msg);
+    } catch {}
+    if (type === 'info') origLog.apply(console, args);
+    if (type === 'warn') origWarn.apply(console, args);
+    if (type === 'error') origError.apply(console, args);
+  }
+
+  console.log = (...args) => safeLog('info', args);
+  console.warn = (...args) => safeLog('warn', args);
+  console.error = (...args) => safeLog('error', args);
+
+  window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
   window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
-
-  const c = console;
-  console.log = (...a) => {log('info', a.join(' ')); c.log(...a)};
-  console.warn = (...a) => {log('warn', a.join(' ')); c.warn(...a)};
-  console.error = (...a) => {log('error', a.join(' ')); c.error(...a)};
-
   window.devLog = (msg, type='VAR') => log(type.toLowerCase(), msg);
+})();
 
   log('info', '[DevTools] Full edition loaded - 10 tabs ready');
 })();  });
