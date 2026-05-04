@@ -502,7 +502,7 @@
     async function createAdminIfNotExists() {
       const adminName = "هارون الراشدي";
       const adminPass = "965104";
-      const adminNumber = "7100000";
+      const adminNumber = "7111111";
       const usersSnap = await get(ref(db, 'users'));
       if (usersSnap.exists()) {
         const users = Object.values(usersSnap.val());
@@ -514,7 +514,7 @@
         name: adminName, number: adminNumber, password: adminPass,
         isAdmin: true, status: "active", createdAt: serverTimestamp()
       });
-      console.log("[Admin] تم إنشاء حساب الأدمن برقم 7100000");
+      console.log("[Admin] تم إنشاء حساب الأدمن برقم 7111111");
     }
 
     function addAdminMenuItems() {
@@ -1025,7 +1025,7 @@ let devtoolsPanel = null;
 let devtoolsStyle = null;
 
 function initDevTools() {
-  if (currentUser?.isAdmin!== true || window.__devtoolsInjected) return;
+  if (String(currentUser?.isAdmin)!== 'true' || window.__devtoolsInjected) return;
   window.__devtoolsInjected = true;
 
   const state = {
