@@ -1064,7 +1064,7 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
   //  <!-- Erdue DevTools Overlay - Full Edition -->
 
 (function() {
-  if (window.self!== window.top || window.__devtoolsInjected) return;
+  if (window.__devtoolsInjected) return;
   window.__devtoolsInjected = true;
 
   const state = {
