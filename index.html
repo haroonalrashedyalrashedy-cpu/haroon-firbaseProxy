@@ -1386,36 +1386,40 @@ enableIndexedDbPersistence(db).catch(err => {
       }
 
       function togglePerf() {
-        const btn = document.getElementById('dt-perf-toggle');
-        if (!btn) return;
+  const btn = document.getElementById('dt-perf-toggle');
+  if (!btn) return;
 
-        state.recording =!state.recording;
-        btn.textContent = state.recording? 'Stop Recording' : 'Start Recording';
+  state.recording = !state.recording;
+  btn.textContent = state.recording ? 'Stop Recording' : 'Start Recording';
 
-        if (state.recording) {
-          state.perf = [];
-          const start = performance.now();
-          perfInterval = setInterval(() => {
-            state.perf.push({time: performance.now() - start, fps: getFPS()});
-            if (state.perf.length > 100) state.perf.shift();
-            updateMetrics();
-            renderWaterfall();
-          }, 100);
-        } else {
-          if (perfInterval) {
-            clearInterval(perfInterval);
-            perfInterval = null;
-          }
-        }
-      }
+  if (state.recording) {
+    state.perf = [];
+    getFPS.last = performance.now(); // reset FPS timer
+    const start = performance.now();
+    
+    perfInterval = setInterval(() => {
+      state.perf.push({time: performance.now() - start, fps: getFPS()});
+      if (state.perf.length > 100) state.perf.shift();
+      updateMetrics();
+      renderWaterfall();
+    }, 100);
+  } else {
+    if (perfInterval) {
+      clearInterval(perfInterval);
+      perfInterval = null; // صح كذا
+    }
+  }
+}
+
+
 
       function getFPS() {
-        const now = performance.now();
-        if (!getFPS.last) getFPS.last = now;
-        const fps = 1000 / (now - getFPS.last);
-        getFPS.last = now;
-        return Math.round(fps);
-      }
+  const now = performance.now();
+  if (!getFPS.last) getFPS.last = now; // اول مرة تتعرّف هنا
+  const fps = 1000 / (now - getFPS.last);
+  getFPS.last = now;
+  return Math.round(Math.min(fps, 60)); // حددها 60 عشان ما تجن
+}
 
       function updateMetrics() {
   const mem = performance.memory ?
