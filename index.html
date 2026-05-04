@@ -339,6 +339,8 @@
     }
 
     async function createAccount(name, password) {
+        
+        hardResetState();
       if (name.length < 3) { showToast("الاسم لازم يكون 3 حروف على الأقل"); return; }
       if (!/^\d{5,}$/.test(password) || /(.)\1{4,}/.test(password) || password === "12345") {
         showToast("كلمة المرور ضعيفة"); return;
@@ -382,6 +384,8 @@
     }
 
     async function restoreAccount(number, password) {
+        
+        hardResetState();
       const usersSnap = await get(ref(db, 'users'));
       if (!usersSnap.exists()) { showToast("الرقم خطأ"); return; }
       const users = usersSnap.val();
@@ -760,7 +764,7 @@
     }
 
     /* ========== Init & Event Listeners ========== */
-    window.addEventListener('load', async () => {
+    window.addEventListener('load', async () => { hardResetState();
 
       const savedUser = localStorage.getItem('wa_haroon_user');
       if (savedUser) {
@@ -837,7 +841,7 @@
       openModal('chatsMenuModal'); 
     };
     document.getElementById('modalOverlay').onclick = closeModal;
-    document.getElementById('btnLogout').onclick = () => {
+   /* document.getElementById('btnLogout').onclick = () => {
   // 1. وقف كل الـ listeners عشان ما تشتغل على اليوزر القديم
   if (chatsUnsubscribe) { chatsUnsubscribe(); chatsUnsubscribe = null; }
   if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
@@ -855,12 +859,26 @@
   if (menu) {
     menu.querySelectorAll('#btnAdminUsers, #btnReserveNumber').forEach(el => el.remove());
   }
-
+    
+    
+    hardResetState();
   // 5. رجع للوجن
   showScreen('loginScreen');
   closeModal();
   showToast("تم تسجيل الخروج");
+};*/
+
+
+document.getElementById('btnLogout').onclick = () => {
+  // كل التنظيف صار هنا في دالة وحدة
+  hardResetState();
+  
+  // رجع للوجن وعرض الرسالة
+  showScreen('loginScreen');
+  closeModal();
+  showToast("تم تسجيل الخروج");
 };
+
     document.getElementById('btnSend').onclick = () => {
       const text = document.getElementById('messageInput').value;
       sendMessage(text);
@@ -1050,6 +1068,31 @@ let devtoolsPanel = null;
 let devtoolsStyle = null;
 let perfInterval = null;
  
+
+function hardResetState() {
+  // 1. وقف كل الـ listeners
+  if (chatsUnsubscribe) { chatsUnsubscribe(); chatsUnsubscribe = null; }
+  if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
+
+  // 2. امسح المتغيرات والـ DOM حق الأدمن
+  localStorage.removeItem('wa_haroon_user');
+  localStorage.removeItem('wa_theme');
+  currentUser = null;
+  destroyDevTools();
+  window.__devtoolsInjected = false;
+
+  // 3. امسح أزرار الأدمن من المينيو
+  const menu = document.getElementById('chatsMenuModal');
+  if (menu) {
+    menu.querySelectorAll('#btnAdminUsers, #btnReserveNumber').forEach(el => el.remove());
+  }
+
+  // 4. رجع الواجهة للوضع الافتراضي
+  document.getElementById('currentUserName').textContent = 'الاسم';
+  document.getElementById('currentUserNumber').textContent = '1234567';
+  document.getElementById('chatsList').innerHTML = '';
+  document.getElementById('messagesList').innerHTML = '';
+}
 
 function initDevTools() {
     
