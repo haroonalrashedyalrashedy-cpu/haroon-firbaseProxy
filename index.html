@@ -129,12 +129,7 @@
    .confirm-buttons { display: flex; gap: 12px; margin-top: 16px; }
    .confirm-buttons button { flex: 1; }
    
-   #devtools-btn { 
-  user-select: auto !important; 
-  -webkit-user-select: auto !important;
-  touch-action: manipulation;
-  z-index: 99999 !important;
-}
+   
    
   </style>
 </head>
@@ -808,7 +803,7 @@
         // شغل DevTools للادمن فقط - تم النقل داخل window.load عشان currentUser يكون جاهز
 // التعديل 1: شلنا document.addEventListener('DOMContentLoaded') لانه يوقف السكربت لو انحط داخل load
 // التعديل 2: صلحنا خطأ syntax في formatBytes
-if (currentUser?.isAdmin &&!window.__devtoolsInjected) {
+if (currentUser?.isAdmin === true && !window.__devtoolsInjected) {
   window.__devtoolsInjected = true; // منع التكرار لو انادى الكود مرتين
 
   (function() {
@@ -822,7 +817,7 @@ if (currentUser?.isAdmin &&!window.__devtoolsInjected) {
     const btn = document.createElement('div');
     btn.innerHTML = '🐞';
     btn.title = 'DevTools Admin';
-    btn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:99999;width:48px;height:48px;
+    btn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:999;width:48px;height:48px;
       background:#25d366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
       font-size:24px;cursor:grab;box-shadow:0 4px 16px rgba(0,0,0,0.3);user-select:none;touch-action:none`;
     document.body.appendChild(btn);
