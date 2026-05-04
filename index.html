@@ -47,6 +47,10 @@
 .auth-mode-btn.active { background: #ff69b4; color: #fff; }
 #loginBtn.loading { background: #ff69b4; color: #fff; opacity: 0.8; pointer-events: none; }
 
+   #btnSignup.loading, #btnRestore.loading {
+     background: #ff69b4; color: #fff; opacity: 0.8; pointer-events: none;
+   }
+
 .login-box input { background: #f0f0f0; transition: background 0.15s ease; }
 .login-box input:focus { background: #fff; outline: 1px solid #ff69b4; }
 
@@ -547,7 +551,6 @@ enableIndexedDbPersistence(db).catch(err => {
 
   // ملاحظة: ما ننادي addAdminMenuItems هنا عشان ما تنادى بدري
 }
-    }
     
     
     
