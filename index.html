@@ -777,6 +777,10 @@
         showScreen('chatsScreen');
         document.getElementById('currentUserName').textContent = currentUser.name;
         document.getElementById('currentUserNumber').textContent = currentUser.number;
+        
+        console.log('[DEBUG] currentUser قبل النداء:', currentUser); // 👈 ضف هذا
+    console.log('[DEBUG] isAdmin:', currentUser.isAdmin, typeof currentUser.isAdmin); // 👈 وهذا
+
         loadChatsList();
         addAdminMenuItems();
         
@@ -1029,14 +1033,24 @@ let devtoolsStyle = null;
 function initDevTools() {
     
     
-    if (!currentUser?.isAdmin) {
-        console.log("[Admin Debug] المستخدم ليس أدمن، إلغاء عرض الكونسول");
-        return;
-      }
-      
-  //if (String(currentUser?.isAdmin)!== 'true' || window.__devtoolsInjected) return;
+    //if (!currentUser?.isAdmin) {
+       // console.log("[Admin Debug] المستخدم ليس أدمن، إلغاء عرض الكونسول");
+       // return;
+  //    }
+      const isAdmin = String(currentUser?.isAdmin).toLowerCase() === 'true' || currentUser?.isAdmin === 1;
+console.log('[DevTools] isAdmin بعد التحويل:', isAdmin);
+if (!isAdmin || window.__devtoolsInjected) {
+    console.log('[DevTools] ما بشتغل - اما مش ادمن او already injected');
+    return;
+}
+
+
+
+ // if (String(currentUser?.isAdmin)!== 'true' || window.__devtoolsInjected) return;
 
   window.__devtoolsInjected = true;
+
+console.log('[DevTools] بدأت الانشاء...');
 
   const state = {
     logs: [], network: [], perf: [], lighthouse: null, security: [],
