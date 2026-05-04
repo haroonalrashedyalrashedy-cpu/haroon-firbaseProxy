@@ -831,6 +831,7 @@
     document.getElementById('btnLogout').onclick = () => {
       localStorage.removeItem('wa_haroon_user');
       currentUser = null;
+      destroyDevTools();
       showScreen('loginScreen');
       closeModal();
       showToast("تم تسجيل الخروج");
@@ -1017,8 +1018,14 @@
 
 
 // دالة DevTools - تشتغل للادمن فقط
+
+// المتغيرات العامة - ضفها فوق initDevTools
+let devtoolsBtn = null;
+let devtoolsPanel = null;
+let devtoolsStyle = null;
+
 function initDevTools() {
-  if (currentUser?.isAdmin !== true || window.__devtoolsInjected) return;
+  if (currentUser?.isAdmin!== true || window.__devtoolsInjected) return;
   window.__devtoolsInjected = true;
 
   const state = {
@@ -1027,55 +1034,57 @@ function initDevTools() {
     activeTab: 'console', recording: false
   };
 
-  // 1. الزر العائم المتحرك
-  const btn = document.createElement('div');
-  btn.innerHTML = '🐞';
-  btn.title = 'DevTools Admin';
-  btn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:999;width:48px;height:48px;
+  // 1. الزر العائم المتحرك - غيّرت const btn لـ devtoolsBtn وضفت id
+  devtoolsBtn = document.createElement('div');
+  devtoolsBtn.id = 'devtools-btn'; // 👈 جديد
+  devtoolsBtn.innerHTML = '🐞';
+  devtoolsBtn.title = 'DevTools Admin';
+  devtoolsBtn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:999;width:48px;height:48px;
     background:#25d366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
     font-size:24px;cursor:grab;box-shadow:0 4px 16px rgba(0,0,0,0.3);user-select:none;touch-action:none`;
-  document.body.appendChild(btn);
+  document.body.appendChild(devtoolsBtn);
 
-  // Drag & Drop للايقونة
+  // Drag & Drop للايقونة - ما تغير شي، بس استبدل btn بـ devtoolsBtn
   let isDragging = false, offsetX, offsetY, moved = false;
-  btn.addEventListener('pointerdown', (e) => {
+  devtoolsBtn.addEventListener('pointerdown', (e) => {
     isDragging = true; moved = false;
-    btn.style.cursor = 'grabbing';
-    offsetX = e.clientX - btn.offsetLeft;
-    offsetY = e.clientY - btn.offsetTop;
-    btn.setPointerCapture(e.pointerId);
+    devtoolsBtn.style.cursor = 'grabbing';
+    offsetX = e.clientX - devtoolsBtn.offsetLeft;
+    offsetY = e.clientY - devtoolsBtn.offsetTop;
+    devtoolsBtn.setPointerCapture(e.pointerId);
   });
-  btn.addEventListener('pointermove', (e) => {
+  devtoolsBtn.addEventListener('pointermove', (e) => {
     if (!isDragging) return;
     moved = true;
     let x = e.clientX - offsetX;
     let y = e.clientY - offsetY;
-    x = Math.max(0, Math.min(x, window.innerWidth - btn.offsetWidth));
-    y = Math.max(0, Math.min(y, window.innerHeight - btn.offsetHeight));
-    btn.style.left = x + 'px';
-    btn.style.top = y + 'px';
-    btn.style.bottom = 'auto';
-    btn.style.right = 'auto';
+    x = Math.max(0, Math.min(x, window.innerWidth - devtoolsBtn.offsetWidth));
+    y = Math.max(0, Math.min(y, window.innerHeight - devtoolsBtn.offsetHeight));
+    devtoolsBtn.style.left = x + 'px';
+    devtoolsBtn.style.top = y + 'px';
+    devtoolsBtn.style.bottom = 'auto';
+    devtoolsBtn.style.right = 'auto';
   });
-  btn.addEventListener('pointerup', (e) => {
+  devtoolsBtn.addEventListener('pointerup', (e) => {
     isDragging = false;
-    btn.style.cursor = 'grab';
-    btn.releasePointerCapture(e.pointerId);
+    devtoolsBtn.style.cursor = 'grab';
+    devtoolsBtn.releasePointerCapture(e.pointerId);
   });
-  btn.addEventListener('click', (e) => {
+  devtoolsBtn.addEventListener('click', (e) => {
     if (moved) { e.stopPropagation(); return; }
-    panel.style.display = panel.style.display === 'none'? 'flex' : 'none';
+    devtoolsPanel.style.display = devtoolsPanel.style.display === 'none'? 'flex' : 'none';
   });
 
-  // 2. البانل - خلفية بيضا
-  const panel = document.createElement('div');
-  panel.style.cssText = `position:fixed;bottom:80px;left:20px;width:94vw;max-width:800px;height:75vh;
+  // 2. البانل - غيّرت const panel لـ devtoolsPanel وضفت id
+  devtoolsPanel = document.createElement('div');
+  devtoolsPanel.id = 'devtools-panel'; // 👈 جديد
+  devtoolsPanel.style.cssText = `position:fixed;bottom:80px;left:20px;width:94vw;max-width:800px;height:75vh;
     background:#fff;color:#222;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.2);
     z-index:99999;display:none;flex-direction:column;font-family:'Consolas',monospace;font-size:12px;
     border:1px solid #ddd;overflow:hidden`;
-  document.body.appendChild(panel);
+  document.body.appendChild(devtoolsPanel);
 
-  panel.innerHTML = `
+  devtoolsPanel.innerHTML = `
     <div style="display:flex;background:#f5f5f5;padding:4px;gap:4px;border-bottom:1px solid #ddd;overflow-x:auto">
       <div class="dt-tab active" data-tab="console">Console</div>
       <div class="dt-tab" data-tab="network">Network</div>
@@ -1118,8 +1127,10 @@ function initDevTools() {
     </div>
   `;
 
-  const style = document.createElement('style');
-  style.textContent = `
+  // 3. الستايل - غيّرت const style لـ devtoolsStyle وضفت id
+  devtoolsStyle = document.createElement('style');
+  devtoolsStyle.id = 'devtools-style'; // 👈 جديد
+  devtoolsStyle.textContent = `
 .dt-tab{padding:6px 10px;cursor:pointer;color:#666;border-radius:4px;white-space:nowrap}
 .dt-tab.active{background:#fff;color:#111;border-bottom:2px solid #25d366}
 .dt-filter{background:#eee;color:#333;border:none;padding:4px 8px;border-radius:4px;cursor:pointer}
@@ -1136,14 +1147,16 @@ pre{margin:0}
 .dt-progress{height:4px;background:#eee;border-radius:2px;overflow:hidden}
 .dt-progress>div{height:100%;background:#25d366;width:0%;transition:width 0.3s}
   `;
-  document.head.appendChild(style);
+  document.head.appendChild(devtoolsStyle);
 
-  panel.querySelectorAll('.dt-tab').forEach(tab => {
+  // باقي الكود كله زي ما هو، ما غيرت شي
+  // بس استبدلت panel بـ devtoolsPanel في كل مكان
+  devtoolsPanel.querySelectorAll('.dt-tab').forEach(tab => {
     tab.onclick = () => {
-      panel.querySelectorAll('.dt-tab').forEach(t => t.classList.remove('active'));
+      devtoolsPanel.querySelectorAll('.dt-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       state.activeTab = tab.dataset.tab;
-      panel.querySelectorAll('.dt-view').forEach(v => v.style.display = 'none');
+      devtoolsPanel.querySelectorAll('.dt-view').forEach(v => v.style.display = 'none');
       document.getElementById('dt-' + state.activeTab).style.display = 'block';
 
       if (state.activeTab === 'sources') loadSources();
@@ -1157,9 +1170,9 @@ pre{margin:0}
     };
   });
 
-  panel.querySelector('.dt-close').onclick = () => panel.style.display = 'none';
+  devtoolsPanel.querySelector('.dt-close').onclick = () => devtoolsPanel.style.display = 'none';
 
-  panel.querySelector('#dt-input').addEventListener('keydown', e => {
+  devtoolsPanel.querySelector('#dt-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       try {
         const result = eval(e.target.value);
@@ -1392,6 +1405,18 @@ pre{margin:0}
   log('info', '[DevTools] Full edition loaded - Admin only');
 }
 
+// الدالة الجديدة - حطها تحت initDevTools مباشرة
+function destroyDevTools() {
+  devtoolsBtn?.remove();
+  devtoolsPanel?.remove();
+  devtoolsStyle?.remove();
+
+  devtoolsBtn = null;
+  devtoolsPanel = null;
+  devtoolsStyle = null;
+
+  window.__devtoolsInjected = false;
+}
 // الاستدعاء - حطه مكان الشرط القديم داخل window.load
 
 
