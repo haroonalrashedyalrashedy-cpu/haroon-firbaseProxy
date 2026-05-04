@@ -1060,13 +1060,7 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
  
  
  
- /*
- 
- 
-    
-    
-  //  <!-- Erdue DevTools Overlay - Full Edition -->
-
+// <!-- Erdue DevTools Overlay - Full Edition -->
 (function() {
   if (window.__devtoolsInjected) return;
   window.__devtoolsInjected = true;
@@ -1138,27 +1132,25 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     </div>
   `;
 
-  // 3. ستايل
   const style = document.createElement('style');
   style.textContent = `
- .dt-tab{padding:6px 10px;cursor:pointer;color:#ccc;border-radius:4px;white-space:nowrap}
- .dt-tab.active{background:#1e1e1e;color:#fff}
- .dt-filter{background:#333;color:#ccc;border:none;padding:4px 8px;border-radius:4px;cursor:pointer}
- .dt-filter.active{background:#4ec9b0;color:#111}
- .dt-log,.dt-net,.dt-perf,.dt-sec{padding:4px 6px;border-bottom:1px solid #2a2a2a}
- .dt-log.info{color:#d4d4d4}.dt-log.warn{color:#ffaa00}.dt-log.error{color:#ff5555}.dt-log.var{color:#9cdcfe}
- .dt-net.get{color:#4ec9b0}.dt-net.post{color:#ce9178}.dt-net.error{color:#ff5555}
- .dt-view{flex:1;overflow:auto;padding:8px;white-space:pre-wrap}
+.dt-tab{padding:6px 10px;cursor:pointer;color:#ccc;border-radius:4px;white-space:nowrap}
+.dt-tab.active{background:#1e1e1e;color:#fff}
+.dt-filter{background:#333;color:#ccc;border:none;padding:4px 8px;border-radius:4px;cursor:pointer}
+.dt-filter.active{background:#4ec9b0;color:#111}
+.dt-log,.dt-net,.dt-perf,.dt-sec{padding:4px 6px;border-bottom:1px solid #2a2a2a}
+.dt-log.info{color:#d4d4d4}.dt-log.warn{color:#ffaa00}.dt-log.error{color:#ff5555}.dt-log.var{color:#9cdcfe}
+.dt-net.get{color:#4ec9b0}.dt-net.post{color:#ce9178}.dt-net.error{color:#ff5555}
+.dt-view{flex:1;overflow:auto;padding:8px;white-space:pre-wrap}
   pre{margin:0}
- .dt-kv{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #2a2a2a}
- .dt-kv b{color:#9cdcfe;min-width:120px}
- .dt-btn{padding:6px 12px;background:#4ec9b0;color:#111;border:none;border-radius:4px;cursor:pointer}
- .dt-progress{height:4px;background:#333;border-radius:2px;overflow:hidden}
- .dt-progress>div{height:100%;background:#4ec9b0;width:0%;transition:width 0.3s}
+.dt-kv{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #2a2a2a}
+.dt-kv b{color:#9cdcfe;min-width:120px}
+.dt-btn{padding:6px 12px;background:#4ec9b0;color:#111;border:none;border-radius:4px;cursor:pointer}
+.dt-progress{height:4px;background:#333;border-radius:2px;overflow:hidden}
+.dt-progress>div{height:100%;background:#4ec9b0;width:0%;transition:width 0.3s}
   `;
   document.head.appendChild(style);
 
-  // 4. تبويبات
   panel.querySelectorAll('.dt-tab').forEach(tab => {
     tab.onclick = () => {
       panel.querySelectorAll('.dt-tab').forEach(t => t.classList.remove('active'));
@@ -1180,7 +1172,6 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
 
   panel.querySelector('.dt-close').onclick = () => panel.style.display = 'none';
 
-  // 5. Console + تنفيذ JS
   panel.querySelector('#dt-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       try {
@@ -1209,7 +1200,6 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     out.scrollTop = out.scrollHeight;
   }
 
-  // 6. Network
   const origFetch = window.fetch;
   window.fetch = async (...args) => {
     const start = performance.now();
@@ -1238,7 +1228,6 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     ).join('');
   }
 
-  // 7. Sources
   function loadSources() {
     const out = document.getElementById('dt-sources');
     out.innerHTML = Array.from(document.scripts).map((s, i) =>
@@ -1249,13 +1238,11 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     ).join('') || 'No scripts';
   }
 
-  // 8. Elements
   function loadElements() {
     document.getElementById('dt-elements').innerHTML =
       `<pre>${escapeHtml(document.documentElement.outerHTML.slice(0, 10000))}...</pre>`;
   }
 
-  // 9. Storage
   function loadStorage() {
     const ls = Object.keys(localStorage).map(k =>
       `<div class="dt-kv"><b>LS:</b>${k} = ${escapeHtml(localStorage.getItem(k))}
@@ -1267,7 +1254,6 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     document.getElementById('dt-storage').innerHTML = ls + ss || 'Empty';
   }
 
-  // 10. Application
   function loadApplication() {
     const out = document.getElementById('dt-application');
     let html = `<div class="dt-kv"><b>URL:</b>${location.href}</div>
@@ -1286,7 +1272,6 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     }
   }
 
-  // 11. Performance + FPS + Memory + Waterfall
   let perfInterval = null;
   function loadPerformance() {
     const out = document.getElementById('dt-performance');
@@ -1343,7 +1328,6 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     ).join('');
   }
 
-  // 12. Lighthouse - Basic Checks
   function loadLighthouse() {
     const out = document.getElementById('dt-lighthouse');
     const checks = [
@@ -1358,20 +1342,18 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
       checks.map(c => `<div class="dt-kv"><b>${c.name}:</b>${c.pass? '✓ Pass' : '✗ Fail'}</div>`).join('');
   }
 
-  // 13. Security
   function loadSecurity() {
     const out = document.getElementById('dt-security');
     const checks = [
-      {name: 'CSP', pass: document.querySelector('meta[http-equiv="Content-Security-Policy"]')},
+      {name: 'CSP', pass:!!document.querySelector('meta[http-equiv="Content-Security-Policy"]')},
       {name: 'HTTPS', pass: location.protocol === 'https:'},
-      {name: 'X-Frame-Options', pass: false},
+      {name: 'X-Frame-Options', pass: false}
     ];
     out.innerHTML = checks.map(c =>
       `<div class="dt-kv"><b>${c.name}:</b>${c.pass? 'Secure' : 'Missing'}</div>`
     ).join('');
   }
 
-  // 14. Coverage - Used vs Unused CSS/JS
   function loadCoverage() {
     const out = document.getElementById('dt-coverage');
     const scripts = document.scripts.length;
@@ -1383,7 +1365,6 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     `;
   }
 
-  // 15. Error Capture + Console Override
   window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
   window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
 
@@ -1403,12 +1384,11 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     const k = 1024;
     const sizes = ['B', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' + sizes[i] + ';
   }
 
   log('info', '[DevTools] Full edition loaded - 10 tabs ready');
-})();      */
-
+})();
     
     
   </script>
