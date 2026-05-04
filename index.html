@@ -542,6 +542,8 @@
       menu.insertAdjacentHTML('beforeend', html);
       console.log("[Admin Debug] تم إضافة أزرار الأدمن بنجاح");
       
+      initDevTools();
+      
       document.getElementById('btnAdminUsers').onclick = () => {
         closeModal(); openAdminUsersModal();
       };
@@ -777,7 +779,7 @@
         document.getElementById('currentUserNumber').textContent = currentUser.number;
         loadChatsList();
         addAdminMenuItems();
-        initDevTools();
+        
         
         
         
