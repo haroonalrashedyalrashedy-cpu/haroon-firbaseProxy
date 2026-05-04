@@ -838,13 +838,29 @@
     };
     document.getElementById('modalOverlay').onclick = closeModal;
     document.getElementById('btnLogout').onclick = () => {
-      localStorage.removeItem('wa_haroon_user');
-      currentUser = null;
-      destroyDevTools();
-      showScreen('loginScreen');
-      closeModal();
-      showToast("تم تسجيل الخروج");
-    };
+  // 1. وقف كل الـ listeners عشان ما تشتغل على اليوزر القديم
+  if (chatsUnsubscribe) { chatsUnsubscribe(); chatsUnsubscribe = null; }
+  if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
+
+  // 2. امسح كل شيء من الذاكرة
+  localStorage.removeItem('wa_haroon_user');
+  currentUser = null;
+  
+  // 3. امسح ادوات الادمن والفلاق
+  destroyDevTools();
+  window.__devtoolsInjected = false; // هذا اهم سطر ناقص عندك
+
+  // 4. امسح ازرار الادمن من المينيو
+  const menu = document.getElementById('chatsMenuModal');
+  if (menu) {
+    menu.querySelectorAll('#btnAdminUsers, #btnReserveNumber').forEach(el => el.remove());
+  }
+
+  // 5. رجع للوجن
+  showScreen('loginScreen');
+  closeModal();
+  showToast("تم تسجيل الخروج");
+};
     document.getElementById('btnSend').onclick = () => {
       const text = document.getElementById('messageInput').value;
       sendMessage(text);
@@ -1318,28 +1334,23 @@ pre{margin:0}
   }
 
   function togglePerf() {
-  const btn = document.getElementById('dt-perf-toggle');
-  if (!btn) return;
+    const btn = document.getElementById('dt-perf-toggle');
+    state.recording =!state.recording;
+    btn.textContent = state.recording? 'Stop Recording' : 'Start Recording';
 
-  state.recording = !state.recording;
-  btn.textContent = state.recording ? 'Stop Recording' : 'Start Recording';
-
-  if (state.recording) {
-    state.perf = [];
-    const start = performance.now();
-    perfInterval = setInterval(() => {
-      state.perf.push({time: performance.now() - start, fps: getFPS()});
-      if (state.perf.length > 100) state.perf.shift();
-      updateMetrics();
-      renderWaterfall();
-    }, 100);
-  } else {
-    if (perfInterval) {
+    if (state.recording) {
+      state.perf = [];
+      const start = performance.now();
+      perfInterval = setInterval(() => {
+        state.perf.push({time: performance.now() - start, fps: getFPS()});
+        if (state.perf.length > 100) state.perf.shift();
+        updateMetrics();
+        renderWaterfall();
+      }, 100);
+    } else {
       clearInterval(perfInterval);
-      perfInterval = null;
     }
   }
-}
 
   function getFPS() {
     const now = performance.now();
@@ -1454,7 +1465,6 @@ console.log('[TEST] Before captureConsole');
 
 // الدالة الجديدة - حطها تحت initDevTools مباشرة
 function destroyDevTools() {
-  // وقف التايمر لو شغال
   if (perfInterval) {
     clearInterval(perfInterval);
     perfInterval = null;
@@ -1468,7 +1478,7 @@ function destroyDevTools() {
   devtoolsPanel = null;
   devtoolsStyle = null;
 
-  window.__devtoolsInjected = false;
+  window.__devtoolsInjected = false; // خله هنا برضه للامان
 }
 // الاستدعاء - حطه مكان الشرط القديم داخل window.load
 
