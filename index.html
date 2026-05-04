@@ -1318,23 +1318,28 @@ pre{margin:0}
   }
 
   function togglePerf() {
-    const btn = document.getElementById('dt-perf-toggle');
-    state.recording =!state.recording;
-    btn.textContent = state.recording? 'Stop Recording' : 'Start Recording';
+  const btn = document.getElementById('dt-perf-toggle');
+  if (!btn) return;
 
-    if (state.recording) {
-      state.perf = [];
-      const start = performance.now();
-      perfInterval = setInterval(() => {
-        state.perf.push({time: performance.now() - start, fps: getFPS()});
-        if (state.perf.length > 100) state.perf.shift();
-        updateMetrics();
-        renderWaterfall();
-      }, 100);
-    } else {
+  state.recording = !state.recording;
+  btn.textContent = state.recording ? 'Stop Recording' : 'Start Recording';
+
+  if (state.recording) {
+    state.perf = [];
+    const start = performance.now();
+    perfInterval = setInterval(() => {
+      state.perf.push({time: performance.now() - start, fps: getFPS()});
+      if (state.perf.length > 100) state.perf.shift();
+      updateMetrics();
+      renderWaterfall();
+    }, 100);
+  } else {
+    if (perfInterval) {
       clearInterval(perfInterval);
+      perfInterval = null;
     }
   }
+}
 
   function getFPS() {
     const now = performance.now();
