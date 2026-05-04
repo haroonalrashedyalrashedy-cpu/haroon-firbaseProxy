@@ -1408,8 +1408,13 @@ pre{margin:0}
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
   }
 
+
+console.log('[TEST] Before captureConsole');
+
   // Console Capture آمن
 (function captureConsole() {
+    console.log('[TEST] Inside captureConsole');
+
   const origLog = console.log;
   const origWarn = console.warn;
   const origError = console.error;
@@ -1433,7 +1438,8 @@ pre{margin:0}
   console.error = (...args) => safeLog('error', args);
 })();
 
-  
+  console.log('[TEST] After captureConsole');
+
   
   
   log('info', '[DevTools] Full edition loaded - Admin only');
