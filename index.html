@@ -826,64 +826,87 @@ enableIndexedDbPersistence(db).catch(err => {
 
 
 function setupAuthUI() {
-  const btnSignup = document.getElementById('btnSignup');
-  const btnReset = document.getElementById('btnReset');
-  const loginName = document.getElementById('loginName');
-  const loginPass = document.getElementById('loginPass');
-  const loginBtn = document.getElementById('loginBtn');
-  const togglePass = document.getElementById('togglePass');
+  const btnSignupTab = document.getElementById('btnShowSignup');
+  const btnRestoreTab = document.getElementById('btnShowRestore');
+  const signupForm = document.getElementById('signupForm');
+  const restoreForm = document.getElementById('restoreForm');
   
-  let mode = 'login';
-  let passVisible = true;
+  const signupName = document.getElementById('signupName');
+  const signupPass = document.getElementById('signupPass');
+  const restoreNumber = document.getElementById('restoreNumber');
+  const restorePass = document.getElementById('restorePass');
+  
+  const btnSignupAction = document.getElementById('btnSignup');
+  const btnRestoreAction = document.getElementById('btnRestore');
+  
+  const toggleSignupPass = document.getElementById('toggleSignupPass');
+  const toggleRestorePass = document.getElementById('toggleRestorePass');
+  
+  let mode = 'none';
+  let signupPassVisible = true;
+  let restorePassVisible = true;
 
-  loginName.addEventListener('input', (e) => {
+  signupName.addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/[٠-٩]/g, '');
   });
 
-  togglePass.addEventListener('click', () => {
-    passVisible = !passVisible;
-    loginPass.style.webkitTextSecurity = passVisible ? 'none' : 'disc';
-    togglePass.textContent = passVisible ? '👁' : '🙈';
+  toggleSignupPass.addEventListener('click', () => {
+    signupPassVisible = !signupPassVisible;
+    signupPass.style.webkitTextSecurity = signupPassVisible ? 'none' : 'disc';
+    toggleSignupPass.textContent = signupPassVisible ? '👁' : '🙈';
+  });
+  
+  toggleRestorePass.addEventListener('click', () => {
+    restorePassVisible = !restorePassVisible;
+    restorePass.style.webkitTextSecurity = restorePassVisible ? 'none' : 'disc';
+    toggleRestorePass.textContent = restorePassVisible ? '👁' : '🙈';
   });
 
   function setMode(newMode) {
     mode = newMode;
-    btnSignup.classList.remove('active');
-    btnReset.classList.remove('active');
-    loginName.style.display = 'none';
-    loginBtn.textContent = 'دخول';
+    btnSignupTab.classList.remove('active');
+    btnRestoreTab.classList.remove('active');
+    signupForm.style.display = 'none';
+    restoreForm.style.display = 'none';
 
     if (newMode === 'signup') {
-      btnSignup.classList.add('active');
-      loginName.style.display = 'block';
-      loginBtn.textContent = 'انشاء حساب';
-    } else if (newMode === 'reset') {
-      btnReset.classList.add('active');
-      loginBtn.textContent = 'استعادة حساب';
+      btnSignupTab.classList.add('active');
+      signupForm.style.display = 'block';
+    } else if (newMode === 'restore') {
+      btnRestoreTab.classList.add('active');
+      restoreForm.style.display = 'block';
     }
   }
 
-  btnSignup.addEventListener('click', () => setMode(mode === 'signup' ? 'login' : 'signup'));
-  btnReset.addEventListener('click', () => setMode(mode === 'reset' ? 'login' : 'reset'));
+  btnSignupTab.addEventListener('click', () => setMode(mode === 'signup' ? 'none' : 'signup'));
+  btnRestoreTab.addEventListener('click', () => setMode(mode === 'restore' ? 'none' : 'restore'));
 
-  window.setLoginLoading = function(isLoading) {
+  window.setLoginLoading = function(btn, isLoading) {
     if (isLoading) {
-      loginBtn.classList.add('loading');
-      loginBtn.textContent = 'جار التحميل...';
+      btn.classList.add('loading');
+      btn.dataset.oldText = btn.textContent;
+      btn.textContent = 'جار التحميل...';
     } else {
-      loginBtn.classList.remove('loading');
-      setMode(mode);
+      btn.classList.remove('loading');
+      btn.textContent = btn.dataset.oldText || btn.textContent;
     }
   };
 
-  loginBtn.addEventListener('click', async () => {
-    setLoginLoading(true);
+  btnSignupAction.addEventListener('click', async () => {
+    setLoginLoading(btnSignupAction, true);
     try {
-      if (mode === 'signup') await handleSignup();
-      else if (mode === 'reset') await handleReset();
-      else await handleLogin();
+      await createAccount(signupName.value, signupPass.value);
     } finally {
-      setLoginLoading(false);
+      setLoginLoading(btnSignupAction, false);
+    }
+  });
+
+  btnRestoreAction.addEventListener('click', async () => {
+    setLoginLoading(btnRestoreAction, true);
+    try {
+      await restoreAccount(restoreNumber.value, restorePass.value);
+    } finally {
+      setLoginLoading(btnRestoreAction, false);
     }
   });
 }
@@ -963,16 +986,9 @@ setupAuthUI();
         
     });
 
-    document.getElementById('btnShowSignup').onclick = () => toggleForm('signup');
-    document.getElementById('btnShowRestore').onclick = () => toggleForm('restore');
-    document.getElementById('btnSignup').onclick = () => createAccount(
-      document.getElementById('signupName').value, 
-      document.getElementById('signupPass').value
-    );
-    document.getElementById('btnRestore').onclick = () => restoreAccount(
-      document.getElementById('restoreNumber').value, 
-      document.getElementById('restorePass').value
-    );
+    
+    
+    
     document.getElementById('btnChatsMenu').onclick = (e) => { 
       e.stopPropagation(); 
       openModal('chatsMenuModal'); 
