@@ -268,10 +268,11 @@
   <!-- ========== القسم 3+4+5: كل الجافاسكربت في Module واحد فقط ========== -->
   <script type="module">
     /* استيراد Firebase */
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, set, get, push, onValue, update, remove, serverTimestamp }
-      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    /* استيراد Firebase */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get, push, onValue, update, remove, serverTimestamp, enableIndexedDbPersistence }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     /* ========== القسم 4: Firebase Config ========== */
     const firebaseConfig = {
@@ -288,7 +289,7 @@
     const auth = getAuth(app);
     
     
-    import { enableIndexedDbPersistence } from "firebase/database";
+    
 enableIndexedDbPersistence(db).catch(err => {
   console.warn('Offline persistence فشل:', err.code);
 });
