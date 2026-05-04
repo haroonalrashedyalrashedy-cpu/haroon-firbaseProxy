@@ -1364,7 +1364,7 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
       <div class="dt-kv"><b>Note:</b>Full coverage requires DevTools Protocol. This is basic count.</div>
     `;
   }
-
+/*
   window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
   window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
 
@@ -1378,7 +1378,7 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
-/*
+*/
   function formatBytes(bytes) {
     if (!bytes) return '';
     const k = 1024;
@@ -1386,7 +1386,7 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' + sizes[i] + ';
   }
-*/
+
   log('info', '[DevTools] Full edition loaded - 10 tabs ready');
 })();
     
