@@ -1399,7 +1399,7 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     const k = 1024;
     const sizes = ['B', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
   }
 
   log('info', '[DevTools] Full edition loaded - 10 tabs ready');
