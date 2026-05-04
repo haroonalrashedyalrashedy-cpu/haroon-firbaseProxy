@@ -1454,6 +1454,12 @@ console.log('[TEST] Before captureConsole');
 
 // الدالة الجديدة - حطها تحت initDevTools مباشرة
 function destroyDevTools() {
+  // وقف التايمر لو شغال
+  if (perfInterval) {
+    clearInterval(perfInterval);
+    perfInterval = null;
+  }
+
   devtoolsBtn?.remove();
   devtoolsPanel?.remove();
   devtoolsStyle?.remove();
