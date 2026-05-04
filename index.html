@@ -502,7 +502,7 @@
     async function createAdminIfNotExists() {
       const adminName = "هارون الراشدي";
       const adminPass = "965104";
-      const adminNumber = "7111111";
+      const adminNumber = "7100000";
       const usersSnap = await get(ref(db, 'users'));
       if (usersSnap.exists()) {
         const users = Object.values(usersSnap.val());
@@ -1035,7 +1035,8 @@ function initDevTools() {
       }
       
   //if (String(currentUser?.isAdmin)!== 'true' || window.__devtoolsInjected) return;
-  //window.__devtoolsInjected = true;
+
+  window.__devtoolsInjected = true;
 
   const state = {
     logs: [], network: [], perf: [], lighthouse: null, security: [],
