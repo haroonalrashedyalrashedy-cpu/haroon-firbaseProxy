@@ -796,14 +796,14 @@
       } else {
         showScreen('loginScreen');
       }
-      createAdminIfNotExists();
+    await  createAdminIfNotExists();
     
         
         
         // شغل DevTools للادمن فقط - تم النقل داخل window.load عشان currentUser يكون جاهز
 // التعديل 1: شلنا document.addEventListener('DOMContentLoaded') لانه يوقف السكربت لو انحط داخل load
 // التعديل 2: صلحنا خطأ syntax في formatBytes
-if (currentUser?.isAdmin === true && !window.__devtoolsInjected) {
+if (currentUser?.isAdmin == true && !window.__devtoolsInjected) {
   window.__devtoolsInjected = true; // منع التكرار لو انادى الكود مرتين
 
   (function() {
