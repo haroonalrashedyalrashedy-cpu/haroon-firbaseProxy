@@ -1048,7 +1048,7 @@
 let devtoolsBtn = null;
 let devtoolsPanel = null;
 let devtoolsStyle = null;
-
+let perfInterval = null;
  
 
 function initDevTools() {
@@ -1321,7 +1321,7 @@ pre{margin:0}
     }
   }
 
-  let perfInterval = null;
+  
   function loadPerformance() {
     const out = document.getElementById('dt-performance');
     out.innerHTML = `
