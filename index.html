@@ -1365,16 +1365,7 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     `;
   }
 
-  window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
-  window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
-
-  const c = console;
-  console.log = (...a) => {log('info', a.join(' ')); c.log(...a)};
-  console.warn = (...a) => {log('warn', a.join(' ')); c.warn(...a)};
-  console.error = (...a) => {log('error', a.join(' ')); c.error(...a)};
-
-  window.devLog = (msg, type='VAR') => log(type.toLowerCase(), msg);
-
+  
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
@@ -1386,6 +1377,15 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' + sizes[i] + ';
   }
+window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
+  window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
+
+  const c = console;
+  console.log = (...a) => {log('info', a.join(' ')); c.log(...a)};
+  console.warn = (...a) => {log('warn', a.join(' ')); c.warn(...a)};
+  console.error = (...a) => {log('error', a.join(' ')); c.error(...a)};
+
+  window.devLog = (msg, type='VAR') => log(type.toLowerCase(), msg);
 
   log('info', '[DevTools] Full edition loaded - 10 tabs ready');
 })();  });
