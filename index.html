@@ -542,7 +542,7 @@
       menu.insertAdjacentHTML('beforeend', html);
       console.log("[Admin Debug] تم إضافة أزرار الأدمن بنجاح");
       
-      initDevTools();
+      
       
       document.getElementById('btnAdminUsers').onclick = () => {
         closeModal(); openAdminUsersModal();
@@ -780,7 +780,7 @@
         loadChatsList();
         addAdminMenuItems();
         
-        
+        initDevTools();
         
         
         get(ref(db, `users/${currentUser.uid}/theme`)).then(snap => {
@@ -1018,7 +1018,7 @@
 
 // دالة DevTools - تشتغل للادمن فقط
 function initDevTools() {
-  if (window.__devtoolsInjected) return;
+  if (currentUser?.isAdmin !== true || window.__devtoolsInjected) return;
   window.__devtoolsInjected = true;
 
   const state = {
