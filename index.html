@@ -1409,30 +1409,33 @@ pre{margin:0}
   }
 
   // Console Capture آمن
-  (function captureConsole() {
-    const origLog = console.log;
-    const origWarn = console.warn;
-    const origError = console.error;
+(function captureConsole() {
+  const origLog = console.log;
+  const origWarn = console.warn;
+  const origError = console.error;
 
-    function safeLog(type, args) {
-      try {
-        const msg = args.map(a => typeof a === 'object'? JSON.stringify(a) : String(a)).join(' ');
+  function safeLog(type, args) {
+    try {
+      // يحاول يرسل للبانل، ولو فشل ما يبلع الخطأ
+      if (typeof log === 'function') { 
+        const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
         log(type, msg);
-      } catch {}
-      if (type === 'info') origLog.apply(console, args);
-      if (type === 'warn') origWarn.apply(console, args);
-      if (type === 'error') origError.apply(console, args);
+      }
+    } catch (e) {
+      // لو فشل، يرميه كـ error في البانل نفسه
+      if (typeof log === 'function') log('error', '[DevTools Crash] ' + e.message);
     }
+    origLog.apply(console, args); 
+  }
 
-    console.log = (...args) => safeLog('info', args);
-    console.warn = (...args) => safeLog('warn', args);
-    console.error = (...args) => safeLog('error', args);
+  console.log = (...args) => safeLog('info', args);
+  console.warn = (...args) => safeLog('warn', args);
+  console.error = (...args) => safeLog('error', args);
+})();
 
-    window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
-    window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
-    window.devLog = (msg, type='VAR') => log(type.toLowerCase(), msg);
-  })();
-
+  
+  
+  
   log('info', '[DevTools] Full edition loaded - Admin only');
 }
 
