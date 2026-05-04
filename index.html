@@ -7,6 +7,8 @@
   <title>واتساب هارون</title>
 
   <style>
+  
+  
     /* ====== 1. متغيرات الألوان العامة ====== */
    :root {
   --bg-dark: #111b21; --bg-panel: #202c33; --bg-chat-list: #0b141a;
@@ -14,6 +16,9 @@
   --text-primary: #e9edef; --text-secondary: #8696a0;
   --accent-green: #25d366; --border-color: #2a3942;
   }
+
+
+
 
     /* ====== 2. إعادة الضبط العام Reset ====== */
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -37,6 +42,19 @@
       padding: 12px 20px; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
     button:active { opacity: 0.8; }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+
+.auth-mode-btn.active { background: #ff69b4; color: #fff; }
+#loginBtn.loading { background: #ff69b4; color: #fff; opacity: 0.8; pointer-events: none; }
+
+.login-box input { background: #f0f0f0; transition: background 0.15s ease; }
+.login-box input:focus { background: #fff; outline: 1px solid #ff69b4; }
+
+.password-wrap { position: relative; display: flex; align-items: center; }
+.password-wrap input { flex: 1; padding-right: 40px; }
+.toggle-pass { position: absolute; right: 10px; width: 22px; height: 22px; cursor: pointer; opacity: 0.6; }
+.toggle-pass:hover { opacity: 1; }
+
 
     /* ====== 6. الحقول العامة Input ====== */
     input, textarea { background: var(--bg-panel); color: var(--text-primary); border: 1px solid var(--border-color);
@@ -136,27 +154,39 @@
 
 <body>
   <!-- ========== القسم 2: HTML زي ماهو بدون تغيير ========== -->
-  <div id="loginScreen" class="screen active">
-    <div class="login-container">
-      <div class="logo">💬</div>
-      <h1 class="app-title">واتساب هارون</h1>
-      <p class="app-subtitle">مرحباً بك، سجل دخولك للمتابعة</p>
-      <div class="login-buttons">
-        <button id="btnShowSignup">إنشاء حساب</button>
-        <button id="btnShowRestore">استعادة حساب</button>
+ <div id="loginScreen" class="screen active">
+  <div class="login-container">
+    <div class="logo">💬</div>
+    <h1 class="app-title">واتساب هارون</h1>
+    <p class="app-subtitle">مرحباً بك، سجل دخولك للمتابعة</p>
+
+    <!-- الازرار + الفورمات المعدلة -->
+    <div class="auth-actions" style="display:flex; gap:8px; margin-bottom:10px;">
+      <button id="btnShowSignup" class="auth-mode-btn" style="flex:1;">إنشاء حساب</button>
+      <button id="btnShowRestore" class="auth-mode-btn" style="flex:1;">استعادة حساب</button>
+    </div>
+
+    <!-- فورم انشاء حساب -->
+    <div id="signupForm" class="auth-form" style="display:none;">
+      <input type="text" id="signupName" placeholder="الاسم" inputmode="text" maxlength="20">
+      <div class="password-wrap">
+        <input type="text" id="signupPass" placeholder="كلمة المرور" inputmode="numeric" pattern="[0-9]*" maxlength="10" autocomplete="one-time-code">
+        <span id="toggleSignupPass" class="toggle-pass">👁</span>
       </div>
-      <div id="signupForm" class="auth-form">
-        <input type="text" id="signupName" placeholder="الاسم" inputmode="text" maxlength="20">
-        <input type="password" id="signupPass" placeholder="كلمة المرور" inputmode="numeric" maxlength="10">
-        <button id="btnSignup">تسجيل</button>
+      <button id="btnSignup">تسجيل</button>
+    </div>
+
+    <!-- فورم استعادة حساب -->
+    <div id="restoreForm" class="auth-form" style="display:none;">
+      <input type="text" id="restoreNumber" placeholder="رقم المستخدم 7 أرقام" inputmode="numeric" pattern="[0-9]*" maxlength="7">
+      <div class="password-wrap">
+        <input type="text" id="restorePass" placeholder="كلمة المرور" inputmode="numeric" pattern="[0-9]*" maxlength="10" autocomplete="one-time-code">
+        <span id="toggleRestorePass" class="toggle-pass">👁</span>
       </div>
-      <div id="restoreForm" class="auth-form">
-        <input type="text" id="restoreNumber" placeholder="رقم المستخدم 7 أرقام" inputmode="numeric" maxlength="7">
-        <input type="password" id="restorePass" placeholder="كلمة المرور" inputmode="numeric" maxlength="10">
-        <button id="btnRestore">دخول</button>
-      </div>
+      <button id="btnRestore">دخول</button>
     </div>
   </div>
+</div>
 
   <div id="chatsScreen" class="screen">
     <header id="chatsHeader">
@@ -252,6 +282,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const auth = getAuth(app);
+    
+    
+    import { enableIndexedDbPersistence } from "firebase/database";
+enableIndexedDbPersistence(db).catch(err => {
+  console.warn('Offline persistence فشل:', err.code);
+});
+    
     console.log("[FB] تم الاتصال بقاعدة البيانات");
 
     /* ========== القسم 3: متغيرات الحالة العامة ========== */
@@ -443,52 +480,81 @@
     }
 
     function loadChatsList() {
-      if (!currentUser) return;
-      if (chatsUnsubscribe) chatsUnsubscribe();
-      const chatsRef = ref(db, `userChats/${currentUser.uid}`);
-      chatsUnsubscribe = onValue(chatsRef, async (snapshot) => {
-        const chatsList = document.getElementById('chatsList');
-        chatsList.innerHTML = '';
-        if (!snapshot.exists()) return;
-        let chatsArr = [];
-        const chats = snapshot.val();
-        for (const [otherId, chatData] of Object.entries(chats)) {
-          const userSnap = await get(ref(db, `users/${otherId}`));
-          if (userSnap.exists()) {
-            chatsArr.push({
-              id: otherId, user: userSnap.val(),
-              lastMsg: chatData.lastMsg || '', lastMsgTime: chatData.lastMsgTime || 0
-            });
-          }
-        }
-        chatsArr.sort((a, b) => b.lastMsgTime - a.lastMsgTime);
-        chatsArr.forEach(chat => {
-          const chatDiv = document.createElement('div');
-          chatDiv.className = 'chat-item';
-          chatDiv.id = 'chat_' + chat.id;
-          chatDiv.innerHTML = `
-            <div class="avatar">${chat.user.name[0]}</div>
-            <div class="chat-info">
-              <div class="chat-top">
-                <span class="chat-name">${chat.user.name}</span>
-                <span class="chat-time">${formatTime(chat.lastMsgTime)}</span>
-              </div>
-              <div class="chat-bottom">
-                <span class="last-msg">${chat.lastMsg}</span>
-              </div>
-            </div>
-          `;
-          chatDiv.addEventListener('click', () => {
-            const chatId = [currentUser.uid, chat.id].sort().join('_');
-            listenMessages(chatId, chat.id);
-            showScreen('chatScreen');
-            document.getElementById('chatUserName').textContent = chat.user.name;
+  if (!currentUser) return;
+  if (chatsUnsubscribe) chatsUnsubscribe();
+  const chatsRef = ref(db, `userChats/${currentUser.uid}`);
+
+  chatsUnsubscribe = onValue(chatsRef, async (snapshot) => {
+    const chatsList = document.getElementById('chatsList');
+    chatsList.innerHTML = '';
+    if (!snapshot.exists()) return;
+
+    let chatsArr = [];
+    const chats = snapshot.val();
+
+    for (const [otherId, chatData] of Object.entries(chats)) {
+      try {
+        const userSnap = await get(ref(db, `users/${otherId}`));
+        if (userSnap.exists()) {
+          chatsArr.push({
+            id: otherId,
+            user: userSnap.val(),
+            lastMsg: chatData.lastMsg || '',
+            lastMsgTime: chatData.lastMsgTime || 0
           });
-          chatsList.appendChild(chatDiv);
+        }
+      } catch (err) {
+        console.warn(`[Chats] فشل جلب بيانات ${otherId}:`, err.code);
+        // يحط بيانات مؤقتة عشان ما يوقف اللوب لو النت مقطوع
+        chatsArr.push({
+          id: otherId,
+          user: { name: 'مستخدم', number: otherId },
+          lastMsg: chatData.lastMsg || '',
+          lastMsgTime: chatData.lastMsgTime || 0
         });
-      });
-      // ملاحظة: ما ننادي addAdminMenuItems هنا عشان ما تنادى بدري
+      }
     }
+
+    chatsArr.sort((a, b) => b.lastMsgTime - a.lastMsgTime);
+    chatsArr.forEach(chat => {
+      const chatDiv = document.createElement('div');
+      chatDiv.className = 'chat-item';
+      chatDiv.id = 'chat_' + chat.id;
+      chatDiv.innerHTML = `
+        <div class="avatar">${chat.user.name[0]}</div>
+        <div class="chat-info">
+          <div class="chat-top">
+            <span class="chat-name">${chat.user.name}</span>
+            <span class="chat-time">${formatTime(chat.lastMsgTime)}</span>
+          </div>
+          <div class="chat-bottom">
+            <span class="last-msg">${chat.lastMsg}</span>
+          </div>
+        </div>
+      `;
+      chatDiv.addEventListener('click', () => {
+        const chatId = [currentUser.uid, chat.id].sort().join('_');
+        listenMessages(chatId, chat.id);
+        showScreen('chatScreen');
+        document.getElementById('chatUserName').textContent = chat.user.name;
+      });
+      chatsList.appendChild(chatDiv);
+    });
+  }, (err) => {
+    console.error('[Chats] onValue error:', err);
+    showToast('انقطع الاتصال. جاري المحاولة...');
+  });
+
+  // ملاحظة: ما ننادي addAdminMenuItems هنا عشان ما تنادى بدري
+}
+    }
+    
+    
+    
+    
+    
+    
+    
 
     function formatTime(timestamp) {
       if (!timestamp) return '';
@@ -757,8 +823,85 @@
       };
     }
 
+
+
+function setupAuthUI() {
+  const btnSignup = document.getElementById('btnSignup');
+  const btnReset = document.getElementById('btnReset');
+  const loginName = document.getElementById('loginName');
+  const loginPass = document.getElementById('loginPass');
+  const loginBtn = document.getElementById('loginBtn');
+  const togglePass = document.getElementById('togglePass');
+  
+  let mode = 'login';
+  let passVisible = true;
+
+  loginName.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/[٠-٩]/g, '');
+  });
+
+  togglePass.addEventListener('click', () => {
+    passVisible = !passVisible;
+    loginPass.style.webkitTextSecurity = passVisible ? 'none' : 'disc';
+    togglePass.textContent = passVisible ? '👁' : '🙈';
+  });
+
+  function setMode(newMode) {
+    mode = newMode;
+    btnSignup.classList.remove('active');
+    btnReset.classList.remove('active');
+    loginName.style.display = 'none';
+    loginBtn.textContent = 'دخول';
+
+    if (newMode === 'signup') {
+      btnSignup.classList.add('active');
+      loginName.style.display = 'block';
+      loginBtn.textContent = 'انشاء حساب';
+    } else if (newMode === 'reset') {
+      btnReset.classList.add('active');
+      loginBtn.textContent = 'استعادة حساب';
+    }
+  }
+
+  btnSignup.addEventListener('click', () => setMode(mode === 'signup' ? 'login' : 'signup'));
+  btnReset.addEventListener('click', () => setMode(mode === 'reset' ? 'login' : 'reset'));
+
+  window.setLoginLoading = function(isLoading) {
+    if (isLoading) {
+      loginBtn.classList.add('loading');
+      loginBtn.textContent = 'جار التحميل...';
+    } else {
+      loginBtn.classList.remove('loading');
+      setMode(mode);
+    }
+  };
+
+  loginBtn.addEventListener('click', async () => {
+    setLoginLoading(true);
+    try {
+      if (mode === 'signup') await handleSignup();
+      else if (mode === 'reset') await handleReset();
+      else await handleLogin();
+    } finally {
+      setLoginLoading(false);
+    }
+  });
+}
+
+
     /* ========== Init & Event Listeners ========== */
     window.addEventListener('load', async () => {
+
+const connectedRef = ref(db, '.info/connected');
+onValue(connectedRef, (snap) => {
+  if (snap.val() === false) {
+    showToast('انقطع الاتصال بالنت');
+  } else {
+    showToast('تم الاتصال');
+  }
+});
+
+setupAuthUI();
 
       const savedUser = localStorage.getItem('wa_haroon_user');
       if (savedUser) {
@@ -1315,24 +1458,34 @@ pre{margin:0}
     updateMetrics();
   }
 
-  function togglePerf() {
-    const btn = document.getElementById('dt-perf-toggle');
-    state.recording =!state.recording;
-    btn.textContent = state.recording? 'Stop Recording' : 'Start Recording';
 
-    if (state.recording) {
-      state.perf = [];
-      const start = performance.now();
-      perfInterval = setInterval(() => {
-        state.perf.push({time: performance.now() - start, fps: getFPS()});
-        if (state.perf.length > 100) state.perf.shift();
-        updateMetrics();
-        renderWaterfall();
-      }, 100);
-    } else {
+
+
+function togglePerf() {
+  const btn = document.getElementById('dt-perf-toggle');
+  if (!btn) return;
+
+  state.recording = !state.recording;
+  btn.textContent = state.recording ? 'Stop Recording' : 'Start Recording';
+
+  if (state.recording) {
+    state.perf = [];
+    const start = performance.now();
+    perfInterval = setInterval(() => {
+      state.perf.push({time: performance.now() - start, fps: getFPS()});
+      if (state.perf.length > 100) state.perf.shift();
+      updateMetrics();
+      renderWaterfall();
+    }, 100);
+  } else {
+    if (perfInterval) {
       clearInterval(perfInterval);
+      perfInterval = null;
     }
   }
+}
+
+  
 
   function getFPS() {
     const now = performance.now();
@@ -1447,6 +1600,12 @@ console.log('[TEST] Before captureConsole');
 
 // الدالة الجديدة - حطها تحت initDevTools مباشرة
 function destroyDevTools() {
+  // وقف التايمر لو شغال
+  if (perfInterval) {
+    clearInterval(perfInterval);
+    perfInterval = null;
+  }
+
   devtoolsBtn?.remove();
   devtoolsPanel?.remove();
   devtoolsStyle?.remove();
