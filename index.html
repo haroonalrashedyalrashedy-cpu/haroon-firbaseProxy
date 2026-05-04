@@ -802,209 +802,10 @@
         showScreen('loginScreen');
       }
       createAdminIfNotExists();
-    });
-
-    document.getElementById('btnShowSignup').onclick = () => toggleForm('signup');
-    document.getElementById('btnShowRestore').onclick = () => toggleForm('restore');
-    document.getElementById('btnSignup').onclick = () => createAccount(
-      document.getElementById('signupName').value, 
-      document.getElementById('signupPass').value
-    );
-    document.getElementById('btnRestore').onclick = () => restoreAccount(
-      document.getElementById('restoreNumber').value, 
-      document.getElementById('restorePass').value
-    );
-    document.getElementById('btnChatsMenu').onclick = (e) => { 
-      e.stopPropagation(); 
-      openModal('chatsMenuModal'); 
-    };
-    document.getElementById('modalOverlay').onclick = closeModal;
-    document.getElementById('btnLogout').onclick = () => {
-      localStorage.removeItem('wa_haroon_user');
-      currentUser = null;
-      showScreen('loginScreen');
-      closeModal();
-      showToast("تم تسجيل الخروج");
-    };
-    document.getElementById('btnSend').onclick = () => {
-      const text = document.getElementById('messageInput').value;
-      sendMessage(text);
-    };
-    document.getElementById('btnBackToChats').onclick = () => showScreen('chatsScreen');
-    document.getElementById('btnChangeTheme').onclick = (e) => {
-      e.stopPropagation();
-      closeModal();
-      openModal('themeModal');
-      initThemeTabs();
-      initThemeColors();
-    };
-    document.getElementById('btnChangePass').onclick = (e) => {
-      e.stopPropagation();
-      closeModal();
-      openModal('changePassModal');
-      document.getElementById('oldPass').value = '';
-      document.getElementById('newPass').value = '';
-      document.getElementById('confirmPass').value = '';
-    };
-    document.getElementById('btnSavePass').onclick = async () => {
-      const oldPass = document.getElementById('oldPass').value;
-      const newPass = document.getElementById('newPass').value;
-      const confirmPass = document.getElementById('confirmPass').value;
-
-      if (!oldPass || !newPass || !confirmPass) {
-        showToast('املأ كل الحقول');
-        return;
-      }
-      if (newPass !== confirmPass) {
-        showToast('كلمات المرور غير متطابقة');
-        return;
-      }
-      if (newPass.length < 5 || /(.)\1{4,}/.test(newPass) || newPass === "12345") {
-        showToast('كلمة المرور ضعيفة');
-        return;
-      }
-
-      const userRef = ref(db, `users/${currentUser.uid}`);
-      const snap = await get(userRef);
-      if (!snap.exists() || snap.val().password !== oldPass) {
-        showToast('كلمة المرور القديمة خطأ');
-        return;
-      }
-
-      await update(userRef, { password: newPass });
-      showToast('تم تغيير كلمة المرور بنجاح');
-      closeModal();
-    };
-    document.getElementById('btnSearch').onclick = async () => {
-      const number = document.getElementById('searchNumber').value.trim();
-      if (!number) { loadChatsList(); return; }
-      
-      const usersSnap = await get(ref(db, 'users'));
-      if (!usersSnap.exists()) { showToast("لا يوجد مستخدم بهذا الرقم"); return; }
-      
-      const users = usersSnap.val();
-      const userEntry = Object.entries(users).find(([uid, u]) => u.number === number);
-      if (!userEntry) { showToast("لا يوجد مستخدم بهذا الرقم"); return; }
-      
-      const [uid, userData] = userEntry;
-      if (uid === currentUser.uid) { showToast("هذا انت"); return; }
-      
-      const chatsList = document.getElementById('chatsList');
-      const existingItem = document.getElementById('search_' + uid);
-      if (existingItem) {
-        existingItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        existingItem.style.background = 'var(--bg-panel)';
-        setTimeout(() => existingItem.style.background = '', 1000);
-        document.getElementById('searchNumber').value = '';
-        return;
-      }
-      
-      const chatDiv = document.createElement('div');
-      chatDiv.className = 'chat-item';
-      chatDiv.id = 'search_' + uid;
-      chatDiv.style.borderBottom = '2px solid var(--accent-green)';
-      chatDiv.innerHTML = `
-        <div class="avatar">${userData.name[0]}</div>
-        <div class="chat-info">
-          <div class="chat-top">
-            <span class="chat-name">${userData.name}</span>
-            <span class="chat-time">بحث</span>
-          </div>
-          <div class="chat-bottom">
-            <span class="last-msg">اضغط لبدء المحادثة</span>
-          </div>
-        </div>
-      `;
-      chatDiv.addEventListener('click', async () => {
-        const chatId = [currentUser.uid, uid].sort().join('_');
-        await set(ref(db, `userChats/${currentUser.uid}/${uid}`), {
-          lastMsg: "", lastMsgTime: serverTimestamp()
-        });
-        listenMessages(chatId, uid);
-        showScreen('chatScreen');
-        document.getElementById('chatUserName').textContent = userData.name;
-        document.getElementById('searchNumber').value = '';
-      });
-      
-      if (chatsList.firstChild) {
-        chatsList.insertBefore(chatDiv, chatsList.firstChild);
-      } else {
-        chatsList.appendChild(chatDiv);
-      }
-      document.getElementById('searchNumber').value = '';
-    };
-
-    /* ========== Emoji & Input Handling ========== */
-    const btnEmoji = document.getElementById('btnEmoji');
-    const emojiPanel = document.getElementById('emojiPanel');
-    const messageInput = document.getElementById('messageInput');
-
-    btnEmoji.addEventListener('click', () => {
-      const isOpen = emojiPanel.style.display === 'grid';
-      emojiPanel.style.display = isOpen ? 'none' : 'grid';
-      btnEmoji.textContent = isOpen ? '😀' : '⌨️';
-      if (isOpen) messageInput.focus();
-    });
-
-    const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰',
-    '😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞',
-    '😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳',
-    '🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯'];
-    emojis.forEach(emoji => {
-      const span = document.createElement('span');
-      span.className = 'emoji-item';
-      span.textContent = emoji;
-      span.addEventListener('click', () => {
-        messageInput.value += emoji;
-        messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
-        messageInput.blur();
-      });
-      emojiPanel.appendChild(span);
-    });
-
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('copy', e => e.preventDefault());
-    document.addEventListener('paste', e => {
-      if (e.target.id !== 'messageInput') {
-        e.preventDefault();
-      }
-    });
-    document.getElementById('signupName').addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '');
-    });
-    ['signupPass', 'restoreNumber', 'restorePass', 'searchNumber', 'oldPass', 'newPass', 'confirmPass']
-    .forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('input', (e) => {
-          e.target.value = e.target.value.replace(/\D/g, '');
-        });
-      }
-    });
-
-    /* ========== Debug Console ========== */
-
-
     
-    
-    
-    
-
-// 2. ربط زر الإغلاق للمودال - استخدم selector صح
-
-
-    window.addEventListener('popstate', () => {
-      if (activeScreen === 'chatScreen') {
-        showScreen('chatsScreen');
-        history.pushState(null, null, location.href);
-      } else if (activeScreen === 'chatsScreen') {
-        window.close(); 
-      }
-    });
-    history.pushState(null, null, location.href);
-    
- 
- 
+        
+        
+        
 // شغل DevTools للادمن فقط
 if (currentUser?.isAdmin) {
 document.addEventListener('DOMContentLoaded', () => {
@@ -1386,6 +1187,214 @@ pre{margin:0}
 });
 } // نهاية شرط الادمن
     
+        
+        
+        
+        
+    });
+
+    document.getElementById('btnShowSignup').onclick = () => toggleForm('signup');
+    document.getElementById('btnShowRestore').onclick = () => toggleForm('restore');
+    document.getElementById('btnSignup').onclick = () => createAccount(
+      document.getElementById('signupName').value, 
+      document.getElementById('signupPass').value
+    );
+    document.getElementById('btnRestore').onclick = () => restoreAccount(
+      document.getElementById('restoreNumber').value, 
+      document.getElementById('restorePass').value
+    );
+    document.getElementById('btnChatsMenu').onclick = (e) => { 
+      e.stopPropagation(); 
+      openModal('chatsMenuModal'); 
+    };
+    document.getElementById('modalOverlay').onclick = closeModal;
+    document.getElementById('btnLogout').onclick = () => {
+      localStorage.removeItem('wa_haroon_user');
+      currentUser = null;
+      showScreen('loginScreen');
+      closeModal();
+      showToast("تم تسجيل الخروج");
+    };
+    document.getElementById('btnSend').onclick = () => {
+      const text = document.getElementById('messageInput').value;
+      sendMessage(text);
+    };
+    document.getElementById('btnBackToChats').onclick = () => showScreen('chatsScreen');
+    document.getElementById('btnChangeTheme').onclick = (e) => {
+      e.stopPropagation();
+      closeModal();
+      openModal('themeModal');
+      initThemeTabs();
+      initThemeColors();
+    };
+    document.getElementById('btnChangePass').onclick = (e) => {
+      e.stopPropagation();
+      closeModal();
+      openModal('changePassModal');
+      document.getElementById('oldPass').value = '';
+      document.getElementById('newPass').value = '';
+      document.getElementById('confirmPass').value = '';
+    };
+    document.getElementById('btnSavePass').onclick = async () => {
+      const oldPass = document.getElementById('oldPass').value;
+      const newPass = document.getElementById('newPass').value;
+      const confirmPass = document.getElementById('confirmPass').value;
+
+      if (!oldPass || !newPass || !confirmPass) {
+        showToast('املأ كل الحقول');
+        return;
+      }
+      if (newPass !== confirmPass) {
+        showToast('كلمات المرور غير متطابقة');
+        return;
+      }
+      if (newPass.length < 5 || /(.)\1{4,}/.test(newPass) || newPass === "12345") {
+        showToast('كلمة المرور ضعيفة');
+        return;
+      }
+
+      const userRef = ref(db, `users/${currentUser.uid}`);
+      const snap = await get(userRef);
+      if (!snap.exists() || snap.val().password !== oldPass) {
+        showToast('كلمة المرور القديمة خطأ');
+        return;
+      }
+
+      await update(userRef, { password: newPass });
+      showToast('تم تغيير كلمة المرور بنجاح');
+      closeModal();
+    };
+    document.getElementById('btnSearch').onclick = async () => {
+      const number = document.getElementById('searchNumber').value.trim();
+      if (!number) { loadChatsList(); return; }
+      
+      const usersSnap = await get(ref(db, 'users'));
+      if (!usersSnap.exists()) { showToast("لا يوجد مستخدم بهذا الرقم"); return; }
+      
+      const users = usersSnap.val();
+      const userEntry = Object.entries(users).find(([uid, u]) => u.number === number);
+      if (!userEntry) { showToast("لا يوجد مستخدم بهذا الرقم"); return; }
+      
+      const [uid, userData] = userEntry;
+      if (uid === currentUser.uid) { showToast("هذا انت"); return; }
+      
+      const chatsList = document.getElementById('chatsList');
+      const existingItem = document.getElementById('search_' + uid);
+      if (existingItem) {
+        existingItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        existingItem.style.background = 'var(--bg-panel)';
+        setTimeout(() => existingItem.style.background = '', 1000);
+        document.getElementById('searchNumber').value = '';
+        return;
+      }
+      
+      const chatDiv = document.createElement('div');
+      chatDiv.className = 'chat-item';
+      chatDiv.id = 'search_' + uid;
+      chatDiv.style.borderBottom = '2px solid var(--accent-green)';
+      chatDiv.innerHTML = `
+        <div class="avatar">${userData.name[0]}</div>
+        <div class="chat-info">
+          <div class="chat-top">
+            <span class="chat-name">${userData.name}</span>
+            <span class="chat-time">بحث</span>
+          </div>
+          <div class="chat-bottom">
+            <span class="last-msg">اضغط لبدء المحادثة</span>
+          </div>
+        </div>
+      `;
+      chatDiv.addEventListener('click', async () => {
+        const chatId = [currentUser.uid, uid].sort().join('_');
+        await set(ref(db, `userChats/${currentUser.uid}/${uid}`), {
+          lastMsg: "", lastMsgTime: serverTimestamp()
+        });
+        listenMessages(chatId, uid);
+        showScreen('chatScreen');
+        document.getElementById('chatUserName').textContent = userData.name;
+        document.getElementById('searchNumber').value = '';
+      });
+      
+      if (chatsList.firstChild) {
+        chatsList.insertBefore(chatDiv, chatsList.firstChild);
+      } else {
+        chatsList.appendChild(chatDiv);
+      }
+      document.getElementById('searchNumber').value = '';
+    };
+
+    /* ========== Emoji & Input Handling ========== */
+    const btnEmoji = document.getElementById('btnEmoji');
+    const emojiPanel = document.getElementById('emojiPanel');
+    const messageInput = document.getElementById('messageInput');
+
+    btnEmoji.addEventListener('click', () => {
+      const isOpen = emojiPanel.style.display === 'grid';
+      emojiPanel.style.display = isOpen ? 'none' : 'grid';
+      btnEmoji.textContent = isOpen ? '😀' : '⌨️';
+      if (isOpen) messageInput.focus();
+    });
+
+    const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰',
+    '😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞',
+    '😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳',
+    '🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯'];
+    emojis.forEach(emoji => {
+      const span = document.createElement('span');
+      span.className = 'emoji-item';
+      span.textContent = emoji;
+      span.addEventListener('click', () => {
+        messageInput.value += emoji;
+        messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
+        messageInput.blur();
+      });
+      emojiPanel.appendChild(span);
+    });
+
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => e.preventDefault());
+    document.addEventListener('paste', e => {
+      if (e.target.id !== 'messageInput') {
+        e.preventDefault();
+      }
+    });
+    document.getElementById('signupName').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, '');
+    });
+    ['signupPass', 'restoreNumber', 'restorePass', 'searchNumber', 'oldPass', 'newPass', 'confirmPass']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', (e) => {
+          e.target.value = e.target.value.replace(/\D/g, '');
+        });
+      }
+    });
+
+    /* ========== Debug Console ========== */
+
+
+    
+    
+    
+    
+
+// 2. ربط زر الإغلاق للمودال - استخدم selector صح
+
+
+    window.addEventListener('popstate', () => {
+      if (activeScreen === 'chatScreen') {
+        showScreen('chatsScreen');
+        history.pushState(null, null, location.href);
+      } else if (activeScreen === 'chatsScreen') {
+        window.close(); 
+      }
+    });
+    history.pushState(null, null, location.href);
+    
+ 
+ 
+
     
   </script>
 </body>
