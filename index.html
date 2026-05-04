@@ -754,7 +754,6 @@
 
     /* ========== Init & Event Listeners ========== */
     window.addEventListener('load', async () => {
-    //  document.getElementById('btnErdue')?.addEventListener('click', openErdueModal);
 
       const savedUser = localStorage.getItem('wa_haroon_user');
       if (savedUser) {
@@ -778,6 +777,9 @@
         document.getElementById('currentUserNumber').textContent = currentUser.number;
         loadChatsList();
         addAdminMenuItems();
+        initDevTools();
+        
+        
         
         get(ref(db, `users/${currentUser.uid}/theme`)).then(snap => {
           if (snap.exists()) {
@@ -796,389 +798,11 @@
       } else {
         showScreen('loginScreen');
       }
-    await  createAdminIfNotExists();
+      createAdminIfNotExists();
     
         
         
-        // شغل DevTools للادمن فقط - تم النقل داخل window.load عشان currentUser يكون جاهز
-// التعديل 1: شلنا document.addEventListener('DOMContentLoaded') لانه يوقف السكربت لو انحط داخل load
-// التعديل 2: صلحنا خطأ syntax في formatBytes
-if (currentUser?.isAdmin === true && !window.__devtoolsInjected) {
-  window.__devtoolsInjected = true; // منع التكرار لو انادى الكود مرتين
 
-  (function() {
-    const state = {
-      logs: [], network: [], perf: [], lighthouse: null, security: [],
-      filters: { all: true, info: true, warn: true, error: true },
-      activeTab: 'console', recording: false
-    };
-
-    // 1. الزر العائم المتحرك
-    const btn = document.createElement('div');
-    btn.innerHTML = '🐞';
-    btn.title = 'DevTools Admin';
-    btn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:999;width:48px;height:48px;
-      background:#25d366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
-      font-size:24px;cursor:grab;box-shadow:0 4px 16px rgba(0,0,0,0.3);user-select:none;touch-action:none`;
-    document.body.appendChild(btn);
-
-    // Drag & Drop للايقونة
-    let isDragging = false, offsetX, offsetY, moved = false;
-    btn.addEventListener('pointerdown', (e) => {
-      isDragging = true; moved = false;
-      btn.style.cursor = 'grabbing';
-      offsetX = e.clientX - btn.offsetLeft;
-      offsetY = e.clientY - btn.offsetTop;
-      btn.setPointerCapture(e.pointerId);
-    });
-    btn.addEventListener('pointermove', (e) => {
-      if (!isDragging) return;
-      moved = true;
-      let x = e.clientX - offsetX;
-      let y = e.clientY - offsetY;
-      x = Math.max(0, Math.min(x, window.innerWidth - btn.offsetWidth));
-      y = Math.max(0, Math.min(y, window.innerHeight - btn.offsetHeight));
-      btn.style.left = x + 'px';
-      btn.style.top = y + 'px';
-      btn.style.bottom = 'auto';
-      btn.style.right = 'auto';
-    });
-    btn.addEventListener('pointerup', (e) => {
-      isDragging = false;
-      btn.style.cursor = 'grab';
-      btn.releasePointerCapture(e.pointerId);
-    });
-    btn.addEventListener('click', (e) => {
-      if (moved) { e.stopPropagation(); return; }
-      panel.style.display = panel.style.display === 'none'? 'flex' : 'none';
-    });
-
-    // 2. البانل - خلفية بيضا
-    const panel = document.createElement('div');
-    panel.style.cssText = `position:fixed;bottom:80px;left:20px;width:94vw;max-width:800px;height:75vh;
-      background:#fff;color:#222;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.2);
-      z-index:99999;display:none;flex-direction:column;font-family:'Consolas',monospace;font-size:12px;
-      border:1px solid #ddd;overflow:hidden`;
-    document.body.appendChild(panel);
-
-    panel.innerHTML = `
-      <div style="display:flex;background:#f5f5f5;padding:4px;gap:4px;border-bottom:1px solid #ddd;overflow-x:auto">
-        <div class="dt-tab active" data-tab="console">Console</div>
-        <div class="dt-tab" data-tab="network">Network</div>
-        <div class="dt-tab" data-tab="sources">Sources</div>
-        <div class="dt-tab" data-tab="elements">Elements</div>
-        <div class="dt-tab" data-tab="storage">Storage</div>
-        <div class="dt-tab" data-tab="application">Application</div>
-        <div class="dt-tab" data-tab="performance">Performance</div>
-        <div class="dt-tab" data-tab="lighthouse">Lighthouse</div>
-        <div class="dt-tab" data-tab="security">Security</div>
-        <div class="dt-tab" data-tab="coverage">Coverage</div>
-        <div style="flex:1"></div>
-        <div class="dt-close" style="cursor:pointer;padding:0 8px;color:#666">✕</div>
-      </div>
-
-      <div id="dt-toolbar" style="display:flex;gap:8px;padding:6px;background:#fafafa;border-bottom:1px solid #ddd;flex-wrap:wrap">
-        <button class="dt-filter" data-filter="all">All</button>
-        <button class="dt-filter" data-filter="info">Info</button>
-        <button class="dt-filter" data-filter="warn">Warn</button>
-        <button class="dt-filter" data-filter="error">Error</button>
-        <button class="dt-clear" style="margin-right:auto">Clear</button>
-      </div>
-
-      <div id="dt-content" style="flex:1;overflow:auto;display:flex;flex-direction:column">
-        <div id="dt-console" class="dt-view"></div>
-        <div id="dt-network" class="dt-view" style="display:none"></div>
-        <div id="dt-sources" class="dt-view" style="display:none"></div>
-        <div id="dt-elements" class="dt-view" style="display:none"></div>
-        <div id="dt-storage" class="dt-view" style="display:none"></div>
-        <div id="dt-application" class="dt-view" style="display:none"></div>
-        <div id="dt-performance" class="dt-view" style="display:none"></div>
-        <div id="dt-lighthouse" class="dt-view" style="display:none"></div>
-        <div id="dt-security" class="dt-view" style="display:none"></div>
-        <div id="dt-coverage" class="dt-view" style="display:none"></div>
-      </div>
-
-      <div style="display:flex;border-top:1px solid #ddd">
-        <input id="dt-input" type="text" placeholder="JS > واضغط Enter"
-          style="flex:1;background:#fff;border:none;color:#222;padding:8px;outline:none">
-      </div>
-    `;
-
-    const style = document.createElement('style');
-    style.textContent = `
- .dt-tab{padding:6px 10px;cursor:pointer;color:#666;border-radius:4px;white-space:nowrap}
- .dt-tab.active{background:#fff;color:#111;border-bottom:2px solid #25d366}
- .dt-filter{background:#eee;color:#333;border:none;padding:4px 8px;border-radius:4px;cursor:pointer}
- .dt-filter.active{background:#25d366;color:#fff}
- .dt-log,.dt-net,.dt-perf,.dt-sec{padding:4px 6px;border-bottom:1px solid #eee}
- .dt-log.info{color:#333}.dt-log.warn{color:#e67e22}.dt-log.error{color:#e74c3c;font-weight:600}
- .dt-log.var{color:#2980b9}
- .dt-net.get{color:#27ae60}.dt-net.post{color:#d35400}.dt-net.error{color:#e74c3c}
- .dt-view{flex:1;overflow:auto;padding:8px;white-space:pre-wrap;background:#fff}
-  pre{margin:0}
- .dt-kv{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #eee}
- .dt-kv b{color:#2980b9;min-width:120px}
- .dt-btn{padding:6px 12px;background:#25d366;color:#fff;border:none;border-radius:4px;cursor:pointer}
- .dt-progress{height:4px;background:#eee;border-radius:2px;overflow:hidden}
- .dt-progress>div{height:100%;background:#25d366;width:0%;transition:width 0.3s}
-    `;
-    document.head.appendChild(style);
-
-    panel.querySelectorAll('.dt-tab').forEach(tab => {
-      tab.onclick = () => {
-        panel.querySelectorAll('.dt-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        state.activeTab = tab.dataset.tab;
-        panel.querySelectorAll('.dt-view').forEach(v => v.style.display = 'none');
-        document.getElementById('dt-' + state.activeTab).style.display = 'block';
-
-        if (state.activeTab === 'sources') loadSources();
-        if (state.activeTab === 'elements') loadElements();
-        if (state.activeTab === 'storage') loadStorage();
-        if (state.activeTab === 'application') loadApplication();
-        if (state.activeTab === 'performance') loadPerformance();
-        if (state.activeTab === 'lighthouse') loadLighthouse();
-        if (state.activeTab === 'security') loadSecurity();
-        if (state.activeTab === 'coverage') loadCoverage();
-      };
-    });
-
-    panel.querySelector('.dt-close').onclick = () => panel.style.display = 'none';
-
-    panel.querySelector('#dt-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        try {
-          const result = eval(e.target.value);
-          log('var', '> ' + e.target.value + '\n' + String(result));
-        } catch (err) {
-          log('error', 'Error: ' + err.message);
-        }
-        e.target.value = '';
-      }
-    });
-
-    function log(type, msg) {
-      state.logs.push({type, msg, time: new Date().toLocaleTimeString('ar')});
-      if (state.activeTab === 'console') renderConsole();
-    }
-
-    function renderConsole() {
-      const out = document.getElementById('dt-console');
-      const filtered = state.logs.filter(l =>
-        state.filters.all || state.filters[l.type] || (l.type === 'var' && state.filters.info)
-      );
-      out.innerHTML = filtered.map(l =>
-        `<div class="dt-log ${l.type}">[${l.time}] [${l.type.toUpperCase()}] ${escapeHtml(l.msg)}</div>`
-      ).join('');
-      out.scrollTop = out.scrollHeight;
-    }
-
-    const origFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const start = performance.now();
-      const url = args[0] instanceof Request? args[0].url : args[0];
-      const method = args[0] instanceof Request? args[0].method : (args[1]?.method || 'GET');
-      try {
-        const res = await origFetch(...args);
-        const duration = Math.round(performance.now() - start);
-        state.network.push({method, url, status: res.status, duration, error: false, size: res.headers.get('content-length')});
-        if (state.activeTab === 'network') renderNetwork();
-        return res;
-      } catch (err) {
-        const duration = Math.round(performance.now() - start);
-        state.network.push({method, url, status: 0, duration, error: true, err: err.message});
-        if (state.activeTab === 'network') renderNetwork();
-        throw err;
-      }
-    };
-
-    function renderNetwork() {
-      const out = document.getElementById('dt-network');
-      out.innerHTML = state.network.map(n =>
-        `<div class="dt-net ${n.error? 'error' : n.method.toLowerCase()}">
-          ${n.method} ${n.status} ${n.duration}ms ${formatBytes(n.size)} ${escapeHtml(n.url)}
-        </div>`
-      ).join('');
-    }
-
-    function loadSources() {
-      const out = document.getElementById('dt-sources');
-      out.innerHTML = Array.from(document.scripts).map((s, i) =>
-        `<div style="padding:4px;border-bottom:1px solid #eee">
-          [${i}] ${escapeHtml(s.src || 'inline')}
-          <button onclick="alert(document.scripts[${i}].textContent.slice(0,3000))">View</button>
-        </div>`
-      ).join('') || 'No scripts';
-    }
-
-    function loadElements() {
-      document.getElementById('dt-elements').innerHTML =
-        `<pre>${escapeHtml(document.documentElement.outerHTML.slice(0, 10000))}...</pre>`;
-    }
-
-    function loadStorage() {
-      const ls = Object.keys(localStorage).map(k =>
-        `<div class="dt-kv"><b>LS:</b>${k} = ${escapeHtml(localStorage.getItem(k))}
-        <button onclick="localStorage.removeItem('${k}');loadStorage()">Del</button></div>`
-      ).join('');
-      const ss = Object.keys(sessionStorage).map(k =>
-        `<div class="dt-kv"><b>SS:</b>${k} = ${escapeHtml(sessionStorage.getItem(k))}</div>`
-      ).join('');
-      document.getElementById('dt-storage').innerHTML = ls + ss || 'Empty';
-    }
-
-    function loadApplication() {
-      const out = document.getElementById('dt-application');
-      let html = `<div class="dt-kv"><b>URL:</b>${location.href}</div>
-      <div class="dt-kv"><b>Cookies:</b>${escapeHtml(document.cookie || 'None')}</div>
-      <div class="dt-kv"><b>UA:</b>${navigator.userAgent}</div>`;
-
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          html += `<div class="dt-kv"><b>SW:</b>${regs.length} registered</div>`;
-          regs.forEach(r => html += `<div class="dt-kv"><span>Scope: ${r.scope}</span></div>`);
-          out.innerHTML = html;
-        });
-      } else {
-        html += `<div class="dt-kv"><b>SW:</b>Not Supported</div>`;
-        out.innerHTML = html;
-      }
-    }
-
-    let perfInterval = null;
-    function loadPerformance() {
-      const out = document.getElementById('dt-performance');
-      out.innerHTML = `
-        <button class="dt-btn" id="dt-perf-toggle">Start Recording</button>
-        <div id="dt-perf-metrics" style="margin-top:12px"></div>
-        <div id="dt-perf-waterfall" style="margin-top:12px"></div>
-      `;
-      document.getElementById('dt-perf-toggle').onclick = togglePerf;
-      updateMetrics();
-    }
-
-    function togglePerf() {
-      const btn = document.getElementById('dt-perf-toggle');
-      state.recording =!state.recording;
-      btn.textContent = state.recording? 'Stop Recording' : 'Start Recording';
-
-      if (state.recording) {
-        state.perf = [];
-        const start = performance.now();
-        perfInterval = setInterval(() => {
-          state.perf.push({time: performance.now() - start, fps: getFPS()});
-          if (state.perf.length > 100) state.perf.shift();
-          updateMetrics();
-          renderWaterfall();
-        }, 100);
-      } else {
-        clearInterval(perfInterval);
-      }
-    }
-
-    function getFPS() {
-      const now = performance.now();
-      if (!getFPS.last) getFPS.last = now;
-      const fps = 1000 / (now - getFPS.last);
-      getFPS.last = now;
-      return Math.round(fps);
-    }
-
-    function updateMetrics() {
-      const mem = performance.memory?
-        `Used: ${Math.round(performance.memory.usedJSHeapSize/1048576)}MB` : 'N/A';
-      document.getElementById('dt-perf-metrics').innerHTML = `
-        <div class="dt-kv"><b>FPS:</b>${getFPS()}</div>
-        <div class="dt-kv"><b>Memory:</b>${mem}</div>
-      `;
-    }
-
-    function renderWaterfall() {
-      const out = document.getElementById('dt-perf-waterfall');
-      const max = Math.max(...state.perf.map(p => p.fps), 1);
-      out.innerHTML = state.perf.map(p =>
-        `<div class="dt-progress"><div style="width:${(p.fps/max)*100}%"></div></div>`
-      ).join('');
-    }
-
-    function loadLighthouse() {
-      const out = document.getElementById('dt-lighthouse');
-      const checks = [
-        {name: 'HTTPS', pass: location.protocol === 'https:'},
-        {name: 'Viewport Meta', pass:!!document.querySelector('meta[name="viewport"]')},
-        {name: 'No Inline JS', pass: document.querySelectorAll('script:not([src])').length < 5},
-        {name: 'Images Alt', pass: [...document.images].every(i => i.alt)}
-      ];
-
-      const score = Math.round(checks.filter(c => c.pass).length / checks.length * 100);
-      out.innerHTML = `<div style="font-size:18px;margin-bottom:12px">Score: ${score}/100</div>` +
-        checks.map(c => `<div class="dt-kv"><b>${c.name}:</b>${c.pass? '✓ Pass' : '✗ Fail'}</div>`).join('');
-    }
-
-    function loadSecurity() {
-      const out = document.getElementById('dt-security');
-      const checks = [
-        {name: 'CSP', pass:!!document.querySelector('meta[http-equiv="Content-Security-Policy"]')},
-        {name: 'HTTPS', pass: location.protocol === 'https:'},
-        {name: 'X-Frame-Options', pass: false}
-      ];
-      out.innerHTML = checks.map(c =>
-        `<div class="dt-kv"><b>${c.name}:</b>${c.pass? 'Secure' : 'Missing'}</div>`
-      ).join('');
-    }
-
-    function loadCoverage() {
-      const out = document.getElementById('dt-coverage');
-      const scripts = document.scripts.length;
-      const styles = document.styleSheets.length;
-      out.innerHTML = `
-        <div class="dt-kv"><b>Scripts:</b>${scripts}</div>
-        <div class="dt-kv"><b>Stylesheets:</b>${styles}</div>
-        <div class="dt-kv"><b>Note:</b>Full coverage requires DevTools Protocol. This is basic count.</div>
-      `;
-    }
-
-    function escapeHtml(str) {
-      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
-    function formatBytes(bytes) {
-      if (!bytes) return '';
-      const k = 1024;
-      const sizes = ['B', 'KB', 'MB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      // تعديل: شلنا علامة التنصيص الزايدة اللي كانت توقف السكربت
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
-    }
-
-    // Console Capture آمن
-    (function captureConsole() {
-      const origLog = console.log;
-      const origWarn = console.warn;
-      const origError = console.error;
-
-      function safeLog(type, args) {
-        try {
-          const msg = args.map(a => typeof a === 'object'? JSON.stringify(a) : String(a)).join(' ');
-          log(type, msg);
-        } catch {}
-        if (type === 'info') origLog.apply(console, args);
-        if (type === 'warn') origWarn.apply(console, args);
-        if (type === 'error') origError.apply(console, args);
-      }
-
-      console.log = (...args) => safeLog('info', args);
-      console.warn = (...args) => safeLog('warn', args);
-      console.error = (...args) => safeLog('error', args);
-
-      window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
-      window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
-      window.devLog = (msg, type='VAR') => log(type.toLowerCase(), msg);
-    })();
-
-    log('info', '[DevTools] Full edition loaded - Admin only');
-  })();
-} // نهاية شرط الادمن
 
     
         
@@ -1388,6 +1012,387 @@ if (currentUser?.isAdmin === true && !window.__devtoolsInjected) {
     
  
  
+
+
+// دالة DevTools - تشتغل للادمن فقط
+function initDevTools() {
+  if (window.__devtoolsInjected) return;
+  window.__devtoolsInjected = true;
+
+  const state = {
+    logs: [], network: [], perf: [], lighthouse: null, security: [],
+    filters: { all: true, info: true, warn: true, error: true },
+    activeTab: 'console', recording: false
+  };
+
+  // 1. الزر العائم المتحرك
+  const btn = document.createElement('div');
+  btn.innerHTML = '🐞';
+  btn.title = 'DevTools Admin';
+  btn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:999;width:48px;height:48px;
+    background:#25d366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:24px;cursor:grab;box-shadow:0 4px 16px rgba(0,0,0,0.3);user-select:none;touch-action:none`;
+  document.body.appendChild(btn);
+
+  // Drag & Drop للايقونة
+  let isDragging = false, offsetX, offsetY, moved = false;
+  btn.addEventListener('pointerdown', (e) => {
+    isDragging = true; moved = false;
+    btn.style.cursor = 'grabbing';
+    offsetX = e.clientX - btn.offsetLeft;
+    offsetY = e.clientY - btn.offsetTop;
+    btn.setPointerCapture(e.pointerId);
+  });
+  btn.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    moved = true;
+    let x = e.clientX - offsetX;
+    let y = e.clientY - offsetY;
+    x = Math.max(0, Math.min(x, window.innerWidth - btn.offsetWidth));
+    y = Math.max(0, Math.min(y, window.innerHeight - btn.offsetHeight));
+    btn.style.left = x + 'px';
+    btn.style.top = y + 'px';
+    btn.style.bottom = 'auto';
+    btn.style.right = 'auto';
+  });
+  btn.addEventListener('pointerup', (e) => {
+    isDragging = false;
+    btn.style.cursor = 'grab';
+    btn.releasePointerCapture(e.pointerId);
+  });
+  btn.addEventListener('click', (e) => {
+    if (moved) { e.stopPropagation(); return; }
+    panel.style.display = panel.style.display === 'none'? 'flex' : 'none';
+  });
+
+  // 2. البانل - خلفية بيضا
+  const panel = document.createElement('div');
+  panel.style.cssText = `position:fixed;bottom:80px;left:20px;width:94vw;max-width:800px;height:75vh;
+    background:#fff;color:#222;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.2);
+    z-index:99999;display:none;flex-direction:column;font-family:'Consolas',monospace;font-size:12px;
+    border:1px solid #ddd;overflow:hidden`;
+  document.body.appendChild(panel);
+
+  panel.innerHTML = `
+    <div style="display:flex;background:#f5f5f5;padding:4px;gap:4px;border-bottom:1px solid #ddd;overflow-x:auto">
+      <div class="dt-tab active" data-tab="console">Console</div>
+      <div class="dt-tab" data-tab="network">Network</div>
+      <div class="dt-tab" data-tab="sources">Sources</div>
+      <div class="dt-tab" data-tab="elements">Elements</div>
+      <div class="dt-tab" data-tab="storage">Storage</div>
+      <div class="dt-tab" data-tab="application">Application</div>
+      <div class="dt-tab" data-tab="performance">Performance</div>
+      <div class="dt-tab" data-tab="lighthouse">Lighthouse</div>
+      <div class="dt-tab" data-tab="security">Security</div>
+      <div class="dt-tab" data-tab="coverage">Coverage</div>
+      <div style="flex:1"></div>
+      <div class="dt-close" style="cursor:pointer;padding:0 8px;color:#666">✕</div>
+    </div>
+
+    <div id="dt-toolbar" style="display:flex;gap:8px;padding:6px;background:#fafafa;border-bottom:1px solid #ddd;flex-wrap:wrap">
+      <button class="dt-filter" data-filter="all">All</button>
+      <button class="dt-filter" data-filter="info">Info</button>
+      <button class="dt-filter" data-filter="warn">Warn</button>
+      <button class="dt-filter" data-filter="error">Error</button>
+      <button class="dt-clear" style="margin-right:auto">Clear</button>
+    </div>
+
+    <div id="dt-content" style="flex:1;overflow:auto;display:flex;flex-direction:column">
+      <div id="dt-console" class="dt-view"></div>
+      <div id="dt-network" class="dt-view" style="display:none"></div>
+      <div id="dt-sources" class="dt-view" style="display:none"></div>
+      <div id="dt-elements" class="dt-view" style="display:none"></div>
+      <div id="dt-storage" class="dt-view" style="display:none"></div>
+      <div id="dt-application" class="dt-view" style="display:none"></div>
+      <div id="dt-performance" class="dt-view" style="display:none"></div>
+      <div id="dt-lighthouse" class="dt-view" style="display:none"></div>
+      <div id="dt-security" class="dt-view" style="display:none"></div>
+      <div id="dt-coverage" class="dt-view" style="display:none"></div>
+    </div>
+
+    <div style="display:flex;border-top:1px solid #ddd">
+      <input id="dt-input" type="text" placeholder="JS > واضغط Enter"
+        style="flex:1;background:#fff;border:none;color:#222;padding:8px;outline:none">
+    </div>
+  `;
+
+  const style = document.createElement('style');
+  style.textContent = `
+.dt-tab{padding:6px 10px;cursor:pointer;color:#666;border-radius:4px;white-space:nowrap}
+.dt-tab.active{background:#fff;color:#111;border-bottom:2px solid #25d366}
+.dt-filter{background:#eee;color:#333;border:none;padding:4px 8px;border-radius:4px;cursor:pointer}
+.dt-filter.active{background:#25d366;color:#fff}
+.dt-log,.dt-net,.dt-perf,.dt-sec{padding:4px 6px;border-bottom:1px solid #eee}
+.dt-log.info{color:#333}.dt-log.warn{color:#e67e22}.dt-log.error{color:#e74c3c;font-weight:600}
+.dt-log.var{color:#2980b9}
+.dt-net.get{color:#27ae60}.dt-net.post{color:#d35400}.dt-net.error{color:#e74c3c}
+.dt-view{flex:1;overflow:auto;padding:8px;white-space:pre-wrap;background:#fff}
+pre{margin:0}
+.dt-kv{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #eee}
+.dt-kv b{color:#2980b9;min-width:120px}
+.dt-btn{padding:6px 12px;background:#25d366;color:#fff;border:none;border-radius:4px;cursor:pointer}
+.dt-progress{height:4px;background:#eee;border-radius:2px;overflow:hidden}
+.dt-progress>div{height:100%;background:#25d366;width:0%;transition:width 0.3s}
+  `;
+  document.head.appendChild(style);
+
+  panel.querySelectorAll('.dt-tab').forEach(tab => {
+    tab.onclick = () => {
+      panel.querySelectorAll('.dt-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.activeTab = tab.dataset.tab;
+      panel.querySelectorAll('.dt-view').forEach(v => v.style.display = 'none');
+      document.getElementById('dt-' + state.activeTab).style.display = 'block';
+
+      if (state.activeTab === 'sources') loadSources();
+      if (state.activeTab === 'elements') loadElements();
+      if (state.activeTab === 'storage') loadStorage();
+      if (state.activeTab === 'application') loadApplication();
+      if (state.activeTab === 'performance') loadPerformance();
+      if (state.activeTab === 'lighthouse') loadLighthouse();
+      if (state.activeTab === 'security') loadSecurity();
+      if (state.activeTab === 'coverage') loadCoverage();
+    };
+  });
+
+  panel.querySelector('.dt-close').onclick = () => panel.style.display = 'none';
+
+  panel.querySelector('#dt-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      try {
+        const result = eval(e.target.value);
+        log('var', '> ' + e.target.value + '\n' + String(result));
+      } catch (err) {
+        log('error', 'Error: ' + err.message);
+      }
+      e.target.value = '';
+    }
+  });
+
+  function log(type, msg) {
+    state.logs.push({type, msg, time: new Date().toLocaleTimeString('ar')});
+    if (state.activeTab === 'console') renderConsole();
+  }
+
+  function renderConsole() {
+    const out = document.getElementById('dt-console');
+    const filtered = state.logs.filter(l =>
+      state.filters.all || state.filters[l.type] || (l.type === 'var' && state.filters.info)
+    );
+    out.innerHTML = filtered.map(l =>
+      `<div class="dt-log ${l.type}">[${l.time}] [${l.type.toUpperCase()}] ${escapeHtml(l.msg)}</div>`
+    ).join('');
+    out.scrollTop = out.scrollHeight;
+  }
+
+  const origFetch = window.fetch;
+  window.fetch = async (...args) => {
+    const start = performance.now();
+    const url = args[0] instanceof Request? args[0].url : args[0];
+    const method = args[0] instanceof Request? args[0].method : (args[1]?.method || 'GET');
+    try {
+      const res = await origFetch(...args);
+      const duration = Math.round(performance.now() - start);
+      state.network.push({method, url, status: res.status, duration, error: false, size: res.headers.get('content-length')});
+      if (state.activeTab === 'network') renderNetwork();
+      return res;
+    } catch (err) {
+      const duration = Math.round(performance.now() - start);
+      state.network.push({method, url, status: 0, duration, error: true, err: err.message});
+      if (state.activeTab === 'network') renderNetwork();
+      throw err;
+    }
+  };
+
+  function renderNetwork() {
+    const out = document.getElementById('dt-network');
+    out.innerHTML = state.network.map(n =>
+      `<div class="dt-net ${n.error? 'error' : n.method.toLowerCase()}">
+        ${n.method} ${n.status} ${n.duration}ms ${formatBytes(n.size)} ${escapeHtml(n.url)}
+      </div>`
+    ).join('');
+  }
+
+  function loadSources() {
+    const out = document.getElementById('dt-sources');
+    out.innerHTML = Array.from(document.scripts).map((s, i) =>
+      `<div style="padding:4px;border-bottom:1px solid #eee">
+        [${i}] ${escapeHtml(s.src || 'inline')}
+        <button onclick="alert(document.scripts[${i}].textContent.slice(0,3000))">View</button>
+      </div>`
+    ).join('') || 'No scripts';
+  }
+
+  function loadElements() {
+    document.getElementById('dt-elements').innerHTML =
+      `<pre>${escapeHtml(document.documentElement.outerHTML.slice(0, 10000))}...</pre>`;
+  }
+
+  function loadStorage() {
+    const ls = Object.keys(localStorage).map(k =>
+      `<div class="dt-kv"><b>LS:</b>${k} = ${escapeHtml(localStorage.getItem(k))}
+      <button onclick="localStorage.removeItem('${k}');loadStorage()">Del</button></div>`
+    ).join('');
+    const ss = Object.keys(sessionStorage).map(k =>
+      `<div class="dt-kv"><b>SS:</b>${k} = ${escapeHtml(sessionStorage.getItem(k))}</div>`
+    ).join('');
+    document.getElementById('dt-storage').innerHTML = ls + ss || 'Empty';
+  }
+
+  function loadApplication() {
+    const out = document.getElementById('dt-application');
+    let html = `<div class="dt-kv"><b>URL:</b>${location.href}</div>
+    <div class="dt-kv"><b>Cookies:</b>${escapeHtml(document.cookie || 'None')}</div>
+    <div class="dt-kv"><b>UA:</b>${navigator.userAgent}</div>`;
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        html += `<div class="dt-kv"><b>SW:</b>${regs.length} registered</div>`;
+        regs.forEach(r => html += `<div class="dt-kv"><span>Scope: ${r.scope}</span></div>`);
+        out.innerHTML = html;
+      });
+    } else {
+      html += `<div class="dt-kv"><b>SW:</b>Not Supported</div>`;
+      out.innerHTML = html;
+    }
+  }
+
+  let perfInterval = null;
+  function loadPerformance() {
+    const out = document.getElementById('dt-performance');
+    out.innerHTML = `
+      <button class="dt-btn" id="dt-perf-toggle">Start Recording</button>
+      <div id="dt-perf-metrics" style="margin-top:12px"></div>
+      <div id="dt-perf-waterfall" style="margin-top:12px"></div>
+    `;
+    document.getElementById('dt-perf-toggle').onclick = togglePerf;
+    updateMetrics();
+  }
+
+  function togglePerf() {
+    const btn = document.getElementById('dt-perf-toggle');
+    state.recording =!state.recording;
+    btn.textContent = state.recording? 'Stop Recording' : 'Start Recording';
+
+    if (state.recording) {
+      state.perf = [];
+      const start = performance.now();
+      perfInterval = setInterval(() => {
+        state.perf.push({time: performance.now() - start, fps: getFPS()});
+        if (state.perf.length > 100) state.perf.shift();
+        updateMetrics();
+        renderWaterfall();
+      }, 100);
+    } else {
+      clearInterval(perfInterval);
+    }
+  }
+
+  function getFPS() {
+    const now = performance.now();
+    if (!getFPS.last) getFPS.last = now;
+    const fps = 1000 / (now - getFPS.last);
+    getFPS.last = now;
+    return Math.round(fps);
+  }
+
+  function updateMetrics() {
+    const mem = performance.memory?
+      `Used: ${Math.round(performance.memory.usedJSHeapSize/1048576)}MB` : 'N/A';
+    document.getElementById('dt-perf-metrics').innerHTML = `
+      <div class="dt-kv"><b>FPS:</b>${getFPS()}</div>
+      <div class="dt-kv"><b>Memory:</b>${mem}</div>
+    `;
+  }
+
+  function renderWaterfall() {
+    const out = document.getElementById('dt-perf-waterfall');
+    const max = Math.max(...state.perf.map(p => p.fps), 1);
+    out.innerHTML = state.perf.map(p =>
+      `<div class="dt-progress"><div style="width:${(p.fps/max)*100}%"></div></div>`
+    ).join('');
+  }
+
+  function loadLighthouse() {
+    const out = document.getElementById('dt-lighthouse');
+    const checks = [
+      {name: 'HTTPS', pass: location.protocol === 'https:'},
+      {name: 'Viewport Meta', pass:!!document.querySelector('meta[name="viewport"]')},
+      {name: 'No Inline JS', pass: document.querySelectorAll('script:not([src])').length < 5},
+      {name: 'Images Alt', pass: [...document.images].every(i => i.alt)}
+    ];
+
+    const score = Math.round(checks.filter(c => c.pass).length / checks.length * 100);
+    out.innerHTML = `<div style="font-size:18px;margin-bottom:12px">Score: ${score}/100</div>` +
+      checks.map(c => `<div class="dt-kv"><b>${c.name}:</b>${c.pass? '✓ Pass' : '✗ Fail'}</div>`).join('');
+  }
+
+  function loadSecurity() {
+    const out = document.getElementById('dt-security');
+    const checks = [
+      {name: 'CSP', pass:!!document.querySelector('meta[http-equiv="Content-Security-Policy"]')},
+      {name: 'HTTPS', pass: location.protocol === 'https:'},
+      {name: 'X-Frame-Options', pass: false}
+    ];
+    out.innerHTML = checks.map(c =>
+      `<div class="dt-kv"><b>${c.name}:</b>${c.pass? 'Secure' : 'Missing'}</div>`
+    ).join('');
+  }
+
+  function loadCoverage() {
+    const out = document.getElementById('dt-coverage');
+    const scripts = document.scripts.length;
+    const styles = document.styleSheets.length;
+    out.innerHTML = `
+      <div class="dt-kv"><b>Scripts:</b>${scripts}</div>
+      <div class="dt-kv"><b>Stylesheets:</b>${styles}</div>
+      <div class="dt-kv"><b>Note:</b>Full coverage requires DevTools Protocol. This is basic count.</div>
+    `;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function formatBytes(bytes) {
+    if (!bytes) return '';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
+  }
+
+  // Console Capture آمن
+  (function captureConsole() {
+    const origLog = console.log;
+    const origWarn = console.warn;
+    const origError = console.error;
+
+    function safeLog(type, args) {
+      try {
+        const msg = args.map(a => typeof a === 'object'? JSON.stringify(a) : String(a)).join(' ');
+        log(type, msg);
+      } catch {}
+      if (type === 'info') origLog.apply(console, args);
+      if (type === 'warn') origWarn.apply(console, args);
+      if (type === 'error') origError.apply(console, args);
+    }
+
+    console.log = (...args) => safeLog('info', args);
+    console.warn = (...args) => safeLog('warn', args);
+    console.error = (...args) => safeLog('error', args);
+
+    window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
+    window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
+    window.devLog = (msg, type='VAR') => log(type.toLowerCase(), msg);
+  })();
+
+  log('info', '[DevTools] Full edition loaded - Admin only');
+}
+
+// الاستدعاء - حطه مكان الشرط القديم داخل window.load
+
+
 
     
   </script>
