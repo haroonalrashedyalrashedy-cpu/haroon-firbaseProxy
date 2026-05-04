@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -19,9 +17,9 @@
 
     /* ====== 2. إعادة الضبط العام Reset ====== */
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body, span, p, h1, h2, h3, button, li {
-  user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
-}
+    body, div, span, p, h1, h2, h3, button, li {
+      user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
+    }
 
     /* ====== 3. إعدادات الجسم الأساسي Body ====== */
     body {
@@ -117,7 +115,7 @@
       user-select: text; -webkit-user-select: text; }
     #emojiPanel { display: none; height: 240px; background: var(--bg-dark); overflow-y: auto;
       grid-template-columns: repeat(8, 1fr); padding: 12px; gap: 8px; }
-   
+    #btnErdue { color: #4ec9b0; font-size: 20px; }
    .emoji-item { font-size: 28px; text-align: center; cursor: pointer; padding: 8px; }
    .emoji-item:active { background: var(--bg-panel); border-radius: 8px; }
    .menu-item { width: 100%; text-align: right; background: none; color: var(--text-primary);
@@ -130,9 +128,6 @@
    .color-item { height: 48px; border-radius: 8px; cursor: pointer; }
    .confirm-buttons { display: flex; gap: 12px; margin-top: 16px; }
    .confirm-buttons button { flex: 1; }
-   
-   
-   
   </style>
 </head>
 
@@ -166,7 +161,7 @@
         <span id="currentUserName">الاسم</span>
         <span id="currentUserNumber">1234567</span>
       </div>
-      
+      <button id="btnErdue" class="icon-btn" title="Erdue Tools">⚡</button>
       <button id="btnChatsMenu" class="icon-btn">⋮</button>
     </header>
     <div id="chatsList"></div>
@@ -231,8 +226,26 @@
   </div>
   <div id="toast" class="toast"></div>
 
- 
-  
+  <div class="modal" id="erdueModal">
+    <div class="modal-title">Erdue Tools</div>
+    <div class="modal-content" style="display:flex; flex-direction:column; gap:12px; max-height:70vh; overflow:auto;">
+      <div class="erdue-section">
+        <h4 style="margin:0 0 6px 0; color:#4ec9b0;">1. الكونسول</h4>
+        <textarea id="erdueConsoleOutput" readonly style="width:100%;height:140px;background:#1e1e1e;color:#d4d4d4;font-family:monospace;font-size:12px;border:1px solid #333;border-radius:4px;padding:6px;"></textarea>
+        <input type="text" id="erdueConsoleInput" placeholder="اكتب JS هنا واضغط Enter" style="width:100%;margin-top:6px;padding:6px;background:#252526;color:#fff;border:1px solid #333;border-radius:4px;">
+      </div>
+      <div class="erdue-section">
+        <h4 style="margin:0 0 6px 0; color:#4ec9b0;">2. الكود المصدري</h4>
+        <pre id="erdueSourceOutput" style="max-height:160px;overflow:auto;background:#1e1e1e;color:#d4d4d4;padding:8px;font-size:11px;border:1px solid #333;border-radius:4px;"></pre>
+      </div>
+      <div class="erdue-section">
+        <h4 style="margin:0 0 6px 0; color:#4ec9b0;">3. الدوال المتاحة</h4>
+        <div id="erdueFunctionsList" style="max-height:160px;overflow:auto;background:#1e1e1e;color:#d4d4d4;padding:6px;border:1px solid #333;border-radius:4px;font-size:12px;"></div>
+      </div>
+    </div>
+    <button class="modal-close" onclick="closeModal()">إغلاق</button>
+  </div>
+
   <!-- ========== القسم 3+4+5: كل الجافاسكربت في Module واحد فقط ========== -->
   <script type="module">
     /* استيراد Firebase */
@@ -319,7 +332,17 @@
       `;
     }
 
-
+    /* ========== Erdue Modal ========== */
+    window.openErdueModal = function() {
+      document.getElementById('modalOverlay').classList.add('active');
+      document.getElementById('erdueModal').classList.add('active');
+      activeModal = 'erdue';
+      const debugBox = document.getElementById('debugConsole');
+      document.getElementById('erdueConsoleOutput').value = debugBox? debugBox.textContent : 'لا يوجد خرج';
+      document.getElementById('erdueSourceOutput').textContent = document.documentElement.outerHTML.substring(0, 5000) + '...';
+      const funcs = Object.getOwnPropertyNames(window).filter(n => typeof window[n] === 'function').slice(0, 50);
+      document.getElementById('erdueFunctionsList').innerHTML = funcs.map(f => `<div style="padding:4px;border-bottom:1px solid #333;">${f}</div>`).join('');
+    }
 
     /* ========== Firebase Logic ========== */
     async function generateUniqueNumber() {
@@ -339,8 +362,6 @@
     }
 
     async function createAccount(name, password) {
-        
-        hardResetState();
       if (name.length < 3) { showToast("الاسم لازم يكون 3 حروف على الأقل"); return; }
       if (!/^\d{5,}$/.test(password) || /(.)\1{4,}/.test(password) || password === "12345") {
         showToast("كلمة المرور ضعيفة"); return;
@@ -378,14 +399,11 @@
       document.getElementById('currentUserName').textContent = name;
       document.getElementById('currentUserNumber').textContent = number;
       loadChatsList();
-      
+      setupErdueButton();
       addAdminMenuItems();
-      initDevTools();
     }
 
     async function restoreAccount(number, password) {
-        
-        hardResetState();
       const usersSnap = await get(ref(db, 'users'));
       if (!usersSnap.exists()) { showToast("الرقم خطأ"); return; }
       const users = usersSnap.val();
@@ -406,10 +424,8 @@
       document.getElementById('currentUserName').textContent = userData.name;
       document.getElementById('currentUserNumber').textContent = number;
       loadChatsList();
-      
+      setupErdueButton();
       addAdminMenuItems();
-      
-      initDevTools();
     }
 
     async function sendMessage(text) {
@@ -523,7 +539,7 @@
         name: adminName, number: adminNumber, password: adminPass,
         isAdmin: true, status: "active", createdAt: serverTimestamp()
       });
-      console.log("[Admin] تم إنشاء حساب الأدمن برقم 7111111");
+      console.log("[Admin] تم إنشاء حساب الأدمن برقم 7100000");
     }
 
     function addAdminMenuItems() {
@@ -551,8 +567,6 @@
       menu.insertAdjacentHTML('beforeend', html);
       console.log("[Admin Debug] تم إضافة أزرار الأدمن بنجاح");
       
-      
-      
       document.getElementById('btnAdminUsers').onclick = () => {
         closeModal(); openAdminUsersModal();
       };
@@ -562,6 +576,8 @@
     }
 
     
+console.log("[Admin] زر Debug مفعل");
+
 
     /* ========== باقي الدوال زي ماهي ========== */
     const themeColors = ['#111b21', '#202c33', '#0b141a', '#075e54', '#128c7e', '#25d366'];
@@ -764,7 +780,8 @@
     }
 
     /* ========== Init & Event Listeners ========== */
-    window.addEventListener('load', async () => { //hardResetState();
+    window.addEventListener('load', async () => {
+      document.getElementById('btnErdue')?.addEventListener('click', openErdueModal);
 
       const savedUser = localStorage.getItem('wa_haroon_user');
       if (savedUser) {
@@ -786,16 +803,9 @@
         showScreen('chatsScreen');
         document.getElementById('currentUserName').textContent = currentUser.name;
         document.getElementById('currentUserNumber').textContent = currentUser.number;
-        
-        console.log('[DEBUG] currentUser قبل النداء:', currentUser); // 👈 ضف هذا
-    console.log('[DEBUG] isAdmin:', currentUser.isAdmin, typeof currentUser.isAdmin); // 👈 وهذا
-
         loadChatsList();
         addAdminMenuItems();
-        
-        initDevTools();
-        
-        
+        setupErdueButton();
         get(ref(db, `users/${currentUser.uid}/theme`)).then(snap => {
           if (snap.exists()) {
             const theme = snap.val();
@@ -814,16 +824,6 @@
         showScreen('loginScreen');
       }
       createAdminIfNotExists();
-    
-        
-        
-
-
-    
-        
-        
-        
-        
     });
 
     document.getElementById('btnShowSignup').onclick = () => toggleForm('signup');
@@ -841,44 +841,13 @@
       openModal('chatsMenuModal'); 
     };
     document.getElementById('modalOverlay').onclick = closeModal;
-   /* document.getElementById('btnLogout').onclick = () => {
-  // 1. وقف كل الـ listeners عشان ما تشتغل على اليوزر القديم
-  if (chatsUnsubscribe) { chatsUnsubscribe(); chatsUnsubscribe = null; }
-  if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
-
-  // 2. امسح كل شيء من الذاكرة
-  localStorage.removeItem('wa_haroon_user');
-  currentUser = null;
-  
-  // 3. امسح ادوات الادمن والفلاق
-  destroyDevTools();
-  window.__devtoolsInjected = false; // هذا اهم سطر ناقص عندك
-
-  // 4. امسح ازرار الادمن من المينيو
-  const menu = document.getElementById('chatsMenuModal');
-  if (menu) {
-    menu.querySelectorAll('#btnAdminUsers, #btnReserveNumber').forEach(el => el.remove());
-  }
-    
-    
-    hardResetState();
-  // 5. رجع للوجن
-  showScreen('loginScreen');
-  closeModal();
-  showToast("تم تسجيل الخروج");
-};*/
-
-
-document.getElementById('btnLogout').onclick = () => {
-  // كل التنظيف صار هنا في دالة وحدة
-  hardResetState();
-  
-  // رجع للوجن وعرض الرسالة
-  showScreen('loginScreen');
-  closeModal();
-  showToast("تم تسجيل الخروج");
-};
-
+    document.getElementById('btnLogout').onclick = () => {
+      localStorage.removeItem('wa_haroon_user');
+      currentUser = null;
+      showScreen('loginScreen');
+      closeModal();
+      showToast("تم تسجيل الخروج");
+    };
     document.getElementById('btnSend').onclick = () => {
       const text = document.getElementById('messageInput').value;
       sendMessage(text);
@@ -1040,11 +1009,37 @@ document.getElementById('btnLogout').onclick = () => {
 
     
     
+    document.addEventListener('keydown', (e) => {
+      if (e.target.id === 'erdueConsoleInput' && e.key === 'Enter') {
+        try {
+          const result = eval(e.target.value);
+          document.getElementById('erdueConsoleOutput').value += '\n> ' + e.target.value + '\n' + result;
+          e.target.value = '';
+        } catch(err) {
+          document.getElementById('erdueConsoleOutput').value += '\nError: ' + err.message;
+        }
+      }
+    });
     
-    
+   // 1. اظهار/اخفاء زر Erdue حسب الأدمن
+function setupErdueButton() {
+  const erdueBtn = document.getElementById('btnErdue');
+  if (!erdueBtn) return;
+
+  if (currentUser?.isAdmin) {
+    erdueBtn.style.display = 'block';
+    erdueBtn.onclick = openErdueModal; // استخدم الدالة الموجودة
+  } else {
+    erdueBtn.style.display = 'none';
+  }
+}
 
 // 2. ربط زر الإغلاق للمودال - استخدم selector صح
-
+document.querySelector('#erdueModal .modal-close')?.addEventListener('click', () => {
+  document.getElementById('erdueModal').classList.remove('active');
+  document.getElementById('modalOverlay').classList.remove('active');
+  activeModal = null;
+}); 
 
     window.addEventListener('popstate', () => {
       if (activeScreen === 'chatScreen') {
@@ -1056,65 +1051,13 @@ document.getElementById('btnLogout').onclick = () => {
     });
     history.pushState(null, null, location.href);
     
- 
- 
-
-
-// دالة DevTools - تشتغل للادمن فقط
-
-// المتغيرات العامة - ضفها فوق initDevTools
-let devtoolsBtn = null;
-let devtoolsPanel = null;
-let devtoolsStyle = null;
-let perfInterval = null;
- 
-
-function hardResetState() {
-  // 1. وقف كل الـ listeners
-  if (chatsUnsubscribe) { chatsUnsubscribe(); chatsUnsubscribe = null; }
-  if (messagesUnsubscribe) { messagesUnsubscribe(); messagesUnsubscribe = null; }
-
-  // 2. امسح المتغيرات والـ DOM حق الأدمن
-  localStorage.removeItem('wa_haroon_user');
-  localStorage.removeItem('wa_theme');
-  currentUser = null;
-  destroyDevTools();
-  window.__devtoolsInjected = false;
-
-  // 3. امسح أزرار الأدمن من المينيو
-  const menu = document.getElementById('chatsMenuModal');
-  if (menu) {
-    menu.querySelectorAll('#btnAdminUsers, #btnReserveNumber').forEach(el => el.remove());
-  }
-
-  // 4. رجع الواجهة للوضع الافتراضي
-  document.getElementById('currentUserName').textContent = 'الاسم';
-  document.getElementById('currentUserNumber').textContent = '1234567';
-  document.getElementById('chatsList').innerHTML = '';
-  document.getElementById('messagesList').innerHTML = '';
-}
-
-function initDevTools() {
     
     
-    //if (!currentUser?.isAdmin) {
-       // console.log("[Admin Debug] المستخدم ليس أدمن، إلغاء عرض الكونسول");
-       // return;
-  //    }
-      const isAdmin = String(currentUser?.isAdmin).toLowerCase() === 'true' || currentUser?.isAdmin === 1;
-console.log('[DevTools] isAdmin بعد التحويل:', isAdmin);
-if (!isAdmin || window.__devtoolsInjected) {
-    console.log('[DevTools] ما بشتغل - اما مش ادمن او already injected');
-    return;
-}
+    <!-- Erdue DevTools Overlay - Full Edition -->
 
-
-
- // if (String(currentUser?.isAdmin)!== 'true' || window.__devtoolsInjected) return;
-
+(function() {
+  if (window.self!== window.top || window.__devtoolsInjected) return;
   window.__devtoolsInjected = true;
-
-console.log('[DevTools] بدأت الانشاء...');
 
   const state = {
     logs: [], network: [], perf: [], lighthouse: null, security: [],
@@ -1122,58 +1065,26 @@ console.log('[DevTools] بدأت الانشاء...');
     activeTab: 'console', recording: false
   };
 
-  // 1. الزر العائم المتحرك - غيّرت const btn لـ devtoolsBtn وضفت id
-  devtoolsBtn = document.createElement('div');
-  devtoolsBtn.id = 'devtools-btn'; // 👈 جديد
-  devtoolsBtn.innerHTML = '🐞';
-  devtoolsBtn.title = 'DevTools Admin';
-  devtoolsBtn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:100000;width:48px;height:48px;
-    background:#25d366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:24px;cursor:grab;box-shadow:0 4px 16px rgba(0,0,0,0.3);user-select:none;touch-action:none`;
-  document.body.appendChild(devtoolsBtn);
+  // 1. الزر العائم
+  const btn = document.createElement('div');
+  btn.innerHTML = '🐞';
+  btn.title = 'Erdue DevTools';
+  btn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:99999;width:48px;height:48px;
+    background:#4ec9b0;color:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.4);user-select:none`;
+  btn.onclick = () => panel.style.display = panel.style.display === 'none'? 'flex' : 'none';
+  document.body.appendChild(btn);
 
-  // Drag & Drop للايقونة - ما تغير شي، بس استبدل btn بـ devtoolsBtn
-  let isDragging = false, offsetX, offsetY, moved = false;
-  devtoolsBtn.addEventListener('pointerdown', (e) => {
-    isDragging = true; moved = false;
-    devtoolsBtn.style.cursor = 'grabbing';
-    offsetX = e.clientX - devtoolsBtn.offsetLeft;
-    offsetY = e.clientY - devtoolsBtn.offsetTop;
-    devtoolsBtn.setPointerCapture(e.pointerId);
-  });
-  devtoolsBtn.addEventListener('pointermove', (e) => {
-    if (!isDragging) return;
-    moved = true;
-    let x = e.clientX - offsetX;
-    let y = e.clientY - offsetY;
-    x = Math.max(0, Math.min(x, window.innerWidth - devtoolsBtn.offsetWidth));
-    y = Math.max(0, Math.min(y, window.innerHeight - devtoolsBtn.offsetHeight));
-    devtoolsBtn.style.left = x + 'px';
-    devtoolsBtn.style.top = y + 'px';
-    devtoolsBtn.style.bottom = 'auto';
-    devtoolsBtn.style.right = 'auto';
-  });
-  devtoolsBtn.addEventListener('pointerup', (e) => {
-    isDragging = false;
-    devtoolsBtn.style.cursor = 'grab';
-    devtoolsBtn.releasePointerCapture(e.pointerId);
-  });
-  devtoolsBtn.addEventListener('click', (e) => {
-    if (moved) { e.stopPropagation(); return; }
-    devtoolsPanel.style.display = devtoolsPanel.style.display === 'none'? 'flex' : 'none';
-  });
-
-  // 2. البانل - غيّرت const panel لـ devtoolsPanel وضفت id
-  devtoolsPanel = document.createElement('div');
-  devtoolsPanel.id = 'devtools-panel'; // 👈 جديد
-  devtoolsPanel.style.cssText = `position:fixed;bottom:80px;left:20px;width:94vw;max-width:800px;height:75vh;
-    background:#fff;color:#222;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.2);
+  // 2. البانل
+  const panel = document.createElement('div');
+  panel.style.cssText = `position:fixed;bottom:80px;left:20px;width:94vw;max-width:800px;height:75vh;
+    background:#1e1e1e;color:#d4d4d4;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.6);
     z-index:99999;display:none;flex-direction:column;font-family:'Consolas',monospace;font-size:12px;
-    border:1px solid #ddd;overflow:hidden`;
-  document.body.appendChild(devtoolsPanel);
+    border:1px solid #333;overflow:hidden`;
+  document.body.appendChild(panel);
 
-  devtoolsPanel.innerHTML = `
-    <div style="display:flex;background:#f5f5f5;padding:4px;gap:4px;border-bottom:1px solid #ddd;overflow-x:auto">
+  panel.innerHTML = `
+    <div style="display:flex;background:#2d2d2d;padding:4px;gap:4px;border-bottom:1px solid #333;overflow-x:auto">
       <div class="dt-tab active" data-tab="console">Console</div>
       <div class="dt-tab" data-tab="network">Network</div>
       <div class="dt-tab" data-tab="sources">Sources</div>
@@ -1185,18 +1096,14 @@ console.log('[DevTools] بدأت الانشاء...');
       <div class="dt-tab" data-tab="security">Security</div>
       <div class="dt-tab" data-tab="coverage">Coverage</div>
       <div style="flex:1"></div>
-      <div class="dt-close" style="cursor:pointer;padding:0 8px;color:#666">✕</div>
+      <div class="dt-close" style="cursor:pointer;padding:0 8px">✕</div>
     </div>
 
-    <div id="dt-toolbar" style="display:flex;gap:8px;padding:6px;background:#fafafa;border-bottom:1px solid #ddd;flex-wrap:wrap">
-      
-      
-      <button class="dt-filter active" data-filter="all">All</button>
-<button class="dt-filter" data-filter="info">Info</button>
-<button class="dt-filter" data-filter="warn">Warn</button>
-<button class="dt-filter" data-filter="error">Error</button>
-      
-      
+    <div id="dt-toolbar" style="display:flex;gap:8px;padding:6px;background:#252526;border-bottom:1px solid #333;flex-wrap:wrap">
+      <button class="dt-filter" data-filter="all">All</button>
+      <button class="dt-filter" data-filter="info">Info</button>
+      <button class="dt-filter" data-filter="warn">Warn</button>
+      <button class="dt-filter" data-filter="error">Error</button>
       <button class="dt-clear" style="margin-right:auto">Clear</button>
     </div>
 
@@ -1213,42 +1120,39 @@ console.log('[DevTools] بدأت الانشاء...');
       <div id="dt-coverage" class="dt-view" style="display:none"></div>
     </div>
 
-    <div style="display:flex;border-top:1px solid #ddd">
+    <div style="display:flex;border-top:1px solid #333">
       <input id="dt-input" type="text" placeholder="JS > واضغط Enter"
-        style="flex:1;background:#fff;border:none;color:#222;padding:8px;outline:none">
+        style="flex:1;background:#252526;border:none;color:#fff;padding:8px;outline:none">
     </div>
   `;
 
-  // 3. الستايل - غيّرت const style لـ devtoolsStyle وضفت id
-  devtoolsStyle = document.createElement('style');
-  devtoolsStyle.id = 'devtools-style'; // 👈 جديد
-  devtoolsStyle.textContent = `
-.dt-tab{padding:6px 10px;cursor:pointer;color:#666;border-radius:4px;white-space:nowrap}
-.dt-tab.active{background:#fff;color:#111;border-bottom:2px solid #25d366}
-.dt-filter{background:#eee;color:#333;border:none;padding:4px 8px;border-radius:4px;cursor:pointer}
-.dt-filter.active{background:#25d366;color:#fff}
-.dt-log,.dt-net,.dt-perf,.dt-sec{padding:4px 6px;border-bottom:1px solid #eee}
-.dt-log.info{color:#333}.dt-log.warn{color:#e67e22}.dt-log.error{color:#e74c3c;font-weight:600}
-.dt-log.var{color:#2980b9}
-.dt-net.get{color:#27ae60}.dt-net.post{color:#d35400}.dt-net.error{color:#e74c3c}
-.dt-view{flex:1;overflow:auto;padding:8px;white-space:pre-wrap;background:#fff}
-pre{margin:0}
-.dt-kv{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #eee}
-.dt-kv b{color:#2980b9;min-width:120px}
-.dt-btn{padding:6px 12px;background:#25d366;color:#fff;border:none;border-radius:4px;cursor:pointer}
-.dt-progress{height:4px;background:#eee;border-radius:2px;overflow:hidden}
-.dt-progress>div{height:100%;background:#25d366;width:0%;transition:width 0.3s}
+  // 3. ستايل
+  const style = document.createElement('style');
+  style.textContent = `
+ .dt-tab{padding:6px 10px;cursor:pointer;color:#ccc;border-radius:4px;white-space:nowrap}
+ .dt-tab.active{background:#1e1e1e;color:#fff}
+ .dt-filter{background:#333;color:#ccc;border:none;padding:4px 8px;border-radius:4px;cursor:pointer}
+ .dt-filter.active{background:#4ec9b0;color:#111}
+ .dt-log,.dt-net,.dt-perf,.dt-sec{padding:4px 6px;border-bottom:1px solid #2a2a2a}
+ .dt-log.info{color:#d4d4d4}.dt-log.warn{color:#ffaa00}.dt-log.error{color:#ff5555}.dt-log.var{color:#9cdcfe}
+ .dt-net.get{color:#4ec9b0}.dt-net.post{color:#ce9178}.dt-net.error{color:#ff5555}
+ .dt-view{flex:1;overflow:auto;padding:8px;white-space:pre-wrap}
+  pre{margin:0}
+ .dt-kv{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #2a2a2a}
+ .dt-kv b{color:#9cdcfe;min-width:120px}
+ .dt-btn{padding:6px 12px;background:#4ec9b0;color:#111;border:none;border-radius:4px;cursor:pointer}
+ .dt-progress{height:4px;background:#333;border-radius:2px;overflow:hidden}
+ .dt-progress>div{height:100%;background:#4ec9b0;width:0%;transition:width 0.3s}
   `;
-  document.head.appendChild(devtoolsStyle);
+  document.head.appendChild(style);
 
-  // باقي الكود كله زي ما هو، ما غيرت شي
-  // بس استبدلت panel بـ devtoolsPanel في كل مكان
-  devtoolsPanel.querySelectorAll('.dt-tab').forEach(tab => {
+  // 4. تبويبات
+  panel.querySelectorAll('.dt-tab').forEach(tab => {
     tab.onclick = () => {
-      devtoolsPanel.querySelectorAll('.dt-tab').forEach(t => t.classList.remove('active'));
+      panel.querySelectorAll('.dt-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       state.activeTab = tab.dataset.tab;
-      devtoolsPanel.querySelectorAll('.dt-view').forEach(v => v.style.display = 'none');
+      panel.querySelectorAll('.dt-view').forEach(v => v.style.display = 'none');
       document.getElementById('dt-' + state.activeTab).style.display = 'block';
 
       if (state.activeTab === 'sources') loadSources();
@@ -1262,9 +1166,10 @@ pre{margin:0}
     };
   });
 
-  devtoolsPanel.querySelector('.dt-close').onclick = () => devtoolsPanel.style.display = 'none';
+  panel.querySelector('.dt-close').onclick = () => panel.style.display = 'none';
 
-  devtoolsPanel.querySelector('#dt-input').addEventListener('keydown', e => {
+  // 5. Console + تنفيذ JS
+  panel.querySelector('#dt-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       try {
         const result = eval(e.target.value);
@@ -1292,6 +1197,7 @@ pre{margin:0}
     out.scrollTop = out.scrollHeight;
   }
 
+  // 6. Network
   const origFetch = window.fetch;
   window.fetch = async (...args) => {
     const start = performance.now();
@@ -1320,21 +1226,24 @@ pre{margin:0}
     ).join('');
   }
 
+  // 7. Sources
   function loadSources() {
     const out = document.getElementById('dt-sources');
     out.innerHTML = Array.from(document.scripts).map((s, i) =>
-      `<div style="padding:4px;border-bottom:1px solid #eee">
+      `<div style="padding:4px;border-bottom:1px solid #333">
         [${i}] ${escapeHtml(s.src || 'inline')}
         <button onclick="alert(document.scripts[${i}].textContent.slice(0,3000))">View</button>
       </div>`
     ).join('') || 'No scripts';
   }
 
+  // 8. Elements
   function loadElements() {
     document.getElementById('dt-elements').innerHTML =
       `<pre>${escapeHtml(document.documentElement.outerHTML.slice(0, 10000))}...</pre>`;
   }
 
+  // 9. Storage
   function loadStorage() {
     const ls = Object.keys(localStorage).map(k =>
       `<div class="dt-kv"><b>LS:</b>${k} = ${escapeHtml(localStorage.getItem(k))}
@@ -1346,6 +1255,7 @@ pre{margin:0}
     document.getElementById('dt-storage').innerHTML = ls + ss || 'Empty';
   }
 
+  // 10. Application
   function loadApplication() {
     const out = document.getElementById('dt-application');
     let html = `<div class="dt-kv"><b>URL:</b>${location.href}</div>
@@ -1364,7 +1274,8 @@ pre{margin:0}
     }
   }
 
-  
+  // 11. Performance + FPS + Memory + Waterfall
+  let perfInterval = null;
   function loadPerformance() {
     const out = document.getElementById('dt-performance');
     out.innerHTML = `
@@ -1420,6 +1331,7 @@ pre{margin:0}
     ).join('');
   }
 
+  // 12. Lighthouse - Basic Checks
   function loadLighthouse() {
     const out = document.getElementById('dt-lighthouse');
     const checks = [
@@ -1434,18 +1346,20 @@ pre{margin:0}
       checks.map(c => `<div class="dt-kv"><b>${c.name}:</b>${c.pass? '✓ Pass' : '✗ Fail'}</div>`).join('');
   }
 
+  // 13. Security
   function loadSecurity() {
     const out = document.getElementById('dt-security');
     const checks = [
-      {name: 'CSP', pass:!!document.querySelector('meta[http-equiv="Content-Security-Policy"]')},
+      {name: 'CSP', pass: document.querySelector('meta[http-equiv="Content-Security-Policy"]')},
       {name: 'HTTPS', pass: location.protocol === 'https:'},
-      {name: 'X-Frame-Options', pass: false}
+      {name: 'X-Frame-Options', pass: 'x-frame-options' in document.headers || true},
     ];
     out.innerHTML = checks.map(c =>
       `<div class="dt-kv"><b>${c.name}:</b>${c.pass? 'Secure' : 'Missing'}</div>`
     ).join('');
   }
 
+  // 14. Coverage - Used vs Unused CSS/JS
   function loadCoverage() {
     const out = document.getElementById('dt-coverage');
     const scripts = document.scripts.length;
@@ -1457,6 +1371,17 @@ pre{margin:0}
     `;
   }
 
+  // 15. Error Capture + Console Override
+  window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
+  window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
+
+  const c = console;
+  console.log = (...a) => {log('info', a.join(' ')); c.log(...a)};
+  console.warn = (...a) => {log('warn', a.join(' ')); c.warn(...a)};
+  console.error = (...a) => {log('error', a.join(' ')); c.error(...a)};
+
+  window.devLog = (msg, type='VAR') => log(type.toLowerCase(), msg);
+
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
@@ -1466,67 +1391,13 @@ pre{margin:0}
     const k = 1024;
     const sizes = ['B', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' + sizes[i];
   }
 
-
-console.log('[TEST] Before captureConsole');
-
-  // Console Capture آمن
-(function captureConsole() {
-    console.log('[TEST] Inside captureConsole');
-
-  const origLog = console.log;
-  const origWarn = console.warn;
-  const origError = console.error;
-
-  function safeLog(type, args) {
-    try {
-      // يحاول يرسل للبانل، ولو فشل ما يبلع الخطأ
-      if (typeof log === 'function') { 
-        const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-        log(type, msg);
-      }
-    } catch (e) {
-      // لو فشل، يرميه كـ error في البانل نفسه
-      if (typeof log === 'function') log('error', '[DevTools Crash] ' + e.message);
-    }
-    origLog.apply(console, args); 
-  }
-
-  console.log = (...args) => safeLog('info', args);
-  console.warn = (...args) => safeLog('warn', args);
-  console.error = (...args) => safeLog('error', args);
+  log('info', '[DevTools] Full edition loaded - 10 tabs ready');
 })();
 
-  console.log('[TEST] After captureConsole');
-
-  
-  
-  log('info', '[DevTools] Full edition loaded - Admin only');
-}
-
-// الدالة الجديدة - حطها تحت initDevTools مباشرة
-function destroyDevTools() {
-  if (perfInterval) {
-    clearInterval(perfInterval);
-    perfInterval = null;
-  }
-
-  devtoolsBtn?.remove();
-  devtoolsPanel?.remove();
-  devtoolsStyle?.remove();
-
-  devtoolsBtn = null;
-  devtoolsPanel = null;
-  devtoolsStyle = null;
-
-  window.__devtoolsInjected = false; // خله هنا برضه للامان
-}
-// الاستدعاء - حطه مكان الشرط القديم داخل window.load
-
-
-
+    
     
   </script>
 </body>
