@@ -115,7 +115,7 @@
       user-select: text; -webkit-user-select: text; }
     #emojiPanel { display: none; height: 240px; background: var(--bg-dark); overflow-y: auto;
       grid-template-columns: repeat(8, 1fr); padding: 12px; gap: 8px; }
-    #btnErdue { color: #4ec9b0; font-size: 20px; }
+   
    .emoji-item { font-size: 28px; text-align: center; cursor: pointer; padding: 8px; }
    .emoji-item:active { background: var(--bg-panel); border-radius: 8px; }
    .menu-item { width: 100%; text-align: right; background: none; color: var(--text-primary);
@@ -169,7 +169,7 @@
         <span id="currentUserName">الاسم</span>
         <span id="currentUserNumber">1234567</span>
       </div>
-      <button id="btnErdue" class="icon-btn" title="Erdue Tools">⚡</button>
+      
       <button id="btnChatsMenu" class="icon-btn">⋮</button>
     </header>
     <div id="chatsList"></div>
@@ -234,26 +234,8 @@
   </div>
   <div id="toast" class="toast"></div>
 
-  <div class="modal" id="erdueModal">
-    <div class="modal-title">Erdue Tools</div>
-    <div class="modal-content" style="display:flex; flex-direction:column; gap:12px; max-height:70vh; overflow:auto;">
-      <div class="erdue-section">
-        <h4 style="margin:0 0 6px 0; color:#4ec9b0;">1. الكونسول</h4>
-        <textarea id="erdueConsoleOutput" readonly style="width:100%;height:140px;background:#1e1e1e;color:#d4d4d4;font-family:monospace;font-size:12px;border:1px solid #333;border-radius:4px;padding:6px;"></textarea>
-        <input type="text" id="erdueConsoleInput" placeholder="اكتب JS هنا واضغط Enter" style="width:100%;margin-top:6px;padding:6px;background:#252526;color:#fff;border:1px solid #333;border-radius:4px;">
-      </div>
-      <div class="erdue-section">
-        <h4 style="margin:0 0 6px 0; color:#4ec9b0;">2. الكود المصدري</h4>
-        <pre id="erdueSourceOutput" style="max-height:160px;overflow:auto;background:#1e1e1e;color:#d4d4d4;padding:8px;font-size:11px;border:1px solid #333;border-radius:4px;"></pre>
-      </div>
-      <div class="erdue-section">
-        <h4 style="margin:0 0 6px 0; color:#4ec9b0;">3. الدوال المتاحة</h4>
-        <div id="erdueFunctionsList" style="max-height:160px;overflow:auto;background:#1e1e1e;color:#d4d4d4;padding:6px;border:1px solid #333;border-radius:4px;font-size:12px;"></div>
-      </div>
-    </div>
-    <button class="modal-close" onclick="closeModal()">إغلاق</button>
-  </div>
-
+ 
+  
   <!-- ========== القسم 3+4+5: كل الجافاسكربت في Module واحد فقط ========== -->
   <script type="module">
     /* استيراد Firebase */
@@ -340,17 +322,7 @@
       `;
     }
 
-    /* ========== Erdue Modal ========== */
-    window.openErdueModal = function() {
-      document.getElementById('modalOverlay').classList.add('active');
-      document.getElementById('erdueModal').classList.add('active');
-      activeModal = 'erdue';
-      const debugBox = document.getElementById('erdueConsoleOutput');
-document.getElementById('erdueConsoleOutput').value = 'لا يوجد خرج';
-      document.getElementById('erdueSourceOutput').textContent = document.documentElement.outerHTML.substring(0, 5000) + '...';
-      const funcs = Object.getOwnPropertyNames(window).filter(n => typeof window[n] === 'function').slice(0, 50);
-      document.getElementById('erdueFunctionsList').innerHTML = funcs.map(f => `<div style="padding:4px;border-bottom:1px solid #333;">${f}</div>`).join('');
-    }
+
 
     /* ========== Firebase Logic ========== */
     async function generateUniqueNumber() {
@@ -407,7 +379,7 @@ document.getElementById('erdueConsoleOutput').value = 'لا يوجد خرج';
       document.getElementById('currentUserName').textContent = name;
       document.getElementById('currentUserNumber').textContent = number;
       loadChatsList();
-      setupErdueButton();
+      
       addAdminMenuItems();
     }
 
@@ -432,7 +404,7 @@ document.getElementById('erdueConsoleOutput').value = 'لا يوجد خرج';
       document.getElementById('currentUserName').textContent = userData.name;
       document.getElementById('currentUserNumber').textContent = number;
       loadChatsList();
-      setupErdueButton();
+      
       addAdminMenuItems();
     }
 
@@ -787,7 +759,7 @@ document.getElementById('erdueConsoleOutput').value = 'لا يوجد خرج';
 
     /* ========== Init & Event Listeners ========== */
     window.addEventListener('load', async () => {
-      document.getElementById('btnErdue')?.addEventListener('click', openErdueModal);
+    //  document.getElementById('btnErdue')?.addEventListener('click', openErdueModal);
 
       const savedUser = localStorage.getItem('wa_haroon_user');
       if (savedUser) {
@@ -811,7 +783,7 @@ document.getElementById('erdueConsoleOutput').value = 'لا يوجد خرج';
         document.getElementById('currentUserNumber').textContent = currentUser.number;
         loadChatsList();
         addAdminMenuItems();
-        setupErdueButton();
+        
         get(ref(db, `users/${currentUser.uid}/theme`)).then(snap => {
           if (snap.exists()) {
             const theme = snap.val();
@@ -1015,37 +987,11 @@ document.getElementById('erdueConsoleOutput').value = 'لا يوجد خرج';
 
     
     
-    document.addEventListener('keydown', (e) => {
-      if (e.target.id === 'erdueConsoleInput' && e.key === 'Enter') {
-        try {
-          const result = eval(e.target.value);
-          document.getElementById('erdueConsoleOutput').value += '\n> ' + e.target.value + '\n' + result;
-          e.target.value = '';
-        } catch(err) {
-          document.getElementById('erdueConsoleOutput').value += '\nError: ' + err.message;
-        }
-      }
-    });
     
-   // 1. اظهار/اخفاء زر Erdue حسب الأدمن
-function setupErdueButton() {
-  const erdueBtn = document.getElementById('btnErdue');
-  if (!erdueBtn) return;
-
-  if (currentUser?.isAdmin) {
-    erdueBtn.style.display = 'block';
-    erdueBtn.onclick = openErdueModal; // استخدم الدالة الموجودة
-  } else {
-    erdueBtn.style.display = 'none';
-  }
-}
+    
 
 // 2. ربط زر الإغلاق للمودال - استخدم selector صح
-document.querySelector('#erdueModal .modal-close')?.addEventListener('click', () => {
-  document.getElementById('erdueModal').classList.remove('active');
-  document.getElementById('modalOverlay').classList.remove('active');
-  activeModal = null;
-}); 
+
 
     window.addEventListener('popstate', () => {
       if (activeScreen === 'chatScreen') {
@@ -1059,7 +1005,9 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     
  
  
- document.addEventListener('DOMContentLoaded', () => {
+// شغل DevTools للادمن فقط
+if (currentUser?.isAdmin) {
+document.addEventListener('DOMContentLoaded', () => {
 // <!-- Erdue DevTools Overlay - Full Edition -->
 (function() {
   if (window.__devtoolsInjected) return;
@@ -1071,26 +1019,56 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     activeTab: 'console', recording: false
   };
 
-  // 1. الزر العائم
+  // 1. الزر العائم المتحرك
   const btn = document.createElement('div');
   btn.innerHTML = '🐞';
-  btn.title = 'Erdue DevTools';
+  btn.title = 'DevTools Admin';
   btn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:99999;width:48px;height:48px;
-    background:#4ec9b0;color:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;
-    font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.4);user-select:none`;
-  btn.onclick = () => panel.style.display = panel.style.display === 'none'? 'flex' : 'none';
+    background:#25d366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:24px;cursor:grab;box-shadow:0 4px 16px rgba(0,0,0,0.3);user-select:none;touch-action:none`;
   document.body.appendChild(btn);
 
-  // 2. البانل
+  // Drag & Drop للايقونة
+  let isDragging = false, offsetX, offsetY, moved = false;
+  btn.addEventListener('pointerdown', (e) => {
+    isDragging = true; moved = false;
+    btn.style.cursor = 'grabbing';
+    offsetX = e.clientX - btn.offsetLeft;
+    offsetY = e.clientY - btn.offsetTop;
+    btn.setPointerCapture(e.pointerId);
+  });
+  btn.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    moved = true;
+    let x = e.clientX - offsetX;
+    let y = e.clientY - offsetY;
+    x = Math.max(0, Math.min(x, window.innerWidth - btn.offsetWidth));
+    y = Math.max(0, Math.min(y, window.innerHeight - btn.offsetHeight));
+    btn.style.left = x + 'px';
+    btn.style.top = y + 'px';
+    btn.style.bottom = 'auto';
+    btn.style.right = 'auto';
+  });
+  btn.addEventListener('pointerup', (e) => {
+    isDragging = false;
+    btn.style.cursor = 'grab';
+    btn.releasePointerCapture(e.pointerId);
+  });
+  btn.addEventListener('click', (e) => {
+    if (moved) { e.stopPropagation(); return; }
+    panel.style.display = panel.style.display === 'none'? 'flex' : 'none';
+  });
+
+  // 2. البانل - خلفية بيضا
   const panel = document.createElement('div');
   panel.style.cssText = `position:fixed;bottom:80px;left:20px;width:94vw;max-width:800px;height:75vh;
-    background:#1e1e1e;color:#d4d4d4;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.6);
+    background:#fff;color:#222;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.2);
     z-index:99999;display:none;flex-direction:column;font-family:'Consolas',monospace;font-size:12px;
-    border:1px solid #333;overflow:hidden`;
+    border:1px solid #ddd;overflow:hidden`;
   document.body.appendChild(panel);
 
   panel.innerHTML = `
-    <div style="display:flex;background:#2d2d2d;padding:4px;gap:4px;border-bottom:1px solid #333;overflow-x:auto">
+    <div style="display:flex;background:#f5f5f5;padding:4px;gap:4px;border-bottom:1px solid #ddd;overflow-x:auto">
       <div class="dt-tab active" data-tab="console">Console</div>
       <div class="dt-tab" data-tab="network">Network</div>
       <div class="dt-tab" data-tab="sources">Sources</div>
@@ -1102,10 +1080,10 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
       <div class="dt-tab" data-tab="security">Security</div>
       <div class="dt-tab" data-tab="coverage">Coverage</div>
       <div style="flex:1"></div>
-      <div class="dt-close" style="cursor:pointer;padding:0 8px">✕</div>
+      <div class="dt-close" style="cursor:pointer;padding:0 8px;color:#666">✕</div>
     </div>
 
-    <div id="dt-toolbar" style="display:flex;gap:8px;padding:6px;background:#252526;border-bottom:1px solid #333;flex-wrap:wrap">
+    <div id="dt-toolbar" style="display:flex;gap:8px;padding:6px;background:#fafafa;border-bottom:1px solid #ddd;flex-wrap:wrap">
       <button class="dt-filter" data-filter="all">All</button>
       <button class="dt-filter" data-filter="info">Info</button>
       <button class="dt-filter" data-filter="warn">Warn</button>
@@ -1126,28 +1104,29 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
       <div id="dt-coverage" class="dt-view" style="display:none"></div>
     </div>
 
-    <div style="display:flex;border-top:1px solid #333">
+    <div style="display:flex;border-top:1px solid #ddd">
       <input id="dt-input" type="text" placeholder="JS > واضغط Enter"
-        style="flex:1;background:#252526;border:none;color:#fff;padding:8px;outline:none">
+        style="flex:1;background:#fff;border:none;color:#222;padding:8px;outline:none">
     </div>
   `;
 
   const style = document.createElement('style');
   style.textContent = `
-.dt-tab{padding:6px 10px;cursor:pointer;color:#ccc;border-radius:4px;white-space:nowrap}
-.dt-tab.active{background:#1e1e1e;color:#fff}
-.dt-filter{background:#333;color:#ccc;border:none;padding:4px 8px;border-radius:4px;cursor:pointer}
-.dt-filter.active{background:#4ec9b0;color:#111}
-.dt-log,.dt-net,.dt-perf,.dt-sec{padding:4px 6px;border-bottom:1px solid #2a2a2a}
-.dt-log.info{color:#d4d4d4}.dt-log.warn{color:#ffaa00}.dt-log.error{color:#ff5555}.dt-log.var{color:#9cdcfe}
-.dt-net.get{color:#4ec9b0}.dt-net.post{color:#ce9178}.dt-net.error{color:#ff5555}
-.dt-view{flex:1;overflow:auto;padding:8px;white-space:pre-wrap}
-  pre{margin:0}
-.dt-kv{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #2a2a2a}
-.dt-kv b{color:#9cdcfe;min-width:120px}
-.dt-btn{padding:6px 12px;background:#4ec9b0;color:#111;border:none;border-radius:4px;cursor:pointer}
-.dt-progress{height:4px;background:#333;border-radius:2px;overflow:hidden}
-.dt-progress>div{height:100%;background:#4ec9b0;width:0%;transition:width 0.3s}
+.dt-tab{padding:6px 10px;cursor:pointer;color:#666;border-radius:4px;white-space:nowrap}
+.dt-tab.active{background:#fff;color:#111;border-bottom:2px solid #25d366}
+.dt-filter{background:#eee;color:#333;border:none;padding:4px 8px;border-radius:4px;cursor:pointer}
+.dt-filter.active{background:#25d366;color:#fff}
+.dt-log,.dt-net,.dt-perf,.dt-sec{padding:4px 6px;border-bottom:1px solid #eee}
+.dt-log.info{color:#333}.dt-log.warn{color:#e67e22}.dt-log.error{color:#e74c3c;font-weight:600}
+.dt-log.var{color:#2980b9}
+.dt-net.get{color:#27ae60}.dt-net.post{color:#d35400}.dt-net.error{color:#e74c3c}
+.dt-view{flex:1;overflow:auto;padding:8px;white-space:pre-wrap;background:#fff}
+pre{margin:0}
+.dt-kv{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #eee}
+.dt-kv b{color:#2980b9;min-width:120px}
+.dt-btn{padding:6px 12px;background:#25d366;color:#fff;border:none;border-radius:4px;cursor:pointer}
+.dt-progress{height:4px;background:#eee;border-radius:2px;overflow:hidden}
+.dt-progress>div{height:100%;background:#25d366;width:0%;transition:width 0.3s}
   `;
   document.head.appendChild(style);
 
@@ -1231,7 +1210,7 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
   function loadSources() {
     const out = document.getElementById('dt-sources');
     out.innerHTML = Array.from(document.scripts).map((s, i) =>
-      `<div style="padding:4px;border-bottom:1px solid #333">
+      `<div style="padding:4px;border-bottom:1px solid #eee">
         [${i}] ${escapeHtml(s.src || 'inline')}
         <button onclick="alert(document.scripts[${i}].textContent.slice(0,3000))">View</button>
       </div>`
@@ -1365,7 +1344,6 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     `;
   }
 
-  
   function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
@@ -1375,35 +1353,38 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     const k = 1024;
     const sizes = ['B', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' + sizes[i] + ';
-  }
-// Console Capture آمن
-(function captureConsole() {
-  const origLog = console.log;
-  const origWarn = console.warn;
-  const origError = console.error;
-
-  function safeLog(type, args) {
-    try {
-      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-      log(type, msg);
-    } catch {}
-    if (type === 'info') origLog.apply(console, args);
-    if (type === 'warn') origWarn.apply(console, args);
-    if (type === 'error') origError.apply(console, args);
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' + sizes[i];
   }
 
-  console.log = (...args) => safeLog('info', args);
-  console.warn = (...args) => safeLog('warn', args);
-  console.error = (...args) => safeLog('error', args);
+  // Console Capture آمن
+  (function captureConsole() {
+    const origLog = console.log;
+    const origWarn = console.warn;
+    const origError = console.error;
 
-  window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
-  window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
-  window.devLog = (msg, type='VAR') => log(type.toLowerCase(), msg);
+    function safeLog(type, args) {
+      try {
+        const msg = args.map(a => typeof a === 'object'? JSON.stringify(a) : String(a)).join(' ');
+        log(type, msg);
+      } catch {}
+      if (type === 'info') origLog.apply(console, args);
+      if (type === 'warn') origWarn.apply(console, args);
+      if (type === 'error') origError.apply(console, args);
+    }
+
+    console.log = (...args) => safeLog('info', args);
+    console.warn = (...args) => safeLog('warn', args);
+    console.error = (...args) => safeLog('error', args);
+
+    window.addEventListener('error', e => log('error', `${e.message} at ${e.filename}:${e.lineno}`));
+    window.addEventListener('unhandledrejection', e => log('error', `Promise: ${e.reason}`));
+    window.devLog = (msg, type='VAR') => log(type.toLowerCase(), msg);
+  })();
+
+  log('info', '[DevTools] Full edition loaded - Admin only');
 })();
-
-  log('info', '[DevTools] Full edition loaded - 10 tabs ready');
-})();  });
+});
+} // نهاية شرط الادمن
     
     
   </script>
