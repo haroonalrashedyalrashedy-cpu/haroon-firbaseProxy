@@ -128,6 +128,14 @@
    .color-item { height: 48px; border-radius: 8px; cursor: pointer; }
    .confirm-buttons { display: flex; gap: 12px; margin-top: 16px; }
    .confirm-buttons button { flex: 1; }
+   
+   #devtools-btn { 
+  user-select: auto !important; 
+  -webkit-user-select: auto !important;
+  touch-action: manipulation;
+  z-index: 99999 !important;
+}
+   
   </style>
 </head>
 
@@ -1053,7 +1061,7 @@ document.querySelector('#erdueModal .modal-close')?.addEventListener('click', ()
     
     
     
-    <!-- Erdue DevTools Overlay - Full Edition -->
+  //  <!-- Erdue DevTools Overlay - Full Edition -->
 
 (function() {
   if (window.self!== window.top || window.__devtoolsInjected) return;
