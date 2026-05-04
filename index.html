@@ -1066,7 +1066,7 @@ console.log('[DevTools] بدأت الانشاء...');
   devtoolsBtn.id = 'devtools-btn'; // 👈 جديد
   devtoolsBtn.innerHTML = '🐞';
   devtoolsBtn.title = 'DevTools Admin';
-  devtoolsBtn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:999;width:48px;height:48px;
+  devtoolsBtn.style.cssText = `position:fixed;bottom:20px;left:20px;z-index:100000;width:48px;height:48px;
     background:#25d366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
     font-size:24px;cursor:grab;box-shadow:0 4px 16px rgba(0,0,0,0.3);user-select:none;touch-action:none`;
   document.body.appendChild(devtoolsBtn);
@@ -1128,10 +1128,14 @@ console.log('[DevTools] بدأت الانشاء...');
     </div>
 
     <div id="dt-toolbar" style="display:flex;gap:8px;padding:6px;background:#fafafa;border-bottom:1px solid #ddd;flex-wrap:wrap">
-      <button class="dt-filter" data-filter="all">All</button>
-      <button class="dt-filter" data-filter="info">Info</button>
-      <button class="dt-filter" data-filter="warn">Warn</button>
-      <button class="dt-filter" data-filter="error">Error</button>
+      
+      
+      <button class="dt-filter active" data-filter="all">All</button>
+<button class="dt-filter" data-filter="info">Info</button>
+<button class="dt-filter" data-filter="warn">Warn</button>
+<button class="dt-filter" data-filter="error">Error</button>
+      
+      
       <button class="dt-clear" style="margin-right:auto">Clear</button>
     </div>
 
